@@ -1,10 +1,7 @@
-# Core runtime
-pandas>=2.0,<3.0
-streamlit>=1.30,<2.0
-# Either provider works - install whichever you hold a key for.
-anthropic>=0.40,<1.0
-openai>=1.60
-python-dotenv>=1.0,<2.0
-
-# Tests
-pytest>=7.4,<9.0
+# Everything the demo needs. Note what is NOT here: no LLM SDK.
+# The deterministic engine, all metrics, the exception list, the cash position
+# and the Q&A run entirely on these, replaying committed reasoning traces.
+pandas==2.3.3
+streamlit==1.62.0
+python-dotenv==1.2.1
+pytest==9.1.1

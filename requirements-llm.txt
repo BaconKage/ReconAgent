@@ -1,0 +1,4 @@
+# Optional. Only needed to regenerate reasoning traces against a live model.
+# Install one of these and set the matching key; see .env.example.
+openai>=3.0,<4.0
+# anthropic>=0.40        # uncomment instead if you are using Claude
