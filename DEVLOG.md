@@ -263,3 +263,44 @@ the caching path. I had not tested the failure path *followed by* the caching
 path. The bug lived in the seam, which is where this kind of bug always lives.
 Now I ask what a fallback leaves behind, not just whether it fires - because a
 fallback that persists its own output is no longer a fallback, it is a writer.
+
+---
+
+### 7. The README's own command was broken — Day 6
+
+**What broke.** The fresh-clone verification, following my own README in order:
+
+```
+1. python run_demo.py                      OK
+2. python run_demo.py --dataset holdout    OK
+3. python run_demo.py --ask "why didn't pay_f7atwyam1n reconcile?"
+   -> "I could not find a transaction ID in that question..."
+```
+
+Audit trails are written per run, and the Q&A layer reads the most recent one.
+Step 2 made the holdout run the most recent, so a dev transaction was genuinely
+absent from it. The answer was technically correct about that trail and useless
+to the person asking, who had reconciled that transaction ninety seconds earlier.
+
+**Why it mattered.** Not the severity - it is a small bug. What matters is how it
+was found. 155 tests passed. The Q&A tests passed, including one asserting that
+an unknown ID returns "not found", which is the very behaviour that was wrong
+here. Every test built its own trail in a temp directory and asked about that
+trail, so none of them could ever encounter two runs in sequence. The bug lived
+in the gap between "each command works" and "the commands work in the order the
+README gives them".
+
+It would have been a bad thirty seconds of demo video: run the tool, run it on
+the held-out set to show the honest numbers, then ask it a question and have it
+say it has never heard of the transaction.
+
+**How I got out.** The Q&A layer now falls back to searching every trail in the
+directory and names the run an answer came from. An ID that exists in no run
+still returns "not found" - that behaviour was correct and is still tested.
+
+**What I changed in how I work.** I had verified that every command works. I had
+not verified that they work *in sequence*, from a clean clone, in the order I
+tell someone to run them. Those are different claims, and only the second one is
+what a judge actually experiences. The fresh-clone rehearsal is not a formality
+at the end of the build; it is the only test that exercises the product rather
+than the code.
