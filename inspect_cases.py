@@ -13,7 +13,9 @@ import csv
 import json
 from pathlib import Path
 
-from core.normalize import format_inr, rupees_to_paise
+from core.normalize import format_inr, make_stdout_safe, rupees_to_paise
+
+make_stdout_safe()
 
 ROOT = Path(__file__).resolve().parent
 

@@ -328,3 +328,39 @@ def test_qa_on_an_empty_trail_says_so(tmp_path):
     q = ReconciliationQA(tmp_path / "missing.jsonl")
     ans = q.ask("why didn't pay_abc reconcile?")
     assert ans.found is False
+
+
+def test_cache_key_changes_when_the_prompt_changes():
+    """Editing the instructions must invalidate cached answers.
+
+    A cached trace is indistinguishable from a fresh one once stored, so a
+    prompt change that did not invalidate the cache would appear to take effect
+    while every existing case silently replayed an answer written under the old
+    rules.
+    """
+    bundle = {"case_id": "pay_1", "engine_finding": "no_candidate_found"}
+    assert evidence_key(bundle, "instructions A") != evidence_key(bundle, "instructions B")
+    assert evidence_key(bundle, "instructions A") == evidence_key(bundle, "instructions A")
+
+
+def test_placeholders_are_never_written_to_the_cache(pipeline, isolated_cache):
+    """A failed run must not poison the cache for the next, working one.
+
+    This was a real bug: an API failure produced placeholder investigations that
+    were cached like real ones, so a later run with a valid key served the
+    failures back under `source: cached_trace` and never called the model.
+    """
+    batch, report = pipeline
+    ExceptionReasoner(cache=isolated_cache).investigate(report, batch)
+    assert len(isolated_cache) == 0, "placeholders must not be persisted"
+
+
+def test_a_cached_placeholder_is_treated_as_a_miss(pipeline, isolated_cache):
+    """Self-healing for caches already poisoned by an earlier failed run."""
+    batch, report = pipeline
+    reasoner = ExceptionReasoner(cache=isolated_cache)
+    poisoned = reasoner._placeholder("pay_x", "API error: 401")
+    assert ExceptionReasoner.is_placeholder(poisoned)
+    isolated_cache.put("somekey", poisoned)
+    assert isolated_cache.get("somekey") is not None
+    assert ExceptionReasoner.is_placeholder(isolated_cache.get("somekey"))

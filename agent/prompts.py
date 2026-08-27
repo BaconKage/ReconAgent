@@ -77,6 +77,8 @@ right one. If it sits outside the engine's thresholds, say so and say by how muc
 the case with no competing reading.
 5. Write the hypothesis for a finance operations person: plain English, specific \
 numbers, no jargon about tiers or algorithms. One or two sentences.
+6. Write amounts as "Rs 1,234.56" and use ASCII characters only. This text is \
+printed to terminals that cannot always encode the rupee sign.
 
 Return one investigation per case, in the same order you received them."""
 

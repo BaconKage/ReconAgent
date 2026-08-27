@@ -1,7 +1,11 @@
 __pycache__/
 *.pyc
-.env
 .pytest_cache/
 audit_trail/*.jsonl
 .venv/
 venv/
+
+# Secrets. Every dotenv variant is ignored; only the template is tracked.
+.env
+.env.*
+!.env.example

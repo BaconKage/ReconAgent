@@ -22,8 +22,10 @@ from audit.trail import AuditTrail
 from cash.position import compute_position, format_position
 from core.loader import load_batch
 from core.matcher import reconcile
-from core.normalize import format_inr
+from core.normalize import format_inr, make_stdout_safe
 from evaluation.metrics import evaluate, format_report
+
+make_stdout_safe()
 
 ROOT = Path(__file__).resolve().parent
 RULE = "=" * 78
@@ -95,10 +97,18 @@ def main() -> int:
     s = outcome.stats
 
     hr("Reasoning layer")
-    mode = ("disabled (--no-llm)" if args.no_llm
-            else "cached traces (no API key)" if s.unavailable
-            else f"live via {s.provider or describe_provider()} "
-                 f"({s.live_calls} calls, {s.served_from_cache} from cache)")
+    # Four genuinely different states, and conflating them is how a broken key
+    # ends up looking like a working cache.
+    if args.no_llm:
+        mode = "disabled (--no-llm)"
+    elif s.live_calls:
+        mode = (f"live via {s.provider} "
+                f"({s.live_calls} calls, {s.served_from_cache} from cache)")
+    elif s.unavailable:
+        mode = (f"committed traces ({s.served_from_cache} replayed); "
+                f"no provider available")
+    else:
+        mode = f"committed traces ({s.served_from_cache} replayed, nothing to call)"
     print(f"  mode                     {mode}")
     print(f"  groups reaching a model  {s.sent_to_llm} of {s.total_records}")
     print(f"  handled with no model    {s.never_touched_llm} ({s.llm_free_fraction:.0%})")
@@ -122,12 +132,19 @@ def main() -> int:
     print(f"\n  agent recommends human review for {len(escalated)}")
     print(f"  agent judged evidence insufficient to decide for {len(refused)}")
 
-    # Lead with the cases the agent declined to force - those are the ones
-    # worth a human's time, and the ones worth showing.
+    # Lead with cases where the engine actually had a candidate in front of it
+    # and declined. An orphan credit with nothing nearby is a trivial absence;
+    # a settlement with a credit 95 paise outside tolerance is a judgement call,
+    # and that is what is worth a reviewer's attention - and a demo's.
+    nets = {s.transaction_id: s.net_paise for s in batch.settlements}
     ordered = sorted(
         report.unresolved,
-        key=lambda r: (outcome.investigations.get(r.record_id, {})
-                       .get("sufficient_evidence", True), r.record_id),
+        key=lambda r: (
+            not r.near_misses,                       # considered-and-declined first
+            outcome.investigations.get(r.record_id, {}).get("sufficient_evidence", True),
+            -nets.get(r.record_id, 0),               # then by money at stake
+            r.record_id,
+        ),
     )
     for r in ordered[:args.exceptions]:
         inv = outcome.investigations.get(r.record_id, {})

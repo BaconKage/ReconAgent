@@ -21,13 +21,22 @@ from typing import Any
 DEFAULT_CACHE_PATH = Path(__file__).resolve().parent / "cache" / "traces.json"
 
 
-def evidence_key(bundle: dict[str, Any]) -> str:
-    """Stable hash of an evidence bundle.
+def evidence_key(bundle: dict[str, Any], instructions: str = "") -> str:
+    """Stable hash of an evidence bundle plus the instructions it was judged under.
 
     `sort_keys` plus separators makes the encoding canonical, so the same
     evidence always produces the same key regardless of dict ordering.
+
+    `instructions` folds the system prompt into the key. An answer is a function
+    of the evidence *and* what the model was told to do with it, so editing the
+    prompt must invalidate the cache. Without this, a prompt change would appear
+    to take effect while every existing case silently replayed an answer written
+    under the old rules - and the difference would be invisible, because a
+    cached trace is indistinguishable from a fresh one once stored.
     """
     blob = json.dumps(bundle, sort_keys=True, separators=(",", ":"), default=str)
+    if instructions:
+        blob = f"{hashlib.sha256(instructions.encode('utf-8')).hexdigest()[:16]}|{blob}"
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()
 
 

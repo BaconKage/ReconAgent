@@ -22,11 +22,68 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Protocol
 
 # Defaults are overridable so a user can pick a tier they actually have access to.
 ANTHROPIC_DEFAULT_MODEL = "claude-opus-5"
 OPENAI_DEFAULT_MODEL = "gpt-5.6-terra"
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+#: Checked in order; the first hit wins and never overrides a real env var.
+ENV_FILES = (".env.local", ".env")
+
+_env_loaded = False
+
+
+def _load_env_files() -> None:
+    """Read .env.local / .env once, without overriding the real environment.
+
+    Skipped entirely under pytest: the suite must never pick up a developer's
+    real key from a file on disk and turn itself into live API spend.
+    """
+    global _env_loaded
+    if _env_loaded:
+        return
+    _env_loaded = True
+    if os.environ.get("PYTEST_CURRENT_TEST") or os.environ.get("PYTEST_VERSION"):
+        return
+    try:
+        from dotenv import load_dotenv
+    except ImportError:
+        return
+    for name in ENV_FILES:
+        path = REPO_ROOT / name
+        if path.exists():
+            load_dotenv(path, override=False)
+
+
+def _usable(value: str | None) -> bool:
+    """Whether an env value is a real credential rather than template filler.
+
+    Copying `.env.example` and filling in one line is the normal way people set
+    this up, which leaves the other provider's placeholder sitting there. Reading
+    it as a real key would select the wrong vendor and fail on auth with a
+    confusing message, so obvious placeholders count as absent.
+    """
+    if not value:
+        return False
+    v = value.strip().strip("'\"")
+    if not v or "..." in v or v.endswith("-") or " " in v:
+        return False
+    return v.lower() not in {
+        "none", "null", "changeme", "your-api-key", "your_api_key",
+        "sk-ant", "sk-", "todo",
+    }
+
+
+def available_keys() -> dict[str, bool]:
+    """Which provider credentials look genuinely present."""
+    _load_env_files()
+    return {
+        "anthropic": _usable(os.environ.get("ANTHROPIC_API_KEY")),
+        "openai": _usable(os.environ.get("OPENAI_API_KEY")),
+    }
 
 
 @dataclass
@@ -168,15 +225,18 @@ PROVIDERS = {"anthropic": AnthropicProvider, "openai": OpenAIProvider}
 def detect_provider_name() -> str | None:
     """Which provider to use, from the environment.
 
-    An explicit RECONAGENT_LLM_PROVIDER wins. Otherwise the first key present,
+    An explicit RECONAGENT_LLM_PROVIDER wins. Otherwise the first *usable* key,
     checked in a fixed order so behaviour is reproducible when both are set.
+    Placeholder values left over from `.env.example` do not count as present.
     """
+    _load_env_files()
     forced = (os.environ.get("RECONAGENT_LLM_PROVIDER") or "").strip().lower()
     if forced:
         return forced if forced in PROVIDERS else None
-    if os.environ.get("ANTHROPIC_API_KEY"):
+    keys = available_keys()
+    if keys["anthropic"]:
         return "anthropic"
-    if os.environ.get("OPENAI_API_KEY"):
+    if keys["openai"]:
         return "openai"
     return None
 
@@ -191,8 +251,11 @@ def get_provider(name: str | None = None) -> LLMProvider:
         raise LLMUnavailable(
             f"unknown provider {name!r}; expected one of {sorted(PROVIDERS)}")
     key_var = "ANTHROPIC_API_KEY" if name == "anthropic" else "OPENAI_API_KEY"
-    if not os.environ.get(key_var):
-        raise LLMUnavailable(f"{name} selected but {key_var} is not set")
+    if not available_keys()[name]:
+        present = os.environ.get(key_var)
+        raise LLMUnavailable(
+            f"{name} selected but {key_var} looks like a placeholder"
+            if present else f"{name} selected but {key_var} is not set")
     try:
         return PROVIDERS[name]()
     except LLMUnavailable:

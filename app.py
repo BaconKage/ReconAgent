@@ -223,10 +223,15 @@ with tab_exceptions:
     unresolved = report.unresolved
     st.caption(f"{len(unresolved)} items the engine would not resolve on its own.")
 
-    # Lead with cases the agent declined to decide - the ones worth a human.
+    # Lead with cases where the engine had a candidate in front of it and
+    # declined. An orphan credit with nothing nearby is a trivial absence; a
+    # settlement with a credit just outside tolerance is a judgement call.
+    nets = {x.transaction_id: x.net_paise for x in state["batch"].settlements}
+
     def sort_key(r):
         inv = outcome.investigations.get(r.record_id, {})
-        return (inv.get("sufficient_evidence", True), r.record_id)
+        return (not r.near_misses, inv.get("sufficient_evidence", True),
+                -nets.get(r.record_id, 0), r.record_id)
 
     ordered = sorted(unresolved, key=sort_key)
     labels = {

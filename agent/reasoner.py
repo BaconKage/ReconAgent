@@ -226,17 +226,22 @@ class ExceptionReasoner:
         outcome = ReasoningOutcome(stats=stats)
 
         bundles = {c.record_id: build_evidence_bundle(c, batch, self.cfg) for c in cases}
-        keys = {rid: evidence_key(b) for rid, b in bundles.items()}
+        # The prompt is part of the key: an answer is a function of the evidence
+        # and the instructions together, so editing one must invalidate the other.
+        instructions = system_prompt(self.cfg)
+        keys = {rid: evidence_key(b, instructions) for rid, b in bundles.items()}
 
         pending: list[str] = []
         for rid in bundles:
             hit = self.cache.get(keys[rid])
-            if hit is not None:
+            if hit is not None and not self.is_placeholder(hit):
                 inv = dict(hit)
                 inv["source"] = "cached_trace"
                 outcome.investigations[rid] = inv
                 stats.served_from_cache += 1
             else:
+                # A cached placeholder is treated as a miss, so a cache poisoned
+                # by an earlier failed run heals itself on the next good one.
                 pending.append(rid)
 
         if pending:
@@ -258,8 +263,9 @@ class ExceptionReasoner:
                         inv["source"] = "live_llm"
                         inv["model"] = stats.provider
                         outcome.investigations[rid] = inv
-                        self.cache.put(keys[rid], {k: v for k, v in inv.items()
-                                                   if k != "source"})
+                        if not self.is_placeholder(inv):
+                            self.cache.put(keys[rid], {k: v for k, v in inv.items()
+                                                       if k != "source"})
                 self.cache.save()
 
         if trail is not None:
@@ -300,6 +306,18 @@ class ExceptionReasoner:
                 if isinstance(inv, dict) and "case_id" in inv}
 
     @staticmethod
+    def is_placeholder(inv: dict[str, Any] | None) -> bool:
+        """Whether this is a stand-in rather than a real investigation.
+
+        Placeholders must never be written to, or served from, the trace cache.
+        They record the *absence* of an explanation - caching one would let a
+        single transient API failure permanently poison that case, and the
+        poisoned entry would then be served with `source: cached_trace`, which
+        reads exactly like a real result.
+        """
+        return bool(inv) and inv.get("_unavailable") is True
+
+    @staticmethod
     def _placeholder(record_id: str, why: str | None) -> dict[str, Any]:
         """What an exception looks like when no explanation could be produced.
 
@@ -318,4 +336,6 @@ class ExceptionReasoner:
             "evidence_cited": [],
             "rupee_impact": "unknown",
             "source": "unavailable",
+            # Sentinel. Keeps this out of the persistent cache - see is_placeholder.
+            "_unavailable": True,
         }

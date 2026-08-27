@@ -209,3 +209,57 @@ the most direct way that claim could quietly become false, so now it cannot.
 noting that the payoff was not avoiding one bug. It was that "which model
 vendor" turned out to be a genuinely small decision, because the architecture
 had already made it one.
+
+---
+
+### 6. My own safety net poisoned the cache — Day 5
+
+**What broke.** The first run with a real API key made zero API calls. Every
+exception came back with `source: cached_trace` and a hypothesis reading
+*"No agent explanation available (API error: 401 ... sk-fake-...)"*.
+
+Earlier I had tested graceful degradation by running with a deliberately fake
+`OPENAI_API_KEY`. That worked - the run completed, the errors were reported, the
+metrics were untouched. What I did not notice is that the placeholder
+investigations it produced were written to the **persistent trace cache**, which
+is committed to the repository. Thirty-one entries, each recording an absence of
+reasoning, stored as though they were reasoning.
+
+**Why it mattered.** Three reasons, escalating.
+
+First, it silently blocked the real run: cache hits meant the working key was
+never used.
+
+Second, the poisoned entries came back labelled `source: cached_trace`, which is
+exactly what a legitimate replayed answer looks like. There was no signal
+distinguishing "we replayed a real investigation" from "we replayed a failure".
+
+Third, and worst: that cache file is the thing a judge sees. Had I not looked at
+the output closely, I would have committed thirty-one API errors into the
+repository as the project's demonstration of agent reasoning, and the keyless
+demo - the whole point of committing traces - would have shown 401s.
+
+The cause is a one-line oversight with a wide blast radius. `_call` returns
+placeholder dicts on API failure so the run can continue. Those placeholders have
+the same shape as real investigations, so the caching path could not tell them
+apart and stored them like anything else. My degradation mechanism and my caching
+mechanism were each correct alone and wrong together.
+
+**How I got out.** Placeholders now carry an `_unavailable` sentinel and
+`is_placeholder()`. They are never written to the cache, and a cached placeholder
+is treated as a **miss** rather than a hit - so a cache already poisoned by a
+failed run heals itself on the next good one instead of needing manual purging.
+Two regression tests cover both halves.
+
+While fixing it I found a second, quieter version of the same class of bug: the
+cache key was a hash of the evidence only, not of the system prompt. Editing the
+prompt would appear to take effect while every existing case silently replayed an
+answer written under the old instructions - undetectable, because a cached trace
+is indistinguishable from a fresh one once stored. The key now folds in a hash of
+the instructions.
+
+**What I changed in how I work.** I had tested the failure path and I had tested
+the caching path. I had not tested the failure path *followed by* the caching
+path. The bug lived in the seam, which is where this kind of bug always lives.
+Now I ask what a fallback leaves behind, not just whether it fires - because a
+fallback that persists its own output is no longer a fallback, it is a writer.
