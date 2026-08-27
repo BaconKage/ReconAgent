@@ -33,7 +33,7 @@ the Q&A all run offline, replaying 104 committed reasoning traces.
 streamlit run app.py                       # the UI
 python run_demo.py --dataset holdout       # the sealed evaluation set
 python run_demo.py --ask "why didn't pay_f7atwyam1n reconcile?"
-python -m pytest tests/ -q                 # 173 tests
+python -m pytest tests/ -q                 # 179 tests
 python -m evaluation.sensitivity           # threshold trade-off sweep
 python benchmark.py                        # throughput and accuracy vs batch size
 ```
@@ -104,8 +104,8 @@ The figures above come from 252 and 290 records. That is enough to demonstrate t
 case types and nowhere near enough to measure an error rate, so I scaled the same
 seeded generator and re-ran everything. `benchmark.py` reproduces this.
 
-**Finding 1 — the false-positive rate is about 0.5%, and my headline sets cannot
-see it.** Two independent seeds:
+**Finding 1 — the false-positive rate was about 0.5%, and my headline sets could
+not see it.** Two independent seeds, before the fix described below:
 
 | rows | settlements | false positives | FP rate | precision |
 |---|---|---|---|---|
@@ -124,8 +124,40 @@ sample too small to detect the error rate that was there all along.
 splits and none are the ambiguity guard. A settlement that should be a split, or
 should have no counterpart at all, gets bound to a *single* unrelated credit that
 coincidentally lands within ±50 paise and the 3-day window. The ambiguity guard
-fires on two or more candidates and has no defence against one coincidental one.
-Known, unfixed, and stated here rather than discovered by a reviewer.
+fires on two or more candidates and had no defence against exactly one.
+
+**The fix: a coincidence guard.** An amount-and-date match carries no identifier,
+so it is worth only as much as the odds against a coincidence. The engine now
+scores each one:
+
+```
+expected coincidences = neighbours within ±Rs 50  x  (delta / Rs 50)  x  ((lag + 1) / window)
+```
+
+An exact match on the settlement date with nothing else nearby scores ~0 and is
+accepted. One sitting mid-tolerance, two days late, in a crowded field scores
+high - which is exactly what a coincidence looks like, because coincidental deltas
+spread evenly across the tolerance band while real ones cluster at zero. Above
+0.05 the match is held for review, and the credit is left available to a
+settlement that can account for it better.
+
+| 25,000 rows | false positives | precision | recall |
+|---|---|---|---|
+| seed 7, guard off | 46 | 98.98% | 83.54% |
+| **seed 7, guard on** | **24** | **99.46%** | 83.26% |
+| seed 99, guard off | 35 | 99.22% | 83.63% |
+| **seed 99, guard on** | **22** | **99.51%** | 83.33% |
+
+Seed 99 was never used to design it. The guard removes roughly 40% of false
+positives for 0.3 percentage points of recall - a trade worth taking, since
+binding money to the wrong counterpart costs far more than asking a human to look.
+It is **dormant at small batch sizes**: dev and holdout are byte-identical with it
+on and off, which a test asserts.
+
+The residual ~0.3% is not separable with the features available. Amount and date
+alone cannot distinguish a real payout from a coincidence once a batch is dense
+enough; that needs narration text or historical pairing, which this synthetic data
+does not carry.
 
 **Finding 2 — the adversarial claim survives scale.** 0 conflations out of **495**
 near-duplicate pairs at 25,000 rows. That claim *is* well-powered, and it is the
@@ -410,10 +442,11 @@ measured (0/264 ungrounded IDs); usefulness is not.
 **Scale is now tested, and it found two things.** Matching is quadratic, so the
 throughput headline was a ~50x overstatement; and the false-positive rate is ~0.5%
 of settlements rather than zero, which my 87-settlement dev set had no power to
-detect. Both are measured and reported in [At scale](#at-scale). Neither is fixed.
-The tier-3 coincidence problem is the more interesting of the two: an amount-and-
-date match with no identifier is weak evidence, and at volume weak evidence is
-wrong about half a percent of the time.
+detect. Both are measured and reported in [At scale](#at-scale). The false-positive
+problem is now roughly halved by a coincidence guard, validated on a seed it was
+not designed against; the residual ~0.3% is not separable from amount and date
+alone. **The quadratic time is not fixed** - the honest figure remains ~2,700
+rows/sec at 25,000 records.
 
 ---
 
@@ -421,11 +454,10 @@ wrong about half a percent of the time.
 
 1. **Bucket credits by date before tier 3.** Measured, not speculated: matching
    is quadratic and drops to ~2,700 rows/sec by 25k records.
-2. **Corroboration for lone tier-3 matches.** A single amount-and-date candidate
-   with no identifier causes every false positive I have measured. Either require
-   that no competing split decomposition exists, or drop its confidence below the
-   auto-match threshold when the batch is dense, so it routes to review instead of
-   being asserted.
+2. **More signal for lone tier-3 matches.** The coincidence guard halves them;
+   the rest need evidence this data does not carry. Narration tokens and customer
+   names in the bank reference would separate a real payout from a coincidence
+   where amount and date cannot.
 3. **Per-bank configuration profiles.** The held-out gap is a configuration
    problem, and the settlement window should be learned per counterparty rather
    than set globally.
@@ -460,7 +492,7 @@ evaluation/   metrics + threshold sensitivity — the only reader of ground trut
 benchmark.py  throughput and accuracy as a function of batch size
 cash/         forward cash position
 data/         seeded generator, dev and holdout batches
-tests/        173 tests
+tests/        179 tests
 DEVLOG.md     what actually broke, and what I did about it
 ```
 

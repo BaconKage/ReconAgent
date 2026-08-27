@@ -390,3 +390,96 @@ def test_thresholds_are_honoured_from_config_not_hardcoded():
     assert reconcile(data()).results[0].status == "unresolved"
     wide = reconcile(data(), MatchConfig(amount_tolerance_paise=500))
     assert result_for(wide, "pay_1").status == "matched"
+
+
+# --------------------------------------------------------------------------
+# The coincidence guard - unique is not the same as trustworthy
+# --------------------------------------------------------------------------
+
+def test_an_exact_same_day_match_in_a_sparse_field_is_accepted():
+    """The guard must not fire on good evidence. Delta 0, lag 0, nothing nearby."""
+    rep = reconcile(batch([settlement(net=100_000, day=D0)],
+                          [bank("BNK_1", credit=100_000, day=D0)]))
+    r = result_for(rep, "pay_1")
+    assert r.status == "matched"
+    assert r.match_type == "amount_date_window"
+
+
+def test_a_loose_late_match_in_a_crowded_field_is_held_for_review():
+    """Unique inside both thresholds, and still not good enough.
+
+    One candidate sits 45 paise off and two days late, surrounded by a dense
+    field of similar amounts. That is what a coincidence looks like: real matches
+    cluster at zero, coincidental deltas are spread across the tolerance band.
+    """
+    crowd = [bank(f"BNK_c{i}", credit=100_000 + 200 * (i + 1), day=D0)
+             for i in range(40)]
+    rep = reconcile(batch(
+        [settlement(net=100_000, day=D0)],
+        [bank("BNK_1", credit=100_045, day=D0 + timedelta(days=2))] + crowd,
+    ))
+    r = result_for(rep, "pay_1")
+    assert r.status == "unresolved"
+    assert r.exception_reason == "weak_amount_date_evidence"
+    assert r.linked_ids["bank"] == [], "the credit stays available to a better claim"
+    assert r.near_misses and r.near_misses[0].record_id == "BNK_1"
+
+
+def test_the_declined_credit_is_named_in_the_trace():
+    """A reviewer must be able to see what was rejected and why."""
+    crowd = [bank(f"BNK_c{i}", credit=100_000 + 200 * (i + 1), day=D0)
+             for i in range(40)]
+    rep = reconcile(batch(
+        [settlement(net=100_000, day=D0)],
+        [bank("BNK_1", credit=100_045, day=D0 + timedelta(days=2))] + crowd,
+    ))
+    trace = " ".join(result_for(rep, "pay_1").rule_trace)
+    assert "BNK_1" in trace and "coincidence score" in trace
+
+
+def test_density_is_what_makes_the_difference_not_the_delta_alone():
+    """The same loose match is accepted when nothing else is nearby.
+
+    This is the whole point of the guard: it weighs evidence against how
+    surprising it is, rather than applying a blanket tighter tolerance, which
+    would reject legitimate sub-rupee rounding drift.
+    """
+    loose = bank("BNK_1", credit=100_045, day=D0 + timedelta(days=2))
+    sparse = reconcile(batch([settlement(net=100_000, day=D0)], [loose]))
+    assert result_for(sparse, "pay_1").status == "matched"
+
+
+def test_the_guard_can_be_disabled_from_config():
+    """Threshold 0 restores the previous behaviour exactly."""
+    crowd = [bank(f"BNK_c{i}", credit=100_000 + 200 * (i + 1), day=D0)
+             for i in range(40)]
+    data = lambda: batch(
+        [settlement(net=100_000, day=D0)],
+        [bank("BNK_1", credit=100_045, day=D0 + timedelta(days=2))] + crowd,
+    )
+    assert result_for(reconcile(data()), "pay_1").status == "unresolved"
+    off = reconcile(data(), MatchConfig(coincidence_threshold=0.0))
+    assert result_for(off, "pay_1").status == "matched"
+
+
+def test_the_guard_does_not_disturb_the_small_batches():
+    """dev and holdout must be byte-identical with the guard on and off.
+
+    The guard is meant to be dormant when a batch is not dense enough for
+    coincidences to matter. If it changed the headline datasets it would be
+    trading a measured problem for an unmeasured one.
+    """
+    from dataclasses import replace
+    from pathlib import Path
+    from core.config import DEFAULT_CONFIG
+    from core.loader import load_batch
+
+    root = Path(__file__).resolve().parents[1] / "data"
+    off = replace(DEFAULT_CONFIG, coincidence_threshold=0.0)
+    for name in ("dev", "holdout"):
+        loaded = load_batch(root / name)
+        a = reconcile(loaded, DEFAULT_CONFIG)
+        b = reconcile(loaded, off)
+        sig = lambda rep: sorted((r.record_id, r.status, r.match_type, r.confidence,
+                                  tuple(sorted(r.group_key))) for r in rep.results)
+        assert sig(a) == sig(b), f"{name} changed when the coincidence guard was toggled"

@@ -34,7 +34,7 @@ from __future__ import annotations
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import date, timedelta
 
 from core.config import DEFAULT_CONFIG, MatchConfig
 from core.loader import LoadedBatch
@@ -95,6 +95,11 @@ class ReconciliationEngine:
         self.claimed_banks: set[str] = set()
         self.results: dict[str, MatchResult] = {}
         self.banks_by_id = {b.bank_row_id: b for b in batch.banks}
+        # Credits indexed by value date, so the coincidence guard can count a
+        # settlement's neighbourhood without rescanning the whole batch.
+        self.banks_by_date: dict[date, list[BankRecord]] = defaultdict(list)
+        for b in batch.banks:
+            self.banks_by_date[b.value_date].append(b)
 
         settlements, duplicate_ids = self._detect_duplicates(batch.settlements)
 
@@ -354,13 +359,36 @@ class ReconciliationEngine:
                 s = by_tid[tid]
                 b = self.banks_by_id[bid]
                 r = self._result_for(s)
+
+                score = self._coincidence_score(s, b)
+                if score > self.cfg.coincidence_threshold > 0:
+                    # Unique, inside both thresholds - and still not good enough.
+                    # The credit is left unclaimed so it stays available to a
+                    # settlement that can account for it more convincingly.
+                    r.status = "unresolved"
+                    r.exception_reason = "weak_amount_date_evidence"
+                    r.confidence = 0.0
+                    r.near_misses.append(NearMiss(
+                        source="bank", record_id=bid,
+                        reason=("only candidate inside both thresholds, but the match is "
+                                "loose enough and the neighbourhood crowded enough that a "
+                                "coincidence is likely"),
+                        amount_delta_paise=b.credit_paise - s.net_paise,
+                        date_delta_days=self._lag(s, b)))
+                    r.note(f"tier3 amount+date: {bid} is the only candidate, but the "
+                           f"expected-coincidence score is {score:.3f} against a limit of "
+                           f"{self.cfg.coincidence_threshold}. Amount and date alone are "
+                           f"not enough evidence here - held for review.")
+                    continue
+
                 self._claim(r, [b])
                 r.status = "matched"
                 r.match_type = "amount_date_window"
                 r.confidence = self._confidence(s, b)
                 r.note(f"tier3 amount+date: uniquely matched {bid} "
                        f"(delta {b.credit_paise - s.net_paise}p, "
-                       f"lag T+{self._lag(s, b)}); no competing candidate")
+                       f"lag T+{self._lag(s, b)}); no competing candidate, "
+                       f"coincidence score {score:.3f}")
                 changed = True
 
         # Whatever is left is unclaimable for one of two distinct reasons, and
@@ -396,6 +424,39 @@ class ReconciliationEngine:
                 r.note(f"tier3 amount+date: {len(remaining)} credits satisfy both thresholds "
                        f"({', '.join(sorted(remaining))}). Refusing to guess - picking the "
                        f"closest would be a coin flip reported as a match.")
+
+    def _coincidence_score(self, s: SettlementRecord, b: BankRecord) -> float:
+        """Expected number of unrelated credits at least as close as this one.
+
+        An amount-and-date match carries no identifier, so its worth depends
+        entirely on how unlikely it is to have happened by chance. Three factors
+        multiply:
+
+        * **neighbourhood density** - how many other credits sit near this net
+          inside the window. A crowded neighbourhood makes any single hit cheap.
+        * **how close the match is** - coincidental deltas are spread evenly
+          across the tolerance band, real ones cluster at zero, so a delta near
+          the tolerance limit is itself evidence of coincidence.
+        * **the lag** - same-day credits are far more often genuine.
+
+        Zero means "nothing else was anywhere near this, and it matched exactly"
+        - accept. High means "in a field this crowded, a hit this loose was
+        always going to happen" - hold it for a human.
+        """
+        radius = self.cfg.coincidence_radius_paise
+        if radius <= 0:
+            return 0.0
+        neighbours = 0
+        for lag in range(0, self.cfg.date_window_days + 1):
+            for other in self.banks_by_date.get(s.settlement_date + timedelta(days=lag), ()):
+                if other.bank_row_id == b.bank_row_id:
+                    continue
+                if abs(other.credit_paise - s.net_paise) <= radius:
+                    neighbours += 1
+        delta = max(abs(b.credit_paise - s.net_paise), 1)
+        lag = self._lag(s, b)
+        window = max(1, self.cfg.date_window_days + 1)
+        return neighbours * (delta / radius) * ((lag + 1) / window)
 
     def _confidence(self, s: SettlementRecord, b: BankRecord) -> float:
         """Confidence for an amount+date match, scaled by how tight the fit is."""

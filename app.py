@@ -40,6 +40,7 @@ REASON_LABEL = {
     "contested_candidate": "One credit, two claimants",
     "ambiguous_split": "Several subsets summed to net",
     "contested_split_legs": "Split legs claimed twice",
+    "weak_amount_date_evidence": "Match too likely to be coincidence",
     "no_candidate_found": "No credit within thresholds",
     "no_settlement_counterpart": "Credit with no settlement",
     "duplicate_settlement_row": "Webhook retry",

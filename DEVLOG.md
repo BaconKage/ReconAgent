@@ -428,3 +428,54 @@ smallest rate that sample could have detected is. If the answer is larger than t
 number I am about to report, I do not have a measurement - I have an absence of
 evidence, and those are not the same thing. A clean 100% on a small sample should
 increase suspicion, not confidence.
+
+
+---
+
+### 10. Fixing the false positives, and the idea that died first - Day 8
+
+**What I tried first, and why it failed.** The obvious fix for the split-related
+false positives was: before accepting a lone amount+date match, check whether a
+split decomposition could also explain the settlement. If two stories fit, refuse.
+
+I measured it before building it. A split decomposition exists for **100% of true
+matches and 100% of false ones** at 25,000 records. Useless as a discriminator -
+and it confirms, harder than I expected, the warning I had written into
+`splits.py` many commits earlier: given enough candidates, *something* always sums
+to the target. Two minutes of measurement killed a fix I would otherwise have
+spent an afternoon building.
+
+**What actually separates them.** Comparing true against false tier-3 matches:
+
+| | median delta | others within Rs 50 |
+|---|---|---|
+| true | 0 paise | 3 |
+| false | 28 paise | 16 |
+
+Both are informative and neither is sufficient. True matches sit at delta zero;
+coincidental deltas spread evenly across the tolerance band, so their median lands
+near half of it. And false positives happen in neighbourhoods five times more
+crowded.
+
+Density alone traded 3.4 true matches per false positive caught - not worth it.
+Adding lag as a third factor took that to **1.0:1**, which is worth taking, since binding
+money wrongly costs far more than asking a human to look.
+
+**The trap I nearly walked into.** I found the best threshold by sweeping it
+against the benchmark, which is tuning on the evaluation set - the exact thing
+entry 4 was about. So I rounded the swept 0.046 to a plain 0.05 and validated on a
+seed the guard had never seen. Seed 99 gives 35 -> 22 false positives against seed
+7 at 46 -> 24. It generalises.
+
+**What I did not do.** Chase the remaining half. Those are cases where a
+coincidental credit is genuinely indistinguishable from a real one on amount and
+date; no feature I have separates them, and with 52 true matches per false one,
+any aggressive rule costs more than it saves. The honest fix needs signal the data
+does not carry - narration text, customer names in the bank reference, historical
+pairing. That is stated in the README rather than papered over.
+
+**What I changed in how I work.** Measure the discriminator before building the
+fix. Both my candidate features were plausible, one was worthless, and finding
+that out cost two minutes instead of an afternoon. And when a threshold has to be
+swept, round it and validate on data it has never seen - a number quoted to three
+decimal places is usually a number fitted to the test set.

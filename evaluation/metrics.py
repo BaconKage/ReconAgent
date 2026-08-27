@@ -54,11 +54,12 @@ EXPECTED_REASONS = {
     "partial_refund": {"identifier_match_amount_discrepancy"},
     "duplicate": {"duplicate_settlement_row"},
     "adversarial_ambiguous": {"ambiguous_candidates", "contested_candidate"},
-    "unmatchable": {"no_candidate_found", "no_settlement_counterpart"},
+    "unmatchable": {"no_candidate_found", "no_settlement_counterpart",
+                    "weak_amount_date_evidence"},
     # The engine cannot tell "not yet arrived" from "never arriving" - both
     # are simply an absent credit. That temporal judgement belongs to the
     # cash layer, which knows the settlement window.
-    "pending_settlement": {"no_candidate_found"},
+    "pending_settlement": {"no_candidate_found", "weak_amount_date_evidence"},
 }
 
 

@@ -71,6 +71,10 @@ REASON_PHRASING = {
         "single combination was identifiable",
     "contested_split_legs":
         "the credits it would need are also claimed by another settlement's split",
+    "weak_amount_date_evidence":
+        "one bank credit did fall inside both the amount tolerance and the date window, "
+        "but the match was loose and the surrounding dates held many similar amounts, so "
+        "a coincidence was more likely than a genuine payout",
     "no_candidate_found":
         "no bank credit satisfied both the amount tolerance and the date window",
     "no_settlement_counterpart":

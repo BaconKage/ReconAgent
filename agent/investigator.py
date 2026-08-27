@@ -186,6 +186,7 @@ def needs_deep_investigation(result) -> bool:
     return result.exception_reason in {
         "ambiguous_candidates", "contested_candidate",
         "ambiguous_split", "contested_split_legs", "no_candidate_found",
+        "weak_amount_date_evidence",
     }
 
 

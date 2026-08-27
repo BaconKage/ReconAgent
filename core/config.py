@@ -44,5 +44,38 @@ class MatchConfig:
     near_miss_amount_paise: int = 50_00      # Rs 50
     near_miss_window_days: int = 7
 
+    # -- coincidence guard ---------------------------------------------
+    # An amount-and-date match carries no identifier, so it is only as good as
+    # the odds against a coincidence. Scaling the benchmark to 25,000 records
+    # showed that every false positive the engine produces comes from this tier:
+    # a settlement that should have been a split, or should have had no
+    # counterpart at all, bound to one unrelated credit that happened to land
+    # inside both thresholds. The existing ambiguity guard fires on *two or more*
+    # candidates and has no answer to exactly one.
+    #
+    # The guard estimates the expected number of unrelated credits at least as
+    # close as the one matched:
+    #
+    #     score = neighbours_within_radius x (delta / radius) x ((lag + 1) / window)
+    #
+    # A credit that matches the net exactly, on the settlement date, in a sparse
+    # neighbourhood scores ~0 and is accepted. One sitting mid-tolerance, a day
+    # or two late, in a crowded neighbourhood scores high - which is precisely
+    # what a coincidence looks like, since coincidental deltas are spread evenly
+    # across the tolerance band while real ones cluster at zero.
+
+    #: Reference radius for counting neighbours. Rs 50 - two orders of magnitude
+    #: wider than the match tolerance, so it measures local density rather than
+    #: re-testing the match.
+    coincidence_radius_paise: int = 50_00
+
+    #: Above this expected-coincidence score, an amount+date match is held for
+    #: review instead of auto-matched. Set from the measured trade-off curve at
+    #: 25k records: it catches about half the false positives for roughly an
+    #: equal number of demoted true matches. That trade is deliberate - binding
+    #: money to the wrong counterpart costs far more than asking a human to look.
+    #: Set to 0 to disable the guard entirely.
+    coincidence_threshold: float = 0.05
+
 
 DEFAULT_CONFIG = MatchConfig()
