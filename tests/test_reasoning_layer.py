@@ -364,3 +364,39 @@ def test_a_cached_placeholder_is_treated_as_a_miss(pipeline, isolated_cache):
     isolated_cache.put("somekey", poisoned)
     assert isolated_cache.get("somekey") is not None
     assert ExceptionReasoner.is_placeholder(isolated_cache.get("somekey"))
+
+
+def test_qa_finds_a_transaction_recorded_in_an_earlier_run(tmp_path, pipeline):
+    """Runs are per-dataset, so the latest trail is not always the right one.
+
+    Asking about a dev transaction straight after a holdout run must not report
+    "not found" for a transaction that reconciled perfectly well. This was a real
+    bug: the exact command documented in the README failed that way.
+    """
+    _, report = pipeline
+    older = AuditTrail(run_id="run_a", directory=tmp_path)
+    for r in report.results:
+        older.append_decision(r)
+
+    newer = AuditTrail(run_id="run_b", directory=tmp_path)
+    newer.append({"record_id": "pay_unrelated", "status": "matched",
+                  "linked_ids": {"settlement": ["pay_unrelated"], "bank": [], "ledger": []},
+                  "rule_trace": [], "near_misses": []})
+
+    q = ReconciliationQA(newer.path)
+    target = report.results[0].record_id
+    assert q.resolve(target) is None, "fixture should not have it in the latest trail"
+
+    ans = q.ask(f"why didn't {target} reconcile?")
+    assert ans.found is True
+    assert "from an earlier run" in ans.answer
+    assert "run_a" in ans.answer
+
+
+def test_qa_still_refuses_an_id_that_exists_in_no_run(tmp_path, pipeline):
+    _, report = pipeline
+    trail = AuditTrail(run_id="only", directory=tmp_path)
+    for r in report.results[:3]:
+        trail.append_decision(r)
+    ans = ReconciliationQA(trail.path).ask("why didn't pay_neverexisted reconcile?")
+    assert ans.found is False and ans.source == "not_found"

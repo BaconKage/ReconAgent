@@ -91,11 +91,30 @@ class Answer:
 
 
 class ReconciliationQA:
-    def __init__(self, trail_path: Path | str | None = None):
+    def __init__(self, trail_path: Path | str | None = None, *, search_all: bool = True):
+        """Load a run's audit trail.
+
+        `search_all` widens the lookup to every trail in the directory when an ID
+        is absent from the most recent one. Runs are per-dataset, so asking about
+        a dev transaction right after a holdout run would otherwise report "not
+        found" for a transaction that was reconciled perfectly well - technically
+        true of that trail, and useless to the person asking.
+        """
         self.trail_path = Path(trail_path) if trail_path else AuditTrail.latest()
         entries = AuditTrail.read(self.trail_path) if self.trail_path else []
         self.records = merge_by_record(entries)
         self._index = self._build_index()
+
+        self._other_runs: dict[str, Path] = {}
+        if search_all and self.trail_path:
+            for other in sorted(self.trail_path.parent.glob("*.jsonl")):
+                if other == self.trail_path:
+                    continue
+                for rid, rec in merge_by_record(AuditTrail.read(other)).items():
+                    self._other_runs.setdefault(rid.lower(), other)
+                    for ids in (rec.get("linked_ids") or {}).values():
+                        for i in ids or []:
+                            self._other_runs.setdefault(str(i).lower(), other)
 
     def _build_index(self) -> dict[str, str]:
         """Map every ID mentioned anywhere in a group back to that group's record.
@@ -121,6 +140,24 @@ class ReconciliationQA:
         bare = (query or "").strip().lower()
         return self._index.get(bare)
 
+    def _find_in_other_runs(self, query: str):
+        """Locate an ID in a previous run's trail when it is absent from this one."""
+        tokens = ID_PATTERN.findall(query or "") or [(query or "").strip()]
+        for token in tokens:
+            path = self._other_runs.get(str(token).lower())
+            if not path:
+                continue
+            records = merge_by_record(AuditTrail.read(path))
+            index = {r.lower(): r for r in records}
+            for rid, rec in records.items():
+                for ids in (rec.get("linked_ids") or {}).values():
+                    for i in ids or []:
+                        index.setdefault(str(i).lower(), rid)
+            hit = index.get(str(token).lower())
+            if hit:
+                return path, hit, records
+        return None
+
     def lookup(self, record_id: str) -> dict[str, Any] | None:
         rid = self._index.get(str(record_id).lower())
         return self.records.get(rid) if rid else None
@@ -130,14 +167,23 @@ class ReconciliationQA:
     def ask(self, question: str, *, use_llm: bool = False) -> Answer:
         rid = self.resolve(question)
         if not rid:
-            known = len(self.records)
+            elsewhere = self._find_in_other_runs(question)
+            if elsewhere is not None:
+                other_path, other_rid, other_records = elsewhere
+                record = other_records[other_rid]
+                return Answer(
+                    question, other_rid, True,
+                    f"[from an earlier run: {other_path.name}]\n\n" + self.explain(record),
+                    "trail", record,
+                )
+            run = self.trail_path.name if self.trail_path else "(no trail found)"
             return Answer(
                 question=question, record_id=None, found=False,
                 answer=(
-                    "I could not find a transaction ID in that question that appears in "
-                    f"this run's audit trail ({known} records). Ask about a specific "
-                    "settlement (pay_...), order (order_...) or bank row (BNK_...) from "
-                    "this batch."
+                    "I could not find a transaction ID from that question in any audit "
+                    f"trail. The most recent run is {run} ({len(self.records)} records). "
+                    "Ask about a specific settlement (pay_...), order (order_...) or bank "
+                    "row (BNK_...), or run `python run_demo.py` to produce a fresh trail."
                 ),
                 source="not_found",
             )
