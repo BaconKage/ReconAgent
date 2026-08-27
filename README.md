@@ -35,6 +35,7 @@ python run_demo.py --dataset holdout       # the sealed evaluation set
 python run_demo.py --ask "why didn't pay_f7atwyam1n reconcile?"
 python -m pytest tests/ -q                 # 173 tests
 python -m evaluation.sensitivity           # threshold trade-off sweep
+python benchmark.py                        # throughput and accuracy vs batch size
 ```
 
 To regenerate reasoning against a live model, install a provider and set a key:
@@ -69,6 +70,12 @@ was **opened once**, after thresholds were frozen — provable from git history:
 | exceptions correctly categorised | 100% | 100% |
 | throughput (deterministic) | 141,000 rows/s | 124,000 rows/s |
 
+> **These two sets are too small to measure the false-positive rate, and the
+> throughput figure is meaningless.** Both were caught by scaling the benchmark to
+> 25,000 records — see [At scale](#at-scale) below, which supersedes the last two
+> rows of this table. The numbers above are accurate for these batches; they are
+> just not evidence of what I originally claimed they were.
+
 **The held-out recall gap is real and is not being hidden.** All 9 misses are
 split settlements whose legs land at T+3 or T+4, in a batch that models a bank on
 a slower cycle than the engine's configured T+2 window. The engine refused rather
@@ -85,9 +92,64 @@ collapsing them into one accuracy number lets a system trade the expensive
 mistake for the cheap one and look better for it.
 
 - A **false positive** binds money to the wrong counterpart. It produces books
-  that look clean and are wrong, and nobody goes looking. Zero on both sets.
+  that look clean and are wrong, and nobody goes looking. Zero on both sets above —
+  but see [At scale](#at-scale): the true rate is around 0.5% of settlements, and
+  these sets are too small to detect it.
 - A **false negative** hands a matchable row to a human. It costs a few minutes.
   A system that refuses when uncertain will deliberately incur more of them.
+
+### At scale
+
+The figures above come from 252 and 290 records. That is enough to demonstrate the
+case types and nowhere near enough to measure an error rate, so I scaled the same
+seeded generator and re-ran everything. `benchmark.py` reproduces this.
+
+**Finding 1 — the false-positive rate is about 0.5%, and my headline sets cannot
+see it.** Two independent seeds:
+
+| rows | settlements | false positives | FP rate | precision |
+|---|---|---|---|---|
+| 255 | 87 | 0 / 0 | 0.00% | 100% |
+| 1,008 | 346 | 0 / 0 | 0.00% | 100% |
+| 5,042 | 1,727 | 10 / 6 | 0.58% / 0.35% | ~99.1% |
+| 24,967 | 8,547 | 46 / 35 | 0.54% / 0.41% | ~99.1% |
+
+The rate is roughly constant. It reads as exactly zero on the dev set for an
+uninteresting statistical reason: 0.5% of 87 settlements is 0.44 expected errors,
+so **observing zero is the most likely outcome even when the true rate is 0.5%**.
+"100% precision, 0 false positives" was never evidence of perfection — it was a
+sample too small to detect the error rate that was there all along.
+
+**Where they come from.** Every one is tier 3 (`amount_date_window`); none are
+splits and none are the ambiguity guard. A settlement that should be a split, or
+should have no counterpart at all, gets bound to a *single* unrelated credit that
+coincidentally lands within ±50 paise and the 3-day window. The ambiguity guard
+fires on two or more candidates and has no defence against one coincidental one.
+Known, unfixed, and stated here rather than discovered by a reviewer.
+
+**Finding 2 — the adversarial claim survives scale.** 0 conflations out of **495**
+near-duplicate pairs at 25,000 rows. That claim *is* well-powered, and it is the
+one the refusal design was built to support.
+
+**Finding 3 — matching is quadratic, so the throughput figure was fiction.**
+
+| rows | match time | rows/sec |
+|---|---|---|
+| 255 | 0.00 s | 132,000 |
+| 5,042 | 0.75 s | 6,694 |
+| 24,967 | 9.18 s | 2,721 |
+
+Doubling the data roughly quadruples the time. Tiers 3, 4 and 5 each scan every
+unclaimed credit for every settlement. **The 141,000 rows/s above is a ~50x
+overstatement** — it was measured over 1.8 ms, which times the interpreter rather
+than the algorithm. The honest figure is **~2,700 rows/sec at 25,000 records**, and
+it degrades from there. The fix is standard (bucket credits by date so each
+settlement examines a handful of candidates instead of all of them); it is not
+implemented, and the number stands as measured.
+
+```bash
+python benchmark.py --rows 250 5000 25000
+```
 
 ---
 
@@ -345,25 +407,34 @@ be decidable. The engine currently uses amount, date and UTR only.
 checked against ground truth, because it does not make decisions. Grounding is
 measured (0/264 ungrounded IDs); usefulness is not.
 
-**Scale is untested.** 290 rows in ~2 ms. Tier 3 is O(settlements x credits)
-within a date window and tier 4 is a bounded subset-sum; neither has been run at
-100k rows.
+**Scale is now tested, and it found two things.** Matching is quadratic, so the
+throughput headline was a ~50x overstatement; and the false-positive rate is ~0.5%
+of settlements rather than zero, which my 87-settlement dev set had no power to
+detect. Both are measured and reported in [At scale](#at-scale). Neither is fixed.
+The tier-3 coincidence problem is the more interesting of the two: an amount-and-
+date match with no identifier is weak evidence, and at volume weak evidence is
+wrong about half a percent of the time.
 
 ---
 
 ## What I would build next
 
-1. **Blocking keys before tier 3**, so the candidate scan is not quadratic at
-   real merchant volume.
-2. **Per-bank configuration profiles.** The held-out gap is a configuration
+1. **Bucket credits by date before tier 3.** Measured, not speculated: matching
+   is quadratic and drops to ~2,700 rows/sec by 25k records.
+2. **Corroboration for lone tier-3 matches.** A single amount-and-date candidate
+   with no identifier causes every false positive I have measured. Either require
+   that no competing split decomposition exists, or drop its confidence below the
+   auto-match threshold when the batch is dense, so it routes to review instead of
+   being asserted.
+3. **Per-bank configuration profiles.** The held-out gap is a configuration
    problem, and the settlement window should be learned per counterparty rather
    than set globally.
-3. **Feed resolved exceptions back as signal.** Once a human pairs an orphan
+4. **Feed resolved exceptions back as signal.** Once a human pairs an orphan
    credit with an overdue settlement, that pairing is training data for narration
    matching — the highest-value unused signal in the data.
-4. **Currency and multi-entity**, where rounding and FX make the tolerance
+5. **Currency and multi-entity**, where rounding and FX make the tolerance
    question genuinely hard rather than a fixed 50 paise.
-5. **Verify the reasoning layer.** Have a second model, or a human queue, check a
+6. **Verify the reasoning layer.** Have a second model, or a human queue, check a
    sample of investigations so its usefulness is measured rather than assumed.
 
 ---
@@ -386,6 +457,7 @@ agent/        the reasoning layer — explains, never matches
   cache/        104 committed traces, so the repo demos offline
 audit/        append-only JSONL decision trail
 evaluation/   metrics + threshold sensitivity — the only reader of ground truth
+benchmark.py  throughput and accuracy as a function of batch size
 cash/         forward cash position
 data/         seeded generator, dev and holdout batches
 tests/        173 tests

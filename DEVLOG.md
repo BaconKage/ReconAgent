@@ -364,3 +364,67 @@ feeds the shim a synthetic two-message response.
 look at the raw response shape once before trusting an accessor - `len(r.output)`
 and the item types cost one print statement. Convenience accessors are designed
 for display, and display tolerates concatenation. Parsers do not.
+
+---
+
+### 9. My headline metric could not measure the thing it claimed — Day 7
+
+**What broke.** Not the code. The evidence.
+
+I had been reporting **100% precision, 0 false positives** on both datasets, and
+treating that as the project's strongest claim. Scaling the benchmark - which I
+expected to be a throughput exercise - produced this, across two independent
+seeds:
+
+| rows | settlements | false positives | FP rate |
+|---|---|---|---|
+| 255 | 87 | 0 / 0 | 0.00% |
+| 1,008 | 346 | 0 / 0 | 0.00% |
+| 5,042 | 1,727 | 10 / 6 | 0.58% / 0.35% |
+| 24,967 | 8,547 | 46 / 35 | 0.54% / 0.41% |
+
+The rate is roughly **constant** at half a percent of settlements. It is not that
+the matcher degrades at scale; it is that the error was always there and my test
+set could not see it. 0.5% of 87 settlements is 0.44 expected errors, so observing
+zero is the single most likely outcome *even if the true rate is exactly 0.5%*.
+
+I had run a test with no power to detect the thing it was testing, got the answer
+I wanted, and put it at the top of the README in bold.
+
+**Why it mattered.** This is the most uncomfortable entry in this log, because
+nothing failed. Every test passed. The number was arithmetically correct. The
+dev and holdout figures are still true statements about those batches. What was
+wrong was the *inference* - treating "we observed zero" as "the rate is zero",
+when the sample could not distinguish those cases.
+
+It is also the failure mode I had already written a test against in spirit. In
+entry 4 I fixed a benchmark whose labels were only conditionally true. Here the
+labels were fine and the *sample size* was the problem, which no amount of
+staring at the ground truth would have revealed. Only more data did.
+
+**What actually causes them.** Every false positive comes from tier 3
+(`amount_date_window`); none from splits, none from the ambiguity guard. A
+settlement that should be a split, or should have no counterpart at all, gets
+bound to a single unrelated credit that happens to fall within 50 paise and the
+three-day window. The ambiguity guard triggers on two or more candidates and has
+no answer to exactly one coincidental candidate. At 87 settlements you will
+almost never see it. At 8,547 you see it 46 times.
+
+The adversarial claim, by contrast, held up completely: 0 conflations out of 495
+near-duplicate pairs at 25,000 rows. That one *was* adequately powered, and it is
+the claim the refusal design was actually built to support.
+
+**How I got out.** I did not fix it. With the deadline close I judged that
+reporting it accurately was worth more than a partial fix I could not properly
+verify, so the README now leads the results table with a warning that those two
+sets cannot measure a false-positive rate, carries the measured ~0.5% figure and
+its cause, and states that the fix is unimplemented. `benchmark.py` is committed
+so anyone can reproduce all of it. The throughput claim, which turned out to be a
+50x overstatement measured over 1.8 milliseconds of interpreter noise, is
+corrected in the same place.
+
+**What I changed in how I work.** Before quoting a rate, I now ask what the
+smallest rate that sample could have detected is. If the answer is larger than the
+number I am about to report, I do not have a measurement - I have an absence of
+evidence, and those are not the same thing. A clean 100% on a small sample should
+increase suspicion, not confidence.
