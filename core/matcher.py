@@ -32,11 +32,13 @@ that scores 50% and reports 100% confidence.
 from __future__ import annotations
 
 import time
+from bisect import bisect_left
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 
 from core.config import DEFAULT_CONFIG, MatchConfig
+from core.index import CreditIndex
 from core.loader import LoadedBatch
 from core.models import BankRecord, MatchResult, NearMiss, SettlementRecord
 from core.normalize import paise_to_rupees
@@ -95,11 +97,9 @@ class ReconciliationEngine:
         self.claimed_banks: set[str] = set()
         self.results: dict[str, MatchResult] = {}
         self.banks_by_id = {b.bank_row_id: b for b in batch.banks}
-        # Credits indexed by value date, so the coincidence guard can count a
-        # settlement's neighbourhood without rescanning the whole batch.
-        self.banks_by_date: dict[date, list[BankRecord]] = defaultdict(list)
-        for b in batch.banks:
-            self.banks_by_date[b.value_date].append(b)
+        # One index serves every tier: amount-and-date lookups become a pair of
+        # binary searches instead of a scan over the whole batch per settlement.
+        self.index = CreditIndex(batch.banks)
 
         settlements, duplicate_ids = self._detect_duplicates(batch.settlements)
 
@@ -292,11 +292,25 @@ class ReconciliationEngine:
         for s in pending:
             utr_to_settlements[s.utr_number].append(s)
 
+        # Sorted once, so a prefix lookup is a binary search rather than a scan
+        # over every pending UTR. Scanning made this tier quadratic: on a
+        # 50,000-row batch it was 1,980 malformed references x 17,000 settlement
+        # UTRs. The sorted order also means the two candidates examined below are
+        # always the same two, whatever order the credits arrive in.
+        sorted_utrs = sorted(utr_to_settlements)
+
         for b in self._unclaimed():
             digits = b.parsed_utr
             if not digits or len(digits) == UTR_LEN:
                 continue
-            matches = [utr for utr in utr_to_settlements if utr.startswith(digits)]
+            # Only ever need to know whether the prefix is unique, so stop at two.
+            start = bisect_left(sorted_utrs, digits)
+            matches = []
+            for i in range(start, min(start + 2, len(sorted_utrs))):
+                if sorted_utrs[i].startswith(digits):
+                    matches.append(sorted_utrs[i])
+                else:
+                    break
             if len(matches) != 1:
                 continue
             cands = [s for s in utr_to_settlements[matches[0]] if not self._is_decided(s)]
@@ -326,11 +340,15 @@ class ReconciliationEngine:
         if not pending:
             return
 
+        tol = self.cfg.amount_tolerance_paise
         candidates: dict[str, set[str]] = {}
         for s in pending:
-            hits = {b.bank_row_id for b in self._unclaimed()
-                    if self._amount_ok(s, b) and self._window_ok(s, b)}
-            candidates[s.transaction_id] = hits
+            candidates[s.transaction_id] = {
+                b.bank_row_id for b in self.index.query(
+                    s.settlement_date, lag_from=0, lag_to=self.cfg.date_window_days,
+                    lo_paise=s.net_paise - tol, hi_paise=s.net_paise + tol,
+                    exclude=self.claimed_banks)
+            }
 
         by_tid = {s.transaction_id: s for s in pending}
 
@@ -446,13 +464,10 @@ class ReconciliationEngine:
         radius = self.cfg.coincidence_radius_paise
         if radius <= 0:
             return 0.0
-        neighbours = 0
-        for lag in range(0, self.cfg.date_window_days + 1):
-            for other in self.banks_by_date.get(s.settlement_date + timedelta(days=lag), ()):
-                if other.bank_row_id == b.bank_row_id:
-                    continue
-                if abs(other.credit_paise - s.net_paise) <= radius:
-                    neighbours += 1
+        neighbours = self.index.count(
+            s.settlement_date, lag_from=0, lag_to=self.cfg.date_window_days,
+            lo_paise=s.net_paise - radius, hi_paise=s.net_paise + radius,
+            ignore=b.bank_row_id)
         delta = max(abs(b.credit_paise - s.net_paise), 1)
         lag = self._lag(s, b)
         window = max(1, self.cfg.date_window_days + 1)
@@ -475,15 +490,23 @@ class ReconciliationEngine:
 
         proposals: dict[str, tuple[SettlementRecord, tuple[str, ...], int]] = {}
         for s in pending:
-            pool = [(b.bank_row_id, b.credit_paise) for b in self._unclaimed()
-                    if self._window_ok(s, b) and b.credit_paise < s.net_paise]
+            # The minimum-leg filter is applied inside find_split_candidates, not
+            # here. Pre-filtering would be marginally faster and would change the
+            # pool size, which decides whether the "no subset sums to net" line
+            # is written to the rule trace at all - a difference a reviewer would
+            # see. Speed is not worth quietly editing the audit trail.
+            min_leg = int(s.net_paise * self.cfg.min_split_leg_fraction)
+            pool = [(b.bank_row_id, b.credit_paise) for b in self.index.query(
+                s.settlement_date, lag_from=0, lag_to=self.cfg.date_window_days,
+                lo_paise=0, hi_paise=s.net_paise - 1,
+                exclude=self.claimed_banks)]
             if len(pool) < 2:
                 continue
             found = find_split_candidates(
                 pool, s.net_paise,
                 tolerance_paise=self.cfg.amount_tolerance_paise,
                 max_legs=self.cfg.max_split_legs,
-                min_leg_paise=int(s.net_paise * self.cfg.min_split_leg_fraction),
+                min_leg_paise=min_leg,
                 max_solutions=3,
             )
             r = self._result_for(s)
@@ -561,14 +584,14 @@ class ReconciliationEngine:
         what lets it say precisely why it will not bind them, instead of just
         reporting an absence.
         """
+        near = self.cfg.near_miss_amount_paise
         out: list[NearMiss] = []
-        for b in self._unclaimed():
+        for b in self.index.query(
+                s.settlement_date, lag_from=-1, lag_to=self.cfg.near_miss_window_days,
+                lo_paise=s.net_paise - near, hi_paise=s.net_paise + near,
+                exclude=self.claimed_banks):
             delta = b.credit_paise - s.net_paise
             lag = self._lag(s, b)
-            if abs(delta) > self.cfg.near_miss_amount_paise:
-                continue
-            if not (-1 <= lag <= self.cfg.near_miss_window_days):
-                continue
             why = []
             if abs(delta) > self.cfg.amount_tolerance_paise:
                 why.append(f"amount off by {delta}p (tolerance "
@@ -578,7 +601,8 @@ class ReconciliationEngine:
             out.append(NearMiss(source="bank", record_id=b.bank_row_id,
                                 reason="; ".join(why) or "inside thresholds but unclaimed",
                                 amount_delta_paise=delta, date_delta_days=lag))
-        out.sort(key=lambda n: (abs(n.amount_delta_paise or 0), abs(n.date_delta_days or 0)))
+        out.sort(key=lambda n: (abs(n.amount_delta_paise or 0),
+                                abs(n.date_delta_days or 0), n.record_id))
         return out[:5]
 
     # ------------------------------------------------------------------

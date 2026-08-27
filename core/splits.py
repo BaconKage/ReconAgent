@@ -19,6 +19,7 @@ Two properties matter more than raw speed:
 
 from __future__ import annotations
 
+from bisect import bisect_left
 from dataclasses import dataclass
 
 
@@ -63,8 +64,10 @@ def find_split_candidates(
     """
     pool = [(rid, amt) for rid, amt in legs
             if amt >= min_leg_paise and amt <= target_paise + tolerance_paise]
-    # Descending order makes the remaining-sum prune bite early.
-    pool.sort(key=lambda x: -x[1])
+    # Descending by amount, then by id. The id tiebreak matters: without it the
+    # result depends on the caller's iteration order, so an indexing change that
+    # merely reorders the input could silently change which subset is found.
+    pool.sort(key=lambda x: (-x[1], x[0]))
 
     # suffix_sums[i] = sum of every amount from i onward. Lets us abandon a
     # branch the moment even taking everything left cannot reach the target.
@@ -72,6 +75,13 @@ def find_split_candidates(
     suffix_sums = [0] * (n + 1)
     for i in range(n - 1, -1, -1):
         suffix_sums[i] = suffix_sums[i + 1] + pool[i][1]
+
+    # Amounts negated so the descending pool reads as ascending, which lets
+    # bisect find the first leg small enough to fit. Without it the search walks
+    # past every too-large leg one at a time; on a dense batch that scan was 71%
+    # of total matching time. Skipping legs the loop would have rejected anyway,
+    # so the result is unchanged - only the work to reach it.
+    neg_amounts = [-amt for _, amt in pool]
 
     found: list[SplitCandidate] = []
     seen: set[tuple[str, ...]] = set()
@@ -92,12 +102,13 @@ def find_split_candidates(
             # discovering that is exactly how ambiguity gets detected.
         if len(chosen) >= max_legs:
             return
-        for i in range(start, n):
+        # Jump straight past the legs that would overshoot rather than testing
+        # each one. Everything before this index is too large to fit.
+        capacity = target_paise + tolerance_paise - total
+        first = max(start, bisect_left(neg_amounts, -capacity))
+        for i in range(first, n):
             amt = pool[i][1]
             new_total = total + amt
-            # Overshoot: everything after i is <= amt, so no later pick helps.
-            if new_total - target_paise > tolerance_paise:
-                continue
             # Even consuming the entire remaining tail cannot reach the target.
             if total + suffix_sums[i] < target_paise - tolerance_paise:
                 return
@@ -110,5 +121,5 @@ def find_split_candidates(
     if target_paise > 0 and pool:
         dfs(0, [], 0)
 
-    found.sort(key=lambda c: (abs(c.delta_paise), c.leg_count))
+    found.sort(key=lambda c: (abs(c.delta_paise), c.leg_count, c.bank_row_ids))
     return found

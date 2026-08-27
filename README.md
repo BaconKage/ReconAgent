@@ -33,7 +33,7 @@ the Q&A all run offline, replaying 104 committed reasoning traces.
 streamlit run app.py                       # the UI
 python run_demo.py --dataset holdout       # the sealed evaluation set
 python run_demo.py --ask "why didn't pay_f7atwyam1n reconcile?"
-python -m pytest tests/ -q                 # 179 tests
+python -m pytest tests/ -q                 # 191 tests
 python -m evaluation.sensitivity           # threshold trade-off sweep
 python benchmark.py                        # throughput and accuracy vs batch size
 ```
@@ -68,7 +68,7 @@ was **opened once**, after thresholds were frozen — provable from git history:
 | adversarial pairs conflated | **0 / 5** | **0 / 9** |
 | exceptions correctly held | 31 / 31 | 40 / 40 |
 | exceptions correctly categorised | 100% | 100% |
-| throughput (deterministic) | 141,000 rows/s | 124,000 rows/s |
+| throughput (deterministic) | see [At scale](#at-scale) | see [At scale](#at-scale) |
 
 > **These two sets are too small to measure the false-positive rate, and the
 > throughput figure is meaningless.** Both were caught by scaling the benchmark to
@@ -163,21 +163,39 @@ does not carry.
 near-duplicate pairs at 25,000 rows. That claim *is* well-powered, and it is the
 one the refusal design was built to support.
 
-**Finding 3 — matching is quadratic, so the throughput figure was fiction.**
+**Finding 3 — matching was quadratic, so the throughput figure was fiction.**
+The 141,000 rows/s in the results table was measured over 1.8 ms — interpreter
+noise, not an algorithm. Measured properly it was **2,721 rows/sec at 25,000
+records**, and falling. Tiers 2 through 5 each scanned every unclaimed credit for
+every settlement: 21.5 million amount comparisons on a single 25,000-row batch.
 
-| rows | match time | rows/sec |
-|---|---|---|
-| 255 | 0.00 s | 132,000 |
-| 5,042 | 0.75 s | 6,694 |
-| 24,967 | 9.18 s | 2,721 |
+Three changes, none of which alters a single result:
 
-Doubling the data roughly quadruples the time. Tiers 3, 4 and 5 each scan every
-unclaimed credit for every settlement. **The 141,000 rows/s above is a ~50x
-overstatement** — it was measured over 1.8 ms, which times the interpreter rather
-than the algorithm. The honest figure is **~2,700 rows/sec at 25,000 records**, and
-it degrades from there. The fix is standard (bucket credits by date so each
-settlement examines a handful of candidates instead of all of them); it is not
-implemented, and the number stands as measured.
+- **`core/index.py`** — credits bucketed by value date, each bucket sorted by
+  amount, so a candidate lookup is two binary searches instead of a full scan.
+- **Tier 2** — prefix-matching truncated UTRs by binary search over a sorted list
+  rather than scanning every pending settlement UTR (1,980 × 17,000 comparisons
+  on a 50,000-row batch).
+- **Subset-sum** — the split search walked past every leg too large to fit; it now
+  skips that prefix with a bisect. This was 71% of total time at 100,000 rows.
+
+| rows | before | after | speedup | rows/sec after |
+|---|---|---|---|---|
+| 5,042 | 0.75 s | 0.40 s | 1.9x | 12,485 |
+| 24,967 | 9.18 s | **0.85 s** | **10.8x** | **29,481** |
+| 49,853 | ~37 s (est.) | **2.09 s** | ~18x | 23,864 |
+| 100,058 | ~147 s (est.) | **6.48 s** | ~23x | 15,447 |
+
+Scaling is near-linear to 50,000 rows and mildly superlinear beyond. The residual
+cost is subset-sum itself: as a batch densifies, more credits fall inside each
+settlement's window and the split search has more ground to cover. That is
+inherent to detecting splits, not an implementation accident.
+
+**Every optimisation was verified byte-identical** — same statuses, confidences,
+linked IDs, rule traces and near misses across dev, holdout and two generated
+batches, 12,940 groups in total. One early version differed on a *single line of
+one rule trace* out of 12,940 groups; it was reverted, because a faster engine
+that quietly edits its own audit trail is not a faster engine.
 
 ```bash
 python benchmark.py --rows 250 5000 25000
@@ -442,18 +460,21 @@ measured (0/264 ungrounded IDs); usefulness is not.
 **Scale is now tested, and it found two things.** Matching is quadratic, so the
 throughput headline was a ~50x overstatement; and the false-positive rate is ~0.5%
 of settlements rather than zero, which my 87-settlement dev set had no power to
-detect. Both are measured and reported in [At scale](#at-scale). The false-positive
-problem is now roughly halved by a coincidence guard, validated on a seed it was
-not designed against; the residual ~0.3% is not separable from amount and date
-alone. **The quadratic time is not fixed** - the honest figure remains ~2,700
-rows/sec at 25,000 records.
+detect. Both are measured and addressed in [At scale](#at-scale). The false-positive rate
+is roughly halved by a coincidence guard validated on an unseen seed; the residual
+~0.3% is not separable from amount and date alone. Matching is ~10x faster and
+near-linear to 50,000 rows, verified byte-identical. Beyond that it is still
+mildly superlinear, and the remaining cost is subset-sum, which is inherent to
+split detection rather than an implementation accident.
 
 ---
 
 ## What I would build next
 
-1. **Bucket credits by date before tier 3.** Measured, not speculated: matching
-   is quadratic and drops to ~2,700 rows/sec by 25k records.
+1. **Bound the split search on dense batches.** Subset-sum is the remaining
+   superlinear cost at 100,000 rows. Capping the candidate pool would fix it, and
+   would also cut the coincidental splits that grow with density - but it changes
+   results, so it needs its own before-and-after rather than being slipped in.
 2. **More signal for lone tier-3 matches.** The coincidence guard halves them;
    the rest need evidence this data does not carry. Narration tokens and customer
    names in the bank reference would separate a real payout from a coincidence
@@ -475,6 +496,7 @@ rows/sec at 25,000 records.
 
 ```
 core/         deterministic engine — no LLM, no network, integer paise
+  index.py      date-bucketed, amount-sorted credit lookup
   config.py     thresholds, frozen in git since the first commit
   loader.py     CSV to typed records, UTR recovery with provenance
   matcher.py    the tiered cascade
@@ -492,7 +514,7 @@ evaluation/   metrics + threshold sensitivity — the only reader of ground trut
 benchmark.py  throughput and accuracy as a function of batch size
 cash/         forward cash position
 data/         seeded generator, dev and holdout batches
-tests/        179 tests
+tests/        191 tests
 DEVLOG.md     what actually broke, and what I did about it
 ```
 

@@ -479,3 +479,70 @@ fix. Both my candidate features were plausible, one was worthless, and finding
 that out cost two minutes instead of an afternoon. And when a threshold has to be
 swept, round it and validate on data it has never seen - a number quoted to three
 decimal places is usually a number fitted to the test set.
+
+
+---
+
+### 11. A 10x speedup, and the one line of trace that nearly went with it - Day 8
+
+**What broke.** Nothing, but the throughput number in my README was fiction, and
+the profile said why: `_amount_ok` called 21.5 million times on a 25,000-row
+batch. Tiers 2 through 5 each scanned every unclaimed credit for every
+settlement, and `_unclaimed()` rebuilt the entire list 6,229 times in one run.
+Matching was quadratic and I had been quoting 141,000 rows/sec, a figure measured
+over 1.8 milliseconds of interpreter noise.
+
+**The rule I set before touching anything.** An optimisation must produce
+byte-identical output or it is a bug, not a speedup. So I captured a full
+signature first - status, match type, confidence, exception reason, linked IDs,
+the complete rule trace and every near miss - across dev, holdout and two
+generated batches. 12,940 groups. Then I compared after every change.
+
+**The near miss.** The first indexed version came back identical on three of four
+datasets. Holdout differed on **one line of one rule trace** out of 12,940 groups:
+
+```
+old: tier4 split: no subset of credits in the window sums to net
+new: (line absent)
+```
+
+No status changed. No confidence, no link, no metric - precision, recall and the
+exception counts were all identical. Purely a line of explanation, on a single
+settlement.
+
+The cause was that I had pre-filtered the split pool by minimum leg size, which
+was marginally faster and dropped the pool below the two-entry threshold that
+decides whether tier 4 writes its "nothing summed to net" line at all. I reverted
+it. A reviewer opening that transaction would have seen an engine that never
+considered a split, when in fact it had. The audit trail is a product feature
+here, not debug output, and a faster engine that quietly edits its own explanation
+of itself is not a faster engine.
+
+Had I compared only statuses and metrics - the obvious thing to compare - I would
+never have seen it.
+
+**What actually made it fast.** Three changes, each verified separately:
+
+| | |
+|---|---|
+| `core/index.py` | credits bucketed by date, sorted by amount, two binary searches per lookup |
+| tier 2 | prefix-match truncated UTRs by bisect, not by scanning 17,000 UTRs each time |
+| subset-sum | skip the too-large prefix by bisect instead of walking past it |
+
+The third was the surprise: at 100,000 rows the split search was **71% of total
+time**, and most of that was the DFS stepping over legs it was going to reject.
+
+| rows | before | after |
+|---|---|---|
+| 25,000 | 9.18 s | 0.85 s |
+| 100,000 | ~147 s (extrapolated) | 6.48 s |
+
+**What I did not fix.** Beyond 50,000 rows it is still mildly superlinear, and the
+residual is subset-sum itself: a denser batch puts more credits inside each
+settlement's window. Capping the pool would fix it and would also cut the
+coincidental splits that grow with density - but it changes results, so it belongs
+in its own before-and-after rather than being slipped into a speed change.
+
+**What I changed in how I work.** When verifying that an optimisation is
+behaviour-preserving, compare everything the system emits, not just the fields
+that feed the metrics. The metrics were identical in the version I nearly shipped.
