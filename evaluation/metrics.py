@@ -55,6 +55,10 @@ EXPECTED_REASONS = {
     "duplicate": {"duplicate_settlement_row"},
     "adversarial_ambiguous": {"ambiguous_candidates", "contested_candidate"},
     "unmatchable": {"no_candidate_found", "no_settlement_counterpart"},
+    # The engine cannot tell "not yet arrived" from "never arriving" - both
+    # are simply an absent credit. That temporal judgement belongs to the
+    # cash layer, which knows the settlement window.
+    "pending_settlement": {"no_candidate_found"},
 }
 
 

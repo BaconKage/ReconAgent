@@ -418,6 +418,29 @@ class ReconDataGenerator:
             ))
         return groups
 
+    def case_pending_settlement(self) -> GroupDraft:
+        """Settled in the last day or two of the cycle; the credit has not landed yet.
+
+        This is the most ordinary thing in payments and it is NOT an error. The
+        engine cannot tell it apart from a genuinely orphaned settlement - both
+        look like an absent credit - and it should not try to. The distinction is
+        temporal, and it is drawn by the cash-position layer, which knows the
+        settlement window and the closing date.
+
+        Its presence keeps the exception list honest: without it, "no credit
+        found" would always read as a problem, and a controller would chase
+        money that is simply in transit.
+        """
+        oid, gross, utr = self._order_id(), self._gross(), self._utr()
+        d = BASE_DATE + timedelta(days=WINDOW_DAYS - self.rng.randint(0, 1))
+        s = self._settlement(oid, gross, d, utr)
+        return GroupDraft(
+            self._next_gid(), CaseType.PENDING_SETTLEMENT, Resolution.EXCEPTION_PENDING,
+            "settled {} with no credit yet - still inside the expected window, "
+            "so in transit rather than late".format(d.isoformat()),
+            [self._ledger(oid, gross, d)], [s], [],
+        )
+
     def case_unmatchable_bank(self) -> GroupDraft:
         """A bank credit with no settlement behind it (e.g. an unrelated inflow)."""
         return GroupDraft(
@@ -456,6 +479,9 @@ class ReconDataGenerator:
             self.groups.extend(pair)
             self.adversarial_pairs.append([g.group_id for g in pair])
 
+        for _ in range(m.get(CaseType.PENDING_SETTLEMENT, 0)):
+            self.groups.append(self.case_pending_settlement())
+
         n_unmatch = m.get(CaseType.UNMATCHABLE, 0)
         n_bank_orphans = max(1, n_unmatch // 3)
         n_settlement_orphans = n_unmatch - n_bank_orphans
@@ -490,6 +516,7 @@ DEV_MIX = {
     CaseType.SPLIT_SETTLEMENT: 8, CaseType.PARTIAL_REFUND: 8, CaseType.DUPLICATE: 5,
     CaseType.ROUNDING: 5, CaseType.ADVERSARIAL_RESOLVABLE: 3,
     CaseType.ADVERSARIAL_AMBIGUOUS: 2, CaseType.UNMATCHABLE: 8,
+    CaseType.PENDING_SETTLEMENT: 5,
 }
 
 # Held-out deliberately re-weights toward the hard cases, widens the settlement
@@ -500,6 +527,7 @@ HOLDOUT_MIX = {
     CaseType.SPLIT_SETTLEMENT: 10, CaseType.PARTIAL_REFUND: 9, CaseType.DUPLICATE: 6,
     CaseType.ROUNDING: 7, CaseType.ADVERSARIAL_RESOLVABLE: 5,
     CaseType.ADVERSARIAL_AMBIGUOUS: 4, CaseType.UNMATCHABLE: 10,
+    CaseType.PENDING_SETTLEMENT: 6,
 }
 
 

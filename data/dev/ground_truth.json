@@ -13,14 +13,15 @@
       "rounding": 5,
       "adversarial_resolvable": 3,
       "adversarial_ambiguous": 2,
-      "unmatchable": 8
+      "unmatchable": 8,
+      "pending_settlement": 5
     },
     "counts": {
-      "settlement_rows": 82,
+      "settlement_rows": 87,
       "bank_rows": 83,
-      "ledger_rows": 77,
-      "total_rows": 242,
-      "groups": 80
+      "ledger_rows": 82,
+      "total_rows": 252,
+      "groups": 85
     }
   },
   "groups": [
@@ -35,7 +36,7 @@
         "pay_mdd4v30t9n"
       ],
       "bank_row_ids": [
-        "BNK_00021"
+        "BNK_00049"
       ],
       "notes": "canonical UTR both sides, same-day credit, exact net"
     },
@@ -50,7 +51,7 @@
         "pay_uy41ibljh7"
       ],
       "bank_row_ids": [
-        "BNK_00048"
+        "BNK_00053"
       ],
       "notes": "canonical UTR both sides, same-day credit, exact net"
     },
@@ -65,7 +66,7 @@
         "pay_azytjxepq8"
       ],
       "bank_row_ids": [
-        "BNK_00067"
+        "BNK_00005"
       ],
       "notes": "canonical UTR both sides, same-day credit, exact net"
     },
@@ -80,7 +81,7 @@
         "pay_1ertj5pht0"
       ],
       "bank_row_ids": [
-        "BNK_00041"
+        "BNK_00068"
       ],
       "notes": "canonical UTR both sides, same-day credit, exact net"
     },
@@ -95,7 +96,7 @@
         "pay_dxmo5bxxc0"
       ],
       "bank_row_ids": [
-        "BNK_00069"
+        "BNK_00012"
       ],
       "notes": "canonical UTR both sides, same-day credit, exact net"
     },
@@ -110,7 +111,7 @@
         "pay_2xrghc0clb"
       ],
       "bank_row_ids": [
-        "BNK_00054"
+        "BNK_00013"
       ],
       "notes": "canonical UTR both sides, same-day credit, exact net"
     },
@@ -125,7 +126,7 @@
         "pay_7awudtsemc"
       ],
       "bank_row_ids": [
-        "BNK_00040"
+        "BNK_00066"
       ],
       "notes": "canonical UTR both sides, same-day credit, exact net"
     },
@@ -140,7 +141,7 @@
         "pay_ja1wj0tpac"
       ],
       "bank_row_ids": [
-        "BNK_00031"
+        "BNK_00015"
       ],
       "notes": "canonical UTR both sides, same-day credit, exact net"
     },
@@ -155,7 +156,7 @@
         "pay_oy0ifznbqh"
       ],
       "bank_row_ids": [
-        "BNK_00003"
+        "BNK_00047"
       ],
       "notes": "canonical UTR both sides, same-day credit, exact net"
     },
@@ -170,7 +171,7 @@
         "pay_jza7tz0ync"
       ],
       "bank_row_ids": [
-        "BNK_00070"
+        "BNK_00030"
       ],
       "notes": "canonical UTR both sides, same-day credit, exact net"
     },
@@ -185,7 +186,7 @@
         "pay_xkxwd8il3f"
       ],
       "bank_row_ids": [
-        "BNK_00061"
+        "BNK_00011"
       ],
       "notes": "ledger gross 4851.75 vs bank net 4737.24; gap = fee 97.04 + tax 17.47"
     },
@@ -200,7 +201,7 @@
         "pay_p36p6qf5q1"
       ],
       "bank_row_ids": [
-        "BNK_00022"
+        "BNK_00070"
       ],
       "notes": "ledger gross 2090.50 vs bank net 2041.16; gap = fee 41.81 + tax 7.53"
     },
@@ -215,7 +216,7 @@
         "pay_148p0tvhhp"
       ],
       "bank_row_ids": [
-        "BNK_00075"
+        "BNK_00025"
       ],
       "notes": "ledger gross 5505.75 vs bank net 5375.81; gap = fee 110.12 + tax 19.82"
     },
@@ -230,7 +231,7 @@
         "pay_9mx2x18haf"
       ],
       "bank_row_ids": [
-        "BNK_00064"
+        "BNK_00058"
       ],
       "notes": "ledger gross 155.75 vs bank net 152.07; gap = fee 3.12 + tax 0.56"
     },
@@ -245,7 +246,7 @@
         "pay_92mpnsm43d"
       ],
       "bank_row_ids": [
-        "BNK_00009"
+        "BNK_00062"
       ],
       "notes": "ledger gross 737.25 vs bank net 719.86; gap = fee 14.74 + tax 2.65"
     },
@@ -260,7 +261,7 @@
         "pay_5usgiotirz"
       ],
       "bank_row_ids": [
-        "BNK_00025"
+        "BNK_00001"
       ],
       "notes": "ledger gross 649.25 vs bank net 633.93; gap = fee 12.98 + tax 2.34"
     },
@@ -275,7 +276,7 @@
         "pay_dgigatj9tz"
       ],
       "bank_row_ids": [
-        "BNK_00034"
+        "BNK_00041"
       ],
       "notes": "ledger gross 9434.25 vs bank net 9211.61; gap = fee 188.68 + tax 33.96"
     },
@@ -290,7 +291,7 @@
         "pay_49kwv08hhx"
       ],
       "bank_row_ids": [
-        "BNK_00026"
+        "BNK_00057"
       ],
       "notes": "ledger gross 49815.00 vs bank net 48639.37; gap = fee 996.30 + tax 179.33"
     },
@@ -305,7 +306,7 @@
         "pay_pqkojtpv60"
       ],
       "bank_row_ids": [
-        "BNK_00033"
+        "BNK_00024"
       ],
       "notes": "ledger gross 29337.99 vs bank net 28645.61; gap = fee 586.76 + tax 105.62"
     },
@@ -320,7 +321,7 @@
         "pay_83tqll8os9"
       ],
       "bank_row_ids": [
-        "BNK_00032"
+        "BNK_00039"
       ],
       "notes": "ledger gross 46010.75 vs bank net 44924.89; gap = fee 920.22 + tax 165.64"
     },
@@ -350,7 +351,7 @@
         "pay_6n92xf8e8l"
       ],
       "bank_row_ids": [
-        "BNK_00082"
+        "BNK_00029"
       ],
       "notes": "ledger gross 41264.75 vs bank net 40290.90; gap = fee 825.30 + tax 148.55"
     },
@@ -365,7 +366,7 @@
         "pay_1zdfkblcmp"
       ],
       "bank_row_ids": [
-        "BNK_00015"
+        "BNK_00078"
       ],
       "notes": "ledger gross 33532.99 vs bank net 32741.61; gap = fee 670.66 + tax 120.72"
     },
@@ -380,7 +381,7 @@
         "pay_nriuu9k9xj"
       ],
       "bank_row_ids": [
-        "BNK_00010"
+        "BNK_00017"
       ],
       "notes": "ledger gross 28733.00 vs bank net 28054.90; gap = fee 574.66 + tax 103.44"
     },
@@ -395,7 +396,7 @@
         "pay_jf678k52qc"
       ],
       "bank_row_ids": [
-        "BNK_00059"
+        "BNK_00036"
       ],
       "notes": "ledger gross 18367.00 vs bank net 17933.54; gap = fee 367.34 + tax 66.12"
     },
@@ -410,7 +411,7 @@
         "pay_krd5eqy08p"
       ],
       "bank_row_ids": [
-        "BNK_00002"
+        "BNK_00009"
       ],
       "notes": "credit T+1; UTR reference truncated to 11 digits"
     },
@@ -425,7 +426,7 @@
         "pay_c1hh5lf6a4"
       ],
       "bank_row_ids": [
-        "BNK_00036"
+        "BNK_00055"
       ],
       "notes": "credit T+1; UTR reference truncated to 11 digits"
     },
@@ -440,7 +441,7 @@
         "pay_94pdzp6lfe"
       ],
       "bank_row_ids": [
-        "BNK_00047"
+        "BNK_00064"
       ],
       "notes": "credit T+2; UTR reference truncated to 11 digits"
     },
@@ -455,7 +456,7 @@
         "pay_ec8uyo57p6"
       ],
       "bank_row_ids": [
-        "BNK_00073"
+        "BNK_00003"
       ],
       "notes": "credit T+1; UTR reference truncated to 11 digits"
     },
@@ -470,7 +471,7 @@
         "pay_ofwb0hpmnz"
       ],
       "bank_row_ids": [
-        "BNK_00013"
+        "BNK_00034"
       ],
       "notes": "credit T+1; UTR reference truncated to 11 digits"
     },
@@ -485,7 +486,7 @@
         "pay_petiuymo0p"
       ],
       "bank_row_ids": [
-        "BNK_00050"
+        "BNK_00083"
       ],
       "notes": "credit T+2; UTR reference truncated to 11 digits"
     },
@@ -500,7 +501,7 @@
         "pay_m8xfdjgf1c"
       ],
       "bank_row_ids": [
-        "BNK_00006"
+        "BNK_00004"
       ],
       "notes": "credit T+2; UTR reference truncated to 11 digits"
     },
@@ -515,7 +516,7 @@
         "pay_6q3xlrfcd6"
       ],
       "bank_row_ids": [
-        "BNK_00027"
+        "BNK_00054"
       ],
       "notes": "credit T+2; UTR reference truncated to 11 digits"
     },
@@ -530,7 +531,7 @@
         "pay_ov7ln23y30"
       ],
       "bank_row_ids": [
-        "BNK_00065"
+        "BNK_00071"
       ],
       "notes": "credit T+1; UTR reference truncated to 11 digits"
     },
@@ -545,7 +546,7 @@
         "pay_pk0qtl3q4n"
       ],
       "bank_row_ids": [
-        "BNK_00035"
+        "BNK_00016"
       ],
       "notes": "credit T+2; UTR reference truncated to 11 digits"
     },
@@ -560,8 +561,8 @@
         "pay_ncildzmfb7"
       ],
       "bank_row_ids": [
-        "BNK_00055",
-        "BNK_00028"
+        "BNK_00010",
+        "BNK_00069"
       ],
       "notes": "net 10205.33 settled as 7298.85 + 2906.48"
     },
@@ -576,8 +577,8 @@
         "pay_8t2sa5bnn0"
       ],
       "bank_row_ids": [
-        "BNK_00068",
-        "BNK_00052"
+        "BNK_00019",
+        "BNK_00044"
       ],
       "notes": "net 1375.50 settled as 177.11 + 1198.39"
     },
@@ -592,8 +593,8 @@
         "pay_xj2pop8mgy"
       ],
       "bank_row_ids": [
-        "BNK_00051",
-        "BNK_00066"
+        "BNK_00026",
+        "BNK_00033"
       ],
       "notes": "net 9274.34 settled as 8360.21 + 914.13"
     },
@@ -608,8 +609,8 @@
         "pay_2bc2nnuvy8"
       ],
       "bank_row_ids": [
-        "BNK_00046",
-        "BNK_00004"
+        "BNK_00061",
+        "BNK_00022"
       ],
       "notes": "net 14426.56 settled as 9310.09 + 5116.47"
     },
@@ -624,8 +625,8 @@
         "pay_4z7w2sehe2"
       ],
       "bank_row_ids": [
-        "BNK_00005",
-        "BNK_00078"
+        "BNK_00059",
+        "BNK_00074"
       ],
       "notes": "net 1321.07 settled as 946.07 + 375.00"
     },
@@ -640,9 +641,9 @@
         "pay_skch8jwwdx"
       ],
       "bank_row_ids": [
-        "BNK_00049",
-        "BNK_00057",
-        "BNK_00029"
+        "BNK_00031",
+        "BNK_00008",
+        "BNK_00082"
       ],
       "notes": "net 1457.76 settled as 404.22 + 44.58 + 1008.96"
     },
@@ -657,8 +658,8 @@
         "pay_lqjidknwi5"
       ],
       "bank_row_ids": [
-        "BNK_00079",
-        "BNK_00008"
+        "BNK_00043",
+        "BNK_00067"
       ],
       "notes": "net 16385.94 settled as 6866.83 + 9519.11"
     },
@@ -673,8 +674,8 @@
         "pay_t3wvedn9un"
       ],
       "bank_row_ids": [
-        "BNK_00016",
-        "BNK_00044"
+        "BNK_00040",
+        "BNK_00051"
       ],
       "notes": "net 30000.87 settled as 8349.10 + 21651.77"
     },
@@ -689,7 +690,7 @@
         "pay_jx8uibrsz1"
       ],
       "bank_row_ids": [
-        "BNK_00081"
+        "BNK_00014"
       ],
       "notes": "partial refund of 8777.66; credited 24463.87 against net 33241.53"
     },
@@ -704,7 +705,7 @@
         "pay_vgiui9kkhz"
       ],
       "bank_row_ids": [
-        "BNK_00083"
+        "BNK_00028"
       ],
       "notes": "partial refund of 5037.73; credited 15515.00 against net 20552.73"
     },
@@ -719,7 +720,7 @@
         "pay_6iidlrye89"
       ],
       "bank_row_ids": [
-        "BNK_00012"
+        "BNK_00063"
       ],
       "notes": "partial refund of 5945.54; credited 24176.40 against net 30121.94"
     },
@@ -734,7 +735,7 @@
         "pay_tr74qgefqj"
       ],
       "bank_row_ids": [
-        "BNK_00024"
+        "BNK_00046"
       ],
       "notes": "partial refund of 35.38; credited 136.47 against net 171.85"
     },
@@ -749,7 +750,7 @@
         "pay_y751yw7nh8"
       ],
       "bank_row_ids": [
-        "BNK_00060"
+        "BNK_00038"
       ],
       "notes": "partial refund of 110.89; credited 266.98 against net 377.87"
     },
@@ -764,7 +765,7 @@
         "pay_6qceouuyla"
       ],
       "bank_row_ids": [
-        "BNK_00071"
+        "BNK_00079"
       ],
       "notes": "partial refund of 10301.55; credited 35212.61 against net 45514.16"
     },
@@ -779,7 +780,7 @@
         "pay_iaakytt3im"
       ],
       "bank_row_ids": [
-        "BNK_00017"
+        "BNK_00050"
       ],
       "notes": "partial refund of 958.51; credited 3160.67 against net 4119.18"
     },
@@ -794,7 +795,7 @@
         "pay_59sojuv0gy"
       ],
       "bank_row_ids": [
-        "BNK_00043"
+        "BNK_00042"
       ],
       "notes": "partial refund of 1858.69; credited 4009.22 against net 5867.91"
     },
@@ -810,7 +811,7 @@
         "pay_yv5g10ur5l"
       ],
       "bank_row_ids": [
-        "BNK_00058"
+        "BNK_00077"
       ],
       "notes": "transaction_id pay_yv5g10ur5l emitted twice (webhook retry); one bank credit"
     },
@@ -826,7 +827,7 @@
         "pay_hfj7upfln4"
       ],
       "bank_row_ids": [
-        "BNK_00074"
+        "BNK_00060"
       ],
       "notes": "transaction_id pay_hfj7upfln4 emitted twice (webhook retry); one bank credit"
     },
@@ -842,7 +843,7 @@
         "pay_qcw76xatoa"
       ],
       "bank_row_ids": [
-        "BNK_00056"
+        "BNK_00081"
       ],
       "notes": "transaction_id pay_qcw76xatoa emitted twice (webhook retry); one bank credit"
     },
@@ -858,7 +859,7 @@
         "pay_tcagrp2u4d"
       ],
       "bank_row_ids": [
-        "BNK_00080"
+        "BNK_00037"
       ],
       "notes": "transaction_id pay_tcagrp2u4d emitted twice (webhook retry); one bank credit"
     },
@@ -889,7 +890,7 @@
         "pay_pusddtv25a"
       ],
       "bank_row_ids": [
-        "BNK_00030"
+        "BNK_00006"
       ],
       "notes": "credit off net by 25 paise; no UTR on the bank row"
     },
@@ -904,7 +905,7 @@
         "pay_vkvzrgol0w"
       ],
       "bank_row_ids": [
-        "BNK_00019"
+        "BNK_00052"
       ],
       "notes": "credit off net by -21 paise; no UTR on the bank row"
     },
@@ -919,7 +920,7 @@
         "pay_t75pb8z3v6"
       ],
       "bank_row_ids": [
-        "BNK_00020"
+        "BNK_00023"
       ],
       "notes": "credit off net by -50 paise; no UTR on the bank row"
     },
@@ -934,7 +935,7 @@
         "pay_7flqhrrpzl"
       ],
       "bank_row_ids": [
-        "BNK_00063"
+        "BNK_00021"
       ],
       "notes": "credit off net by 3 paise; no UTR on the bank row"
     },
@@ -949,7 +950,7 @@
         "pay_glqj5sxvwv"
       ],
       "bank_row_ids": [
-        "BNK_00077"
+        "BNK_00045"
       ],
       "notes": "credit off net by 23 paise; no UTR on the bank row"
     },
@@ -964,7 +965,7 @@
         "pay_t9t11php0x"
       ],
       "bank_row_ids": [
-        "BNK_00045"
+        "BNK_00075"
       ],
       "notes": "adversarial twin (identified leg): clean UTR lets the cascade claim it first"
     },
@@ -979,7 +980,7 @@
         "pay_i5bj5d5e3h"
       ],
       "bank_row_ids": [
-        "BNK_00014"
+        "BNK_00065"
       ],
       "notes": "adversarial twin (unidentified leg): no UTR, net identical to its twin"
     },
@@ -994,7 +995,7 @@
         "pay_42o83rlkte"
       ],
       "bank_row_ids": [
-        "BNK_00023"
+        "BNK_00020"
       ],
       "notes": "adversarial twin (identified leg): clean UTR lets the cascade claim it first"
     },
@@ -1009,7 +1010,7 @@
         "pay_4261bw4a7f"
       ],
       "bank_row_ids": [
-        "BNK_00053"
+        "BNK_00073"
       ],
       "notes": "adversarial twin (unidentified leg): no UTR, net identical to its twin"
     },
@@ -1024,7 +1025,7 @@
         "pay_h6fe0mp2ix"
       ],
       "bank_row_ids": [
-        "BNK_00037"
+        "BNK_00018"
       ],
       "notes": "adversarial twin (identified leg): clean UTR lets the cascade claim it first"
     },
@@ -1039,7 +1040,7 @@
         "pay_ivzk7a45hv"
       ],
       "bank_row_ids": [
-        "BNK_00011"
+        "BNK_00076"
       ],
       "notes": "adversarial twin (unidentified leg): no UTR, net identical to its twin"
     },
@@ -1054,7 +1055,7 @@
         "pay_9flv1xxlp8"
       ],
       "bank_row_ids": [
-        "BNK_00018"
+        "BNK_00080"
       ],
       "notes": "ambiguous twin A: same date, nets within tolerance, no UTR on either bank row - not decidable from the data"
     },
@@ -1069,7 +1070,7 @@
         "pay_rms3jn050e"
       ],
       "bank_row_ids": [
-        "BNK_00042"
+        "BNK_00035"
       ],
       "notes": "ambiguous twin B: same date, nets within tolerance, no UTR on either bank row - not decidable from the data"
     },
@@ -1084,7 +1085,7 @@
         "pay_isbo551ldq"
       ],
       "bank_row_ids": [
-        "BNK_00076"
+        "BNK_00032"
       ],
       "notes": "ambiguous twin A: same date, nets within tolerance, no UTR on either bank row - not decidable from the data"
     },
@@ -1099,14 +1100,14 @@
         "pay_f7atwyam1n"
       ],
       "bank_row_ids": [
-        "BNK_00038"
+        "BNK_00056"
       ],
       "notes": "ambiguous twin B: same date, nets within tolerance, no UTR on either bank row - not decidable from the data"
     },
     {
       "group_id": "G0072",
-      "case_type": "unmatchable",
-      "expected_resolution": "exception_unmatchable",
+      "case_type": "pending_settlement",
+      "expected_resolution": "exception_pending",
       "ledger_order_ids": [
         "order_p89fkbi4o6"
       ],
@@ -1114,103 +1115,168 @@
         "pay_jch2vffqot"
       ],
       "bank_row_ids": [],
-      "notes": "settlement with no bank credit anywhere in the batch (paired with a planted near-miss)"
+      "notes": "settled 2026-07-28 with no credit yet - still inside the expected window, so in transit rather than late"
     },
     {
       "group_id": "G0073",
-      "case_type": "unmatchable",
-      "expected_resolution": "exception_unmatchable",
-      "ledger_order_ids": [],
-      "settlement_txn_ids": [],
-      "bank_row_ids": [
-        "BNK_00039"
+      "case_type": "pending_settlement",
+      "expected_resolution": "exception_pending",
+      "ledger_order_ids": [
+        "order_qq4d3kzvh4"
       ],
-      "notes": "planted near-miss: orphan credit just outside both the amount tolerance and the date window - must NOT be bound to the settlement it resembles"
+      "settlement_txn_ids": [
+        "pay_c2ihoy7dv7"
+      ],
+      "bank_row_ids": [],
+      "notes": "settled 2026-07-29 with no credit yet - still inside the expected window, so in transit rather than late"
     },
     {
       "group_id": "G0074",
-      "case_type": "unmatchable",
-      "expected_resolution": "exception_unmatchable",
+      "case_type": "pending_settlement",
+      "expected_resolution": "exception_pending",
       "ledger_order_ids": [
-        "order_4d3kzvh4fz"
+        "order_ac6pe63lbq"
       ],
       "settlement_txn_ids": [
-        "pay_ihoy7dv7c9"
+        "pay_ckeh5sw229"
       ],
       "bank_row_ids": [],
-      "notes": "settlement with no bank credit anywhere in the batch"
+      "notes": "settled 2026-07-28 with no credit yet - still inside the expected window, so in transit rather than late"
     },
     {
       "group_id": "G0075",
-      "case_type": "unmatchable",
-      "expected_resolution": "exception_unmatchable",
-      "ledger_order_ids": [
-        "order_6pe63lbqgu"
-      ],
-      "settlement_txn_ids": [
-        "pay_dnpx2i9tan"
-      ],
-      "bank_row_ids": [],
-      "notes": "settlement with no bank credit anywhere in the batch"
-    },
-    {
-      "group_id": "G0076",
-      "case_type": "unmatchable",
-      "expected_resolution": "exception_unmatchable",
+      "case_type": "pending_settlement",
+      "expected_resolution": "exception_pending",
       "ledger_order_ids": [
         "order_r2muljavb3"
       ],
       "settlement_txn_ids": [
-        "pay_n79gil0mvz"
+        "pay_m44gv3z6bz"
       ],
       "bank_row_ids": [],
-      "notes": "settlement with no bank credit anywhere in the batch"
+      "notes": "settled 2026-07-28 with no credit yet - still inside the expected window, so in transit rather than late"
+    },
+    {
+      "group_id": "G0076",
+      "case_type": "pending_settlement",
+      "expected_resolution": "exception_pending",
+      "ledger_order_ids": [
+        "order_uug95rlrdi"
+      ],
+      "settlement_txn_ids": [
+        "pay_8n7odkef82"
+      ],
+      "bank_row_ids": [],
+      "notes": "settled 2026-07-28 with no credit yet - still inside the expected window, so in transit rather than late"
     },
     {
       "group_id": "G0077",
       "case_type": "unmatchable",
       "expected_resolution": "exception_unmatchable",
       "ledger_order_ids": [
-        "order_8uug95rlrd"
+        "order_xg8y72ivgl"
       ],
       "settlement_txn_ids": [
-        "pay_448n7odkef"
+        "pay_0i9g5dzx5q"
       ],
       "bank_row_ids": [],
-      "notes": "settlement with no bank credit anywhere in the batch"
+      "notes": "settlement with no bank credit anywhere in the batch (paired with a planted near-miss)"
     },
     {
       "group_id": "G0078",
       "case_type": "unmatchable",
       "expected_resolution": "exception_unmatchable",
-      "ledger_order_ids": [
-        "order_28xg8y72iv"
+      "ledger_order_ids": [],
+      "settlement_txn_ids": [],
+      "bank_row_ids": [
+        "BNK_00027"
       ],
-      "settlement_txn_ids": [
-        "pay_drlcmlw83y"
-      ],
-      "bank_row_ids": [],
-      "notes": "settlement with no bank credit anywhere in the batch"
+      "notes": "planted near-miss: orphan credit just outside both the amount tolerance and the date window - must NOT be bound to the settlement it resembles"
     },
     {
       "group_id": "G0079",
       "case_type": "unmatchable",
       "expected_resolution": "exception_unmatchable",
-      "ledger_order_ids": [],
-      "settlement_txn_ids": [],
-      "bank_row_ids": [
-        "BNK_00062"
+      "ledger_order_ids": [
+        "order_m2zbppfo5m"
       ],
-      "notes": "bank credit with no settlement counterpart in the batch"
+      "settlement_txn_ids": [
+        "pay_m96zpxvpbl"
+      ],
+      "bank_row_ids": [],
+      "notes": "settlement with no bank credit anywhere in the batch"
     },
     {
       "group_id": "G0080",
       "case_type": "unmatchable",
       "expected_resolution": "exception_unmatchable",
+      "ledger_order_ids": [
+        "order_ot7txkdotr"
+      ],
+      "settlement_txn_ids": [
+        "pay_jxnnngbpj4"
+      ],
+      "bank_row_ids": [],
+      "notes": "settlement with no bank credit anywhere in the batch"
+    },
+    {
+      "group_id": "G0081",
+      "case_type": "unmatchable",
+      "expected_resolution": "exception_unmatchable",
+      "ledger_order_ids": [
+        "order_c1ydmt8vt4"
+      ],
+      "settlement_txn_ids": [
+        "pay_g983ep9p9w"
+      ],
+      "bank_row_ids": [],
+      "notes": "settlement with no bank credit anywhere in the batch"
+    },
+    {
+      "group_id": "G0082",
+      "case_type": "unmatchable",
+      "expected_resolution": "exception_unmatchable",
+      "ledger_order_ids": [
+        "order_j66cnoljq5"
+      ],
+      "settlement_txn_ids": [
+        "pay_xurgowyoo5"
+      ],
+      "bank_row_ids": [],
+      "notes": "settlement with no bank credit anywhere in the batch"
+    },
+    {
+      "group_id": "G0083",
+      "case_type": "unmatchable",
+      "expected_resolution": "exception_unmatchable",
+      "ledger_order_ids": [
+        "order_brjnm2l44y"
+      ],
+      "settlement_txn_ids": [
+        "pay_flse45bg34"
+      ],
+      "bank_row_ids": [],
+      "notes": "settlement with no bank credit anywhere in the batch"
+    },
+    {
+      "group_id": "G0084",
+      "case_type": "unmatchable",
+      "expected_resolution": "exception_unmatchable",
       "ledger_order_ids": [],
       "settlement_txn_ids": [],
       "bank_row_ids": [
-        "BNK_00001"
+        "BNK_00002"
+      ],
+      "notes": "bank credit with no settlement counterpart in the batch"
+    },
+    {
+      "group_id": "G0085",
+      "case_type": "unmatchable",
+      "expected_resolution": "exception_unmatchable",
+      "ledger_order_ids": [],
+      "settlement_txn_ids": [],
+      "bank_row_ids": [
+        "BNK_00048"
       ],
       "notes": "bank credit with no settlement counterpart in the batch"
     }
@@ -1238,14 +1304,14 @@
     ]
   ],
   "unmatchable_groups": [
-    "G0072",
-    "G0073",
-    "G0074",
-    "G0075",
-    "G0076",
     "G0077",
     "G0078",
     "G0079",
-    "G0080"
+    "G0080",
+    "G0081",
+    "G0082",
+    "G0083",
+    "G0084",
+    "G0085"
   ]
 }

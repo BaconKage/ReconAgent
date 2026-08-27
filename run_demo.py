@@ -18,6 +18,7 @@ from pathlib import Path
 from agent.qa import ReconciliationQA
 from agent.reasoner import ExceptionReasoner
 from audit.trail import AuditTrail
+from cash.position import compute_position, format_position
 from core.loader import load_batch
 from core.matcher import reconcile
 from core.normalize import format_inr
@@ -148,6 +149,10 @@ def main() -> int:
                       llm_free_groups=s.never_touched_llm)
         print()
         print(format_report(ev))
+
+    # ---- 7. forward cash position ------------------------------------
+    print()
+    print(format_position(compute_position(report, batch)))
 
     hr("Audit trail")
     print(f"  {len(trail)} entries written to {trail.path}")

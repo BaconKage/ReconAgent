@@ -29,6 +29,7 @@ class CaseType(str, Enum):
     ROUNDING = "rounding"
     ADVERSARIAL_RESOLVABLE = "adversarial_resolvable"
     ADVERSARIAL_AMBIGUOUS = "adversarial_ambiguous"
+    PENDING_SETTLEMENT = "pending_settlement"
     UNMATCHABLE = "unmatchable"
 
 
@@ -39,6 +40,7 @@ class Resolution(str, Enum):
     EXCEPTION_PARTIAL_REFUND = "exception_partial_refund"
     EXCEPTION_DUPLICATE = "exception_duplicate"
     EXCEPTION_AMBIGUOUS = "exception_ambiguous"
+    EXCEPTION_PENDING = "exception_pending"
     EXCEPTION_UNMATCHABLE = "exception_unmatchable"
 
     @property
