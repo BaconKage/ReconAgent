@@ -342,8 +342,10 @@ class ReconDataGenerator:
         oid_a, oid_b = self._order_id(), self._order_id()
         utr_a, utr_b = self._utr(), self._utr()
         s_a = self._settlement(oid_a, gross_a, d, utr_a)
-        # Nudge B's gross so its NET lands within a few paise of A's net.
-        s_b = self._settlement(oid_b, gross_a + self.rng.choice([-3, -2, 2, 3]), d, utr_b)
+        # Identical net to its twin. The ONLY thing separating these two
+        # transactions is that one carries a recoverable UTR - so this tests
+        # cascade order and nothing else.
+        s_b = self._settlement(oid_b, gross_a, d, utr_b)
         g_a = GroupDraft(
             self._next_gid(), CaseType.ADVERSARIAL_RESOLVABLE, Resolution.MATCHED,
             "adversarial twin (identified leg): clean UTR lets the cascade claim it first",
@@ -352,7 +354,7 @@ class ReconDataGenerator:
         )
         g_b = GroupDraft(
             self._next_gid(), CaseType.ADVERSARIAL_RESOLVABLE, Resolution.MATCHED,
-            "adversarial twin (unidentified leg): no UTR, near-identical net to its twin",
+            "adversarial twin (unidentified leg): no UTR, net identical to its twin",
             [self._ledger(oid_b, s_b.gross_paise, d + timedelta(days=1))], [s_b],
             [self._bank(d + timedelta(days=1), s_b.net_paise, utr_b,
                         ref_style="empty", desc_has_utr=False)],
@@ -363,16 +365,19 @@ class ReconDataGenerator:
         """Two unrelated transactions, same date, nets within tolerance, NO UTR
         on either bank row.
 
-        There is genuinely not enough information to bind these correctly. The
-        right behaviour is to refuse both, not to guess and be right half the
-        time. Ground truth therefore expects an exception, and a matcher that
-        "resolves" these is penalised rather than rewarded.
+        The two settlements carry IDENTICAL nets on the SAME date, and neither
+        bank row carries a UTR. This is deliberate: undecidability must not be an
+        artefact of the tolerance setting. An earlier version separated the twins
+        by a few paise, which made them separable under a tight tolerance and
+        turned a correct match into a scored false positive. With the amounts
+        equal, no threshold anywhere can distinguish them, so "refuse both" is
+        the right answer at every configuration.
         """
         d = self._date()
         gross_a = self._gross()
         oid_a, oid_b = self._order_id(), self._order_id()
         s_a = self._settlement(oid_a, gross_a, d, self._utr())
-        s_b = self._settlement(oid_b, gross_a + self.rng.choice([-2, -1, 1, 2]), d, self._utr())
+        s_b = self._settlement(oid_b, gross_a, d, self._utr())
         out = []
         for oid, s, tag in ((oid_a, s_a, "A"), (oid_b, s_b, "B")):
             out.append(GroupDraft(

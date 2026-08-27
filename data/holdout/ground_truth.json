@@ -997,22 +997,22 @@
         "order_2k0yae4p6a"
       ],
       "settlement_txn_ids": [
-        "pay_4wif13toqz"
+        "pay_0ixm8gznnk"
       ],
       "bank_row_ids": [
         "BNK_00033"
       ],
-      "notes": "adversarial twin (unidentified leg): no UTR, near-identical net to its twin"
+      "notes": "adversarial twin (unidentified leg): no UTR, net identical to its twin"
     },
     {
       "group_id": "G0065",
       "case_type": "adversarial_resolvable",
       "expected_resolution": "matched",
       "ledger_order_ids": [
-        "order_jgw17iloe8"
+        "order_mtaqbicsrb"
       ],
       "settlement_txn_ids": [
-        "pay_9vnib3gxm9"
+        "pay_eggoctpcek"
       ],
       "bank_row_ids": [
         "BNK_00015"
@@ -1024,25 +1024,25 @@
       "case_type": "adversarial_resolvable",
       "expected_resolution": "matched",
       "ledger_order_ids": [
-        "order_lmyfx9nnwx"
+        "order_r091fzdurh"
       ],
       "settlement_txn_ids": [
-        "pay_95vlqlo0rh"
+        "pay_y1295vlqlo"
       ],
       "bank_row_ids": [
         "BNK_00056"
       ],
-      "notes": "adversarial twin (unidentified leg): no UTR, near-identical net to its twin"
+      "notes": "adversarial twin (unidentified leg): no UTR, net identical to its twin"
     },
     {
       "group_id": "G0067",
       "case_type": "adversarial_resolvable",
       "expected_resolution": "matched",
       "ledger_order_ids": [
-        "order_yxps284slv"
+        "order_5kyxps284s"
       ],
       "settlement_txn_ids": [
-        "pay_a8b7mlufbk"
+        "pay_pra8b7mluf"
       ],
       "bank_row_ids": [
         "BNK_00094"
@@ -1054,25 +1054,25 @@
       "case_type": "adversarial_resolvable",
       "expected_resolution": "matched",
       "ledger_order_ids": [
-        "order_xmg7g8f4xb"
+        "order_lvxmg7g8f4"
       ],
       "settlement_txn_ids": [
-        "pay_nqewo4mbze"
+        "pay_bkynqewo4m"
       ],
       "bank_row_ids": [
         "BNK_00010"
       ],
-      "notes": "adversarial twin (unidentified leg): no UTR, near-identical net to its twin"
+      "notes": "adversarial twin (unidentified leg): no UTR, net identical to its twin"
     },
     {
       "group_id": "G0069",
       "case_type": "adversarial_resolvable",
       "expected_resolution": "matched",
       "ledger_order_ids": [
-        "order_edt2envi33"
+        "order_s7li1edt2e"
       ],
       "settlement_txn_ids": [
-        "pay_cqsuq0ar7g"
+        "pay_dgqzhcqsuq"
       ],
       "bank_row_ids": [
         "BNK_00057"
@@ -1084,25 +1084,25 @@
       "case_type": "adversarial_resolvable",
       "expected_resolution": "matched",
       "ledger_order_ids": [
-        "order_15zpq42fan"
+        "order_nvi3315zpq"
       ],
       "settlement_txn_ids": [
-        "pay_8hbp1o5fxm"
+        "pay_0ar7gt8hbp"
       ],
       "bank_row_ids": [
         "BNK_00049"
       ],
-      "notes": "adversarial twin (unidentified leg): no UTR, near-identical net to its twin"
+      "notes": "adversarial twin (unidentified leg): no UTR, net identical to its twin"
     },
     {
       "group_id": "G0071",
       "case_type": "adversarial_resolvable",
       "expected_resolution": "matched",
       "ledger_order_ids": [
-        "order_jweb6rv5ys"
+        "order_7gyhepjweb"
       ],
       "settlement_txn_ids": [
-        "pay_fvc7c7ccw3"
+        "pay_4h1qj3fvc7"
       ],
       "bank_row_ids": [
         "BNK_00016"
@@ -1114,25 +1114,25 @@
       "case_type": "adversarial_resolvable",
       "expected_resolution": "matched",
       "ledger_order_ids": [
-        "order_pde09vh142"
+        "order_6rv5yspde0"
       ],
       "settlement_txn_ids": [
-        "pay_knhvy15rsk"
+        "pay_c7ccw3odpv"
       ],
       "bank_row_ids": [
         "BNK_00020"
       ],
-      "notes": "adversarial twin (unidentified leg): no UTR, near-identical net to its twin"
+      "notes": "adversarial twin (unidentified leg): no UTR, net identical to its twin"
     },
     {
       "group_id": "G0073",
       "case_type": "adversarial_ambiguous",
       "expected_resolution": "exception_ambiguous",
       "ledger_order_ids": [
-        "order_z7fdi4oov2"
+        "order_t68sqq9845"
       ],
       "settlement_txn_ids": [
-        "pay_f5s5ers6lw"
+        "pay_796nfy9711"
       ],
       "bank_row_ids": [
         "BNK_00042"
@@ -1144,10 +1144,10 @@
       "case_type": "adversarial_ambiguous",
       "expected_resolution": "exception_ambiguous",
       "ledger_order_ids": [
-        "order_5xlnx76amy"
+        "order_331dh6vjku"
       ],
       "settlement_txn_ids": [
-        "pay_w8c5re44cf"
+        "pay_hbggiw8c5r"
       ],
       "bank_row_ids": [
         "BNK_00014"
@@ -1159,10 +1159,10 @@
       "case_type": "adversarial_ambiguous",
       "expected_resolution": "exception_ambiguous",
       "ledger_order_ids": [
-        "order_dbcsrt1guo"
+        "order_kfagtdbcsr"
       ],
       "settlement_txn_ids": [
-        "pay_htram8xqk7"
+        "pay_4taowhtram"
       ],
       "bank_row_ids": [
         "BNK_00034"
@@ -1174,10 +1174,10 @@
       "case_type": "adversarial_ambiguous",
       "expected_resolution": "exception_ambiguous",
       "ledger_order_ids": [
-        "order_kdxdvyf3of"
+        "order_t1guokdxdv"
       ],
       "settlement_txn_ids": [
-        "pay_mdgg5fxpib"
+        "pay_zwfq9duprw"
       ],
       "bank_row_ids": [
         "BNK_00082"
@@ -1189,10 +1189,10 @@
       "case_type": "adversarial_ambiguous",
       "expected_resolution": "exception_ambiguous",
       "ledger_order_ids": [
-        "order_2gvaa300vr"
+        "order_l2sx2gvaa3"
       ],
       "settlement_txn_ids": [
-        "pay_k5mdf7jy5i"
+        "pay_3gdlk5mdf7"
       ],
       "bank_row_ids": [
         "BNK_00092"
@@ -1204,10 +1204,10 @@
       "case_type": "adversarial_ambiguous",
       "expected_resolution": "exception_ambiguous",
       "ledger_order_ids": [
-        "order_cq00wpb7xf"
+        "order_00vrcq00wp"
       ],
       "settlement_txn_ids": [
-        "pay_ne1qt2o747"
+        "pay_mqk4lbj5c5"
       ],
       "bank_row_ids": [
         "BNK_00079"
@@ -1219,10 +1219,10 @@
       "case_type": "adversarial_ambiguous",
       "expected_resolution": "exception_ambiguous",
       "ledger_order_ids": [
-        "order_70ozmifoip"
+        "order_9os6hdqxab"
       ],
       "settlement_txn_ids": [
-        "pay_r2ioqkdujo"
+        "pay_5knfouzeu7"
       ],
       "bank_row_ids": [
         "BNK_00088"
@@ -1234,10 +1234,10 @@
       "case_type": "adversarial_ambiguous",
       "expected_resolution": "exception_ambiguous",
       "ledger_order_ids": [
-        "order_qe8083grdf"
+        "order_i1nrgdv9dr"
       ],
       "settlement_txn_ids": [
-        "pay_0yij52z5yg"
+        "pay_d61jwy1ux4"
       ],
       "bank_row_ids": [
         "BNK_00080"
@@ -1249,10 +1249,10 @@
       "case_type": "unmatchable",
       "expected_resolution": "exception_unmatchable",
       "ledger_order_ids": [
-        "order_hj7ettiiyu"
+        "order_ymxlzxsv7v"
       ],
       "settlement_txn_ids": [
-        "pay_ejggw1515w"
+        "pay_zqxs4hfek3"
       ],
       "bank_row_ids": [],
       "notes": "settlement with no bank credit anywhere in the batch (paired with a planted near-miss)"
@@ -1273,7 +1273,7 @@
       "case_type": "unmatchable",
       "expected_resolution": "exception_unmatchable",
       "ledger_order_ids": [
-        "order_suwy3uzlpr"
+        "order_a0ojfzp4sq"
       ],
       "settlement_txn_ids": [
         "pay_d321ydbl3i"

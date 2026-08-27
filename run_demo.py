@@ -21,6 +21,7 @@ from audit.trail import AuditTrail
 from core.loader import load_batch
 from core.matcher import reconcile
 from core.normalize import format_inr
+from evaluation.metrics import evaluate, format_report
 
 ROOT = Path(__file__).resolve().parent
 RULE = "=" * 78
@@ -37,6 +38,8 @@ def main() -> int:
                     help="skip the reasoning layer entirely (engine only)")
     ap.add_argument("--ask", metavar="QUESTION",
                     help="ask why a transaction did or did not reconcile, then exit")
+    ap.add_argument("--no-eval", action="store_true",
+                    help="skip scoring against ground truth")
     ap.add_argument("--exceptions", type=int, default=5,
                     help="how many exceptions to print in full (default 5)")
     args = ap.parse_args()
@@ -136,6 +139,15 @@ def main() -> int:
                   f"evidence sufficient: {inv.get('sufficient_evidence')})")
             if inv.get("evidence_cited"):
                 print(f"      cites    : {', '.join(inv['evidence_cited'])}")
+
+    # ---- 6. evaluation against ground truth --------------------------
+    gt_path = data_dir / "ground_truth.json"
+    if gt_path.exists() and not args.no_eval:
+        ev = evaluate(report, data_dir, batch=batch,
+                      reasoning_seconds=s.elapsed_seconds if s.sent_to_llm else None,
+                      llm_free_groups=s.never_touched_llm)
+        print()
+        print(format_report(ev))
 
     hr("Audit trail")
     print(f"  {len(trail)} entries written to {trail.path}")

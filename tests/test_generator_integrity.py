@@ -275,3 +275,31 @@ def test_holdout_contains_narration_format_absent_from_dev():
     assert novel, "holdout has no novel narration format"
     assert not any(d.startswith(("BY TRANSFER", "CR/UTRNO")) for d in
                    (r["description"] for r in dev_b.values()))
+
+
+def test_ambiguous_twins_are_undecidable_at_any_tolerance(dataset):
+    """Undecidability must not be an artefact of the threshold setting.
+
+    An earlier version separated the ambiguous twins by a couple of paise. That
+    made them separable under a tight amount tolerance, so a matcher configured
+    that way would correctly bind both - and the evaluator, reading a ground
+    truth that labels them 'ambiguous' unconditionally, would score those two
+    correct matches as false positives.
+
+    The labels are only sound if the twins carry IDENTICAL nets on the SAME
+    date with no UTR on either side. Then no tolerance anywhere can tell them
+    apart, and "refuse both" is right at every configuration.
+    """
+    name, settlements, _, _, gt = dataset
+    by_id = {g["group_id"]: g for g in gt["groups"]}
+    pairs = [p for p in gt["adversarial_pairs"]
+             if by_id[p[0]]["case_type"] == "adversarial_ambiguous"]
+    assert pairs, f"{name}: no ambiguous pairs generated"
+
+    for a_id, b_id in pairs:
+        sa = settlements[by_id[a_id]["settlement_txn_ids"][0]]
+        sb = settlements[by_id[b_id]["settlement_txn_ids"][0]]
+        assert rupees_to_paise(sa["net_amount"]) == rupees_to_paise(sb["net_amount"]), (
+            f"{name} {a_id}/{b_id}: nets differ, so a tight tolerance could separate them "
+            f"and the 'ambiguous' label would be wrong")
+        assert sa["settlement_date"] == sb["settlement_date"]

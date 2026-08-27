@@ -104,3 +104,71 @@ shape several times in 2025-26. Second, I made the degradation path *loud about
 which* failure it hit: `ReasoningStats` records `api_errors` separately from
 `unavailable`, and the run prints them separately, so "no key" and "the call
 failed" can never again look like the same thing on screen.
+
+---
+
+### 4. The held-out set worked — and then found a bug in my own benchmark — Day 4
+
+**What broke.** Two things, in sequence. The second one is the interesting one.
+
+**First: a real recall gap.** Dev scored 100% precision and 100% recall. The
+held-out set — different seed, harder mix, sealed until thresholds were frozen —
+came back at 100% precision but **84.2% recall**. Every miss was a split
+settlement: 9 of 10 failed, against 8 of 8 on dev.
+
+The cause was not a bug. The held-out batch is generated with `max_lag_days=4`,
+modelling a bank on a slower settlement cycle, while the engine is configured for
+T+2. Legs landing on day three and four fall outside the window, so the split
+cannot be assembled. The engine's response was to refuse rather than mis-bind —
+precision stayed at 100%. The conservative failure mode behaved exactly as
+designed.
+
+The tempting fix was to widen the window to 4 and watch the number go green.
+That is tuning on the evaluation set, so I did not do it. `core/config.py` has
+not been modified since the first commit, which is checkable in git history.
+Instead I wrote `evaluation/sensitivity.py` to measure the trade — and that is
+where the second problem surfaced.
+
+**Second: my ground truth was lying at the edges.** The sweep reported that
+*tightening* the amount tolerance to zero produced **four false positives** on
+dev. That is backwards on its face: a stricter threshold should never invent
+matches. I went to look at the four cases expecting an engine bug in tier
+cascade fallthrough.
+
+They were not engine bugs. For all four, `expected == predicted` — the engine had
+bound each adversarial twin to its *correct* counterpart. The evaluator was
+scoring four correct matches as false positives.
+
+The reason: I had generated the "ambiguous" twins two paise apart. At the shipped
+50-paise tolerance they are genuinely undecidable, so the label was right. At
+zero tolerance each twin has exactly one exact-amount candidate, so they become
+*perfectly* decidable — and my ground truth, which hard-codes
+`expected_resolution: exception_ambiguous`, kept insisting they were not. I had
+encoded a **threshold-dependent property as an absolute label**.
+
+**Why it mattered.** This is the failure mode that quietly invalidates a whole
+evaluation. Every headline number I had reported was correct *at the shipped
+configuration*, so nothing looked wrong. But the benchmark could not be trusted
+off that one operating point — which is precisely what a sensitivity analysis is
+for, and precisely the question a panel would ask. Worse, it made my central
+adversarial claim weaker than I thought: I was testing "can the engine refuse
+when two things are two paise apart", not "can it refuse when two things are
+genuinely indistinguishable".
+
+**How I got out.** Regenerated the adversarial twins with **identical** nets on
+the same date and no UTR on either bank row. Now no threshold anywhere can
+separate them, so "refuse both" is correct at every configuration — and the sweep
+confirms it: zero conflations across every tolerance from 0p to Rs 50.
+`test_ambiguous_twins_are_undecidable_at_any_tolerance` locks it in so the
+weakness cannot creep back.
+
+I changed the *test*, not the engine, and the change made the benchmark harder
+rather than easier. The headline numbers were unaffected.
+
+**What I changed in how I work.** A benchmark is code, and it deserves the same
+suspicion as the code under test. I had already written tests asserting my
+generator produced what it claimed — but every one of them checked the data
+against the *shipped* thresholds, so they could never have caught a label that
+was only conditionally true. Now I sweep the parameter space partly to find
+answers and partly to interrogate the harness, on the principle that a result
+which makes no sense is usually the measurement failing, not the thing measured.
