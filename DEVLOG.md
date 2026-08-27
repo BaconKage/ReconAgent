@@ -304,3 +304,63 @@ tell someone to run them. Those are different claims, and only the second one is
 what a judge actually experiences. The fresh-clone rehearsal is not a formality
 at the end of the build; it is the only test that exercises the product rather
 than the code.
+
+---
+
+### 8. A convenience accessor that silently produced invalid JSON — Day 7
+
+**What broke.** The very first turn of the very first investigation:
+
+```
+TURN 1: step failed: Extra data: line 1 column 320 (char 319)
+```
+
+The model had returned this, twice, concatenated:
+
+```
+{"thought":"...","action":"credits_near_settlement",...}{"thought":"...","action":"credits_near_settlement",...}
+```
+
+Two complete, valid, identical JSON objects glued together - which is not valid
+JSON. `json.loads` gave up at the boundary.
+
+**The cause.** I was reading the response with `response.output_text`, the
+documented convenience accessor on the OpenAI Responses API. Inspecting the raw
+response showed five output items:
+
+```
+[0] reasoning
+[1] message   -> 326 chars of JSON
+[2] reasoning
+[3] reasoning
+[4] message   -> the same 326 chars
+```
+
+`output_text` concatenates the text of **every** message item. A reasoning model
+routinely emits more than one, interleaved with its reasoning items. For prose
+output the result is merely repetitive; for a schema-constrained JSON response it
+is a parse error every time two messages appear.
+
+**Why it mattered more than the fix suggests.** This is the third entry in this
+log about trusting a familiar-looking API surface, and it is the most insidious
+of them, because `output_text` is not deprecated, not misused, and not wrong -
+it does exactly what it documents. It is simply the wrong tool for structured
+output, and nothing about the call site says so.
+
+It is also *intermittent*. Whether a second message appears depends on the
+prompt, so my earlier batched calls had worked fine for over a hundred traces.
+Had I shipped the investigation loop without testing a single case end to end, it
+would have failed on some cases and not others, and the failures would have been
+absorbed by my own graceful-degradation path into "escalate to human" - which is
+exactly what an unresolvable case looks like. Silent, plausible, and wrong.
+
+**How I got out.** `_openai_text` now walks the output items and returns the
+**last** message rather than the concatenation of all of them, joining content
+parts only within that single message. Added `parse_first_object` as a second
+line of defence on both the batched and the investigation paths, and a test that
+feeds the shim a synthetic two-message response.
+
+**What I changed in how I work.** For anything whose output feeds a parser, I now
+look at the raw response shape once before trusting an accessor - `len(r.output)`
+and the item types cost one print statement. Convenience accessors are designed
+for display, and display tolerates concatenation. Parsers do not.
