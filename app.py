@@ -188,7 +188,9 @@ with tab_overview:
     st.subheader("Where the model is and is not used")
     m1, m2, m3 = st.columns(3)
     stats = outcome.stats
-    m1.metric("Groups reaching a model", stats.sent_to_llm)
+    m1.metric("Groups reaching a model", stats.sent_to_llm,
+              f"{stats.deep_investigations} investigated with tools"
+              if stats.deep_investigations else None, delta_color="off")
     m2.metric("Handled with no model", stats.never_touched_llm,
               f"{stats.llm_free_fraction:.0%} of the batch")
     m3.metric("Live API calls", stats.live_calls)
@@ -284,7 +286,20 @@ with tab_exceptions:
                     "and deferred to human review rather than forcing a match."
                 )
 
-        with st.expander("Evidence the agent was given"):
+        trace = inv.get("investigation_trace") if inv else None
+        if trace:
+            st.markdown("**How it investigated**")
+            st.caption(f"{len(trace)} turns using read-only query tools. The agent "
+                       f"chose each step; none of these tools can change a match.")
+            for st_ in trace:
+                params = {k: v for k, v in (st_.get("params") or {}).items() if v}
+                with st.expander(f"Turn {st_['turn']} - {st_['action']}"
+                                 + (f" {params}" if params else "")):
+                    st.write(st_["thought"])
+                    if st_.get("observation"):
+                        st.json(st_["observation"])
+
+        with st.expander("Evidence the agent started from"):
             st.json(build_evidence_bundle(r, state["batch"]))
 
 

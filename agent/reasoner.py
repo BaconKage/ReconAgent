@@ -24,11 +24,16 @@ from __future__ import annotations
 
 import json
 import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from typing import Any
 
 from agent.cache import TraceCache, evidence_key
+from agent.investigator import (investigate_case, needs_deep_investigation,
+                                parse_first_object,
+                                system_prompt as investigation_system_prompt)
 from agent.llm import LLMUnavailable, get_provider
+from agent.tools import BatchInvestigator
 from agent.prompts import INVESTIGATION_SCHEMA, build_user_message, system_prompt
 from core.config import DEFAULT_CONFIG, MatchConfig
 from core.loader import LoadedBatch
@@ -38,6 +43,9 @@ from core.normalize import paise_to_rupees
 
 BATCH_SIZE = 6
 MAX_TOKENS = 16000
+#: Concurrent deep investigations. Independent work, so this is pure latency
+#: reduction - kept modest to stay well inside provider rate limits.
+DEEP_WORKERS = 6
 
 
 @dataclass
@@ -50,6 +58,10 @@ class ReasoningStats:
     unavailable: bool = False
     provider: str = ""
     elapsed_seconds: float = 0.0
+    #: Cases that got a multi-turn tool-using investigation rather than a
+    #: one-shot batched explanation.
+    deep_investigations: int = 0
+    deep_turns: int = 0
 
     @property
     def never_touched_llm(self) -> int:
@@ -186,8 +198,9 @@ def select_cases(report: ReconciliationReport) -> list[MatchResult]:
 
 class ExceptionReasoner:
     def __init__(self, cfg: MatchConfig = DEFAULT_CONFIG, *, cache: TraceCache | None = None,
-                 use_llm: bool = True):
+                 use_llm: bool = True, deep: bool = True):
         self.cfg = cfg
+        self.deep = deep
         self.cache = cache if cache is not None else TraceCache()
         self.use_llm = use_llm
         self._client = None
@@ -228,7 +241,8 @@ class ExceptionReasoner:
         bundles = {c.record_id: build_evidence_bundle(c, batch, self.cfg) for c in cases}
         # The prompt is part of the key: an answer is a function of the evidence
         # and the instructions together, so editing one must invalidate the other.
-        instructions = system_prompt(self.cfg)
+        instructions = system_prompt(self.cfg) + (
+            investigation_system_prompt(self.cfg) if self.deep else '')
         keys = {rid: evidence_key(b, instructions) for rid, b in bundles.items()}
 
         pending: list[str] = []
@@ -239,6 +253,13 @@ class ExceptionReasoner:
                 inv["source"] = "cached_trace"
                 outcome.investigations[rid] = inv
                 stats.served_from_cache += 1
+                # A replayed investigation is still an investigation. Counting it
+                # keeps the summary honest on a keyless run, where every trace
+                # comes from cache and the live counters are all zero.
+                trace = inv.get("investigation_trace") or []
+                if trace:
+                    stats.deep_investigations += 1
+                    stats.deep_turns += len(trace)
             else:
                 # A cached placeholder is treated as a miss, so a cache poisoned
                 # by an earlier failed run heals itself on the next good one.
@@ -251,8 +272,44 @@ class ExceptionReasoner:
                 for rid in pending:
                     outcome.investigations[rid] = self._placeholder(rid, self._client_error)
             else:
-                for i in range(0, len(pending), BATCH_SIZE):
-                    chunk = pending[i:i + BATCH_SIZE]
+                by_id = {r.record_id: r for r in cases}
+                # Effort is matched to difficulty, the same way the matching
+                # engine spends its effort. A case where the engine had a
+                # candidate and declined earns a multi-turn investigation with
+                # tools; a credit that resembles nothing earns a sentence.
+                deep = [r for r in pending
+                        if self.deep and needs_deep_investigation(by_id[r])]
+                shallow = [r for r in pending if r not in set(deep)]
+
+                if deep:
+                    # Investigations are independent of each other, so they run
+                    # concurrently. Sequentially this is ~20s x 60 cases; the
+                    # pool brings a full run down to a few minutes. Results are
+                    # merged on this thread, so the cache and stats stay
+                    # single-writer.
+                    investigator = BatchInvestigator(batch, report)
+                    with ThreadPoolExecutor(max_workers=DEEP_WORKERS) as pool:
+                        futures = {
+                            pool.submit(investigate_case, client, bundles[rid],
+                                        investigator, self.cfg): rid
+                            for rid in deep
+                        }
+                        for future in as_completed(futures):
+                            rid = futures[future]
+                            try:
+                                conclusion, steps, calls = future.result()
+                            except Exception as exc:          # noqa: BLE001
+                                conclusion, steps, calls = None, [], 0
+                                stats.api_errors += 1
+                            inv = self._finalise_investigation(
+                                client, bundles[rid], conclusion, steps, calls, stats)
+                            outcome.investigations[rid] = inv
+                            if not self.is_placeholder(inv):
+                                self.cache.put(keys[rid], {k: v for k, v in inv.items()
+                                                           if k != "source"})
+
+                for i in range(0, len(shallow), BATCH_SIZE):
+                    chunk = shallow[i:i + BATCH_SIZE]
                     got = self._call(client, [bundles[r] for r in chunk], stats)
                     for rid in chunk:
                         inv = got.get(rid)
@@ -274,6 +331,33 @@ class ExceptionReasoner:
 
         stats.elapsed_seconds = time.perf_counter() - started
         return outcome
+
+    def _finalise_investigation(self, provider, bundle, conclusion, steps, calls,
+                                stats: ReasoningStats) -> dict[str, Any]:
+        """Turn one completed investigation into a stored result.
+
+        Called on the main thread so stats and the cache have a single writer.
+        """
+        stats.live_calls += calls
+        stats.deep_investigations += 1
+        stats.deep_turns += len(steps)
+        if not stats.provider:
+            stats.provider = f"{provider.name}/{provider.model}"
+
+        trace = [st.to_dict() for st in steps]
+        if conclusion is None:
+            # Never converged. Escalating is the safe default, and the trace
+            # still shows a reviewer everything the agent looked at.
+            out = self._placeholder(
+                bundle["case_id"], "investigation did not converge within its turn limit")
+            out["investigation_trace"] = trace
+            return out
+
+        conclusion["source"] = "live_llm"
+        conclusion["model"] = stats.provider
+        conclusion["investigation_trace"] = trace
+        conclusion["tools_used"] = [st.action for st in steps if st.action != "conclude"]
+        return conclusion
 
     # -- api -----------------------------------------------------------
 
@@ -298,7 +382,7 @@ class ExceptionReasoner:
         stats.live_calls += 1
         stats.provider = f"{response.provider}/{response.model}"
         try:
-            parsed = json.loads(response.text)
+            parsed = parse_first_object(response.text)
         except json.JSONDecodeError:
             stats.api_errors += 1
             return {}

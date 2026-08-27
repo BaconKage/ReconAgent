@@ -111,6 +111,10 @@ def main() -> int:
         mode = f"committed traces ({s.served_from_cache} replayed, nothing to call)"
     print(f"  mode                     {mode}")
     print(f"  groups reaching a model  {s.sent_to_llm} of {s.total_records}")
+    if s.deep_investigations:
+        print(f"  deep investigations      {s.deep_investigations} "
+              f"({s.deep_turns} turns using read-only tools)")
+        print(f"  one-shot explanations    {s.sent_to_llm - s.deep_investigations}")
     print(f"  handled with no model    {s.never_touched_llm} ({s.llm_free_fraction:.0%})")
     if s.api_errors:
         print(f"  api errors (degraded)    {s.api_errors}")
@@ -159,6 +163,11 @@ def main() -> int:
                   f"evidence sufficient: {inv.get('sufficient_evidence')})")
             if inv.get("evidence_cited"):
                 print(f"      cites    : {', '.join(inv['evidence_cited'])}")
+            for st in inv.get("investigation_trace", []):
+                params = {k: v for k, v in (st.get("params") or {}).items() if v}
+                detail = f" {params}" if params else ""
+                print(f"      turn {st['turn']}  : {st['action']}{detail}")
+                print(f"                 {st['thought']}")
 
     # ---- 6. evaluation against ground truth --------------------------
     gt_path = data_dir / "ground_truth.json"

@@ -199,20 +199,35 @@ class OpenAIProvider:
 
 
 def _openai_text(response: Any) -> str:
-    """Pull the text out of a Responses API result.
+    """Pull the final answer text out of a Responses API result.
 
-    `output_text` is the documented convenience accessor; the manual walk is a
-    fallback so a shape change degrades to empty rather than raising.
+    Deliberately NOT `response.output_text`. That accessor concatenates the text
+    of *every* message item in the response, and a reasoning model routinely
+    emits more than one - interleaved with `reasoning` items. For prose the
+    concatenation is merely odd; for a JSON schema response it produces two valid
+    objects glued together, which fails to parse with "Extra data: line 1 column
+    N". The failure is intermittent, because whether a second message appears
+    depends on the prompt.
+
+    The last message item is the model's final answer, so that is what is
+    returned. Content parts *within* that one message are joined, since a single
+    message legitimately splits across parts.
     """
-    text = getattr(response, "output_text", None)
-    if text:
-        return text
-    parts: list[str] = []
+    messages: list[str] = []
     for item in getattr(response, "output", None) or []:
-        for block in getattr(item, "content", None) or []:
-            if getattr(block, "type", None) in ("output_text", "text"):
-                parts.append(getattr(block, "text", "") or "")
-    return "".join(parts)
+        if getattr(item, "type", None) != "message":
+            continue
+        parts = [
+            getattr(block, "text", "") or ""
+            for block in (getattr(item, "content", None) or [])
+            if getattr(block, "type", None) in ("output_text", "text")
+        ]
+        if parts:
+            messages.append("".join(parts))
+    if messages:
+        return messages[-1]
+    # Older or unexpected shapes: fall back rather than returning nothing.
+    return getattr(response, "output_text", "") or ""
 
 
 # --------------------------------------------------------------------------

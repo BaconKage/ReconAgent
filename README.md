@@ -33,7 +33,7 @@ the Q&A all run offline, replaying 104 committed reasoning traces.
 streamlit run app.py                       # the UI
 python run_demo.py --dataset holdout       # the sealed evaluation set
 python run_demo.py --ask "why didn't pay_f7atwyam1n reconcile?"
-python -m pytest tests/ -q                 # 153 tests
+python -m pytest tests/ -q                 # 173 tests
 python -m evaluation.sensitivity           # threshold trade-off sweep
 ```
 
@@ -115,8 +115,15 @@ flowchart TB
     end
 
     ENGINE -->|matched / split / duplicate| TRAIL
-    ENGINE -->|exceptions only| REASON["<b>agent/reasoner</b><br/>batched, schema-constrained<br/>explains — never matches"]
-    REASON --> TRAIL["<b>audit/trail</b><br/>append-only JSONL<br/>one entry per decision"]
+    ENGINE -->|exceptions only| ROUTE{"<b>agent/reasoner</b><br/>how hard is it?"}
+
+    ROUTE -->|"engine had a candidate<br/>and declined"| DEEP["<b>agent/investigator</b><br/>bounded multi-turn loop<br/>chooses its own queries"]
+    ROUTE -->|"trivial absence"| SHALLOW["one-shot explanation<br/>batched, 6 per call"]
+
+    DEEP <-->|"read-only questions"| TOOLS["<b>agent/tools</b><br/>search credits · get row<br/>find UTR · batch summary<br/><i>no tool can change a match</i>"]
+
+    DEEP --> TRAIL["<b>audit/trail</b><br/>append-only JSONL<br/>decisions + every agent query"]
+    SHALLOW --> TRAIL
 
     TRAIL --> QA["<b>agent/qa</b><br/>retrieval over the trail"]
     ENGINE --> EVAL["<b>evaluation/metrics</b><br/>vs ground truth"]
@@ -125,7 +132,9 @@ flowchart TB
     GT[("ground_truth.json")] -.->|"read ONLY here"| EVAL
 
     style ENGINE fill:#e8f4ea,stroke:#2d6a3e
-    style REASON fill:#eef2fb,stroke:#3d5a99
+    style DEEP fill:#eef2fb,stroke:#3d5a99
+    style SHALLOW fill:#f4f4f7,stroke:#777
+    style TOOLS fill:#fdf6e8,stroke:#a07a2c
     style GT fill:#fbeeee,stroke:#994444
 ```
 
@@ -154,19 +163,36 @@ This is not a convention. It is enforced:
 - `tests/test_llm_provider.py` asserts reconciliation output is identical under
   Anthropic, OpenAI, and no provider at all.
 
-**The result:** 58 of 85 groups (65%) never reach a model. Only exceptions and
-sub-0.80-confidence matches do — 31 cases in 6 batched calls, roughly 60 seconds
-and a few cents for the whole batch.
+**The result:** 58 of 85 groups (65%) never reach a model at all.
 
 ### Where I did use one
 
-Explaining exceptions, and phrasing Q&A answers. Both are grounded: the model is
-handed the actual settlement, ledger row, and every near-miss credit with its real
-amount, date and narration — and never the ground truth, the case label, or any
-hint of the expected outcome (`test_evidence_bundle_never_leaks_ground_truth`).
+Investigating exceptions, and phrasing Q&A answers — and the effort spent scales
+with difficulty, the same way the matching engine's does.
 
-**Measured grounding:** across all 104 traces the model wrote 264 record IDs.
-**Zero** were absent from the evidence it was shown.
+| | cases (dev) | what happens |
+|---|---|---|
+| never reaches a model | 58 | matched confidently by rules |
+| one-shot explanation | 8 | a sentence is enough — an orphan credit resembling nothing |
+| **multi-turn investigation** | **23** | the engine had a candidate and declined; the agent gets tools |
+
+**The investigation loop is what makes this an agent rather than a prompt.** For
+the hard cases the model gets **read-only tools** over the batch — search credits
+by amount and date, pull a bank row, look up a settlement, search UTR fragments —
+and up to four turns. It chooses each query, sees real results, and decides when
+it has enough.
+
+Every tool is a *question*. There is deliberately no tool that creates a link,
+changes a status or resolves anything, so no sequence of agent actions can alter a
+reconciliation outcome (`test_no_tool_can_mutate_the_reconciliation`). The loop is
+hard-bounded, and failing to converge escalates rather than guessing
+(`test_the_loop_is_bounded`).
+
+Every query and every result is written to the audit trail, so a reviewer can walk
+the same path the agent walked.
+
+**Grounding is measured:** across 104 traces the model wrote 264 record IDs, and
+**zero** were absent from the evidence it was shown.
 
 The output schema requires a `sufficient_evidence` boolean, and the prompt states
 plainly that "there is not enough here to decide" is a correct and valued answer.
@@ -199,6 +225,33 @@ High confidence in the judgement that it *cannot* be decided. A matcher that
 picked the closer amount here would be right half the time and report certainty
 every time. There are 5 such pairs in dev and 9 in holdout; **zero** were
 conflated.
+
+It did not simply accept the engine's finding — it went and looked:
+
+```
+turn 1  credits_near_settlement(pay_f7atwyam1n)
+        "inspect all credits around this settlement to determine whether either
+         same-day identical amount has distinguishing evidence"
+turn 2  get_credit(BNK_00032)
+        "inspect the full bank-row details to see whether any reference, posting
+         metadata, or linkage distinguishes it from the other identical candidate"
+turn 3  conclude
+        "both bank rows are identical on the available matching facts"
+```
+
+The planted near-miss case is the same story with a different ending. There, the
+agent searched wider than the engine's window, found the single candidate that
+exists, checked its narration for an explanation, searched the settlement's UTR
+across the whole batch — and still declined:
+
+> BNK_00027 is the only plausible nearby unmatched credit... It is Rs 1.06 short
+> and six days late, and neither its narration nor the UTR search explains the
+> difference. Do not match automatically.
+
+**An agent that refuses what it was never allowed to look for is restating its
+input. An agent that searches, finds the one candidate, and still declines is
+exercising judgement** — and because every query is in the audit trail, that
+judgement is checkable rather than asserted.
 
 The synthetic generator builds these deliberately, with *identical* net amounts —
 so no threshold setting anywhere can separate them
@@ -278,6 +331,12 @@ mitigation, not a cure. Real bank statements are messier than anything here.
 **The held-out recall gap is unfixed by choice.** 84.2%, all split settlements
 beyond the configured window. See above.
 
+**The ledger records refund status but not refund amount.** The agent found this
+itself: on a partial refund it can see the order is marked refunded, but nothing
+lets it confirm the shortfall reconciles, so it escalates. A real system would
+join a refunds table. That the agent noticed and said so is the behaviour I want;
+the missing column is a limitation of my synthetic sources.
+
 **Ambiguous cases are refused, not resolved.** With more signal — narration
 tokens, customer names in the bank reference, historical pairing — several would
 be decidable. The engine currently uses amount, date and UTR only.
@@ -320,14 +379,16 @@ core/         deterministic engine — no LLM, no network, integer paise
 agent/        the reasoning layer — explains, never matches
   llm.py        provider shim: Anthropic or OpenAI, chosen from the environment
   prompts.py    system prompt + output schema
-  reasoner.py   batched investigation of exceptions only
+  tools.py      read-only query surface the agent investigates with
+  investigator.py  bounded multi-turn loop for the hard cases
+  reasoner.py   routes each exception to the deep or the cheap path
   qa.py         retrieval over the audit trail
   cache/        104 committed traces, so the repo demos offline
 audit/        append-only JSONL decision trail
 evaluation/   metrics + threshold sensitivity — the only reader of ground truth
 cash/         forward cash position
 data/         seeded generator, dev and holdout batches
-tests/        153 tests
+tests/        173 tests
 DEVLOG.md     what actually broke, and what I did about it
 ```
 
