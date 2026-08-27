@@ -11,8 +11,9 @@ The claims these defend:
   escalate rather than quietly resolving.
 * Q&A retrieves; it does not invent. An unknown ID returns "not found".
 
-No test here makes a network call. `ANTHROPIC_API_KEY` is stripped from the
-environment so a developer's real key cannot turn the suite into live spend.
+No test here makes a network call. Both `ANTHROPIC_API_KEY` and `OPENAI_API_KEY`
+are stripped from the environment so a developer's real key cannot turn the
+suite into live spend.
 """
 
 from __future__ import annotations
@@ -35,8 +36,14 @@ DEV = Path(__file__).resolve().parents[1] / "data" / "dev"
 
 @pytest.fixture(autouse=True)
 def no_api_key(monkeypatch):
-    """Guarantee offline behaviour for every test in this module."""
+    """Guarantee offline behaviour for every test in this module.
+
+    Both vendor keys are stripped, plus the provider override - otherwise a
+    developer with either key set would turn this suite into live API spend.
+    """
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("RECONAGENT_LLM_PROVIDER", raising=False)
 
 
 @pytest.fixture(scope="module")

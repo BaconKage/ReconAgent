@@ -4,9 +4,9 @@
     python run_demo.py --dataset holdout    # the sealed evaluation set
     python run_demo.py --ask pay_xxxxxxxxxx # why did this reconcile?
 
-Runs with or without ANTHROPIC_API_KEY. Without one, the deterministic engine
-produces every match and metric exactly as it otherwise would, and the agent's
-explanations are replayed from committed traces.
+Runs with or without a model API key (ANTHROPIC_API_KEY or OPENAI_API_KEY).
+Without one, the deterministic engine produces every match and metric exactly as
+it otherwise would, and the agent's explanations replay from committed traces.
 """
 
 from __future__ import annotations
@@ -16,6 +16,7 @@ import sys
 from pathlib import Path
 
 from agent.qa import ReconciliationQA
+from agent.llm import describe_provider
 from agent.reasoner import ExceptionReasoner
 from audit.trail import AuditTrail
 from cash.position import compute_position, format_position
@@ -96,7 +97,8 @@ def main() -> int:
     hr("Reasoning layer")
     mode = ("disabled (--no-llm)" if args.no_llm
             else "cached traces (no API key)" if s.unavailable
-            else f"live ({s.live_calls} calls, {s.served_from_cache} from cache)")
+            else f"live via {s.provider or describe_provider()} "
+                 f"({s.live_calls} calls, {s.served_from_cache} from cache)")
     print(f"  mode                     {mode}")
     print(f"  groups reaching a model  {s.sent_to_llm} of {s.total_records}")
     print(f"  handled with no model    {s.never_touched_llm} ({s.llm_free_fraction:.0%})")

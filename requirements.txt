@@ -1,7 +1,9 @@
 # Core runtime
 pandas>=2.0,<3.0
 streamlit>=1.30,<2.0
+# Either provider works - install whichever you hold a key for.
 anthropic>=0.40,<1.0
+openai>=1.60
 python-dotenv>=1.0,<2.0
 
 # Tests

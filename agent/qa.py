@@ -10,8 +10,10 @@ There are two rendering paths and they read the same retrieved record:
 
 * **Deterministic** - formats the stored decision directly. No API key needed,
   and it is impossible for it to state anything the trail does not contain.
-* **Model-phrased** - hands the same retrieved record to Claude purely to write
-  it up more fluently, under instructions to use nothing else.
+* **Model-phrased** - hands the same retrieved record to a model purely to write
+  it up more fluently, under instructions to use nothing else. Which vendor
+  answers is decided by `agent.llm` from the environment, and is irrelevant to
+  the content of the answer.
 
 The deterministic path is the default and the fallback. The model is a
 presentation layer over retrieval, which is the whole point: it cannot
@@ -27,12 +29,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from agent.llm import LLMUnavailable, get_provider
 from audit.trail import AuditTrail, merge_by_record
 from core.normalize import format_inr, rupees_to_paise
 
 ID_PATTERN = re.compile(r"\b(pay_[a-z0-9]+|order_[a-z0-9]+|BNK_\d+)\b", re.IGNORECASE)
-
-MODEL = "claude-opus-5"
 
 QA_SYSTEM = """You answer questions about a single reconciliation decision that has \
 already been made and recorded in an audit trail.
@@ -212,28 +213,19 @@ class ReconciliationQA:
     # -- optional model phrasing ---------------------------------------
 
     def _phrase_with_model(self, question: str, record: dict[str, Any]) -> str | None:
-        if not os.environ.get("ANTHROPIC_API_KEY"):
-            return None
-        try:
-            import anthropic
-        except ImportError:
-            return None
         import json
         try:
-            client = anthropic.Anthropic()
-            response = client.messages.create(
-                model=MODEL,
-                max_tokens=1024,
+            provider = get_provider()
+        except LLMUnavailable:
+            return None
+        try:
+            response = provider.complete_text(
                 system=QA_SYSTEM,
-                messages=[{
-                    "role": "user",
-                    "content": (
-                        f"Question: {question}\n\n"
-                        f"Audit record:\n{json.dumps(record, indent=2, default=str)}"
-                    ),
-                }],
+                user=(f"Question: {question}\n\n"
+                      f"Audit record:\n{json.dumps(record, indent=2, default=str)}"),
+                max_tokens=1024,
             )
-            return next((b.text for b in response.content if b.type == "text"), None)
+            return response.text or None
         except Exception:                             # noqa: BLE001
             # Falling back to the deterministic rendering is strictly safer than
             # surfacing an error: the answer is still correct, just plainer.

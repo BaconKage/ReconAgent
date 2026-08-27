@@ -15,6 +15,7 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
+from agent.llm import describe_provider, detect_provider_name
 from agent.qa import ReconciliationQA
 from agent.reasoner import ExceptionReasoner, build_evidence_bundle
 from audit.trail import AuditTrail
@@ -102,7 +103,7 @@ dataset = st.sidebar.selectbox(
          "bank narration format the parser was never tuned on",
 )
 
-has_key = bool(os.environ.get("ANTHROPIC_API_KEY"))
+has_key = detect_provider_name() is not None
 use_llm = st.sidebar.toggle(
     "Reasoning layer", value=True,
     help="Explains exceptions. It cannot change a single match - turn it off and "
@@ -110,7 +111,7 @@ use_llm = st.sidebar.toggle(
 )
 
 if has_key:
-    st.sidebar.success("API key detected - live reasoning")
+    st.sidebar.success(f"Live reasoning via {describe_provider()}")
 else:
     st.sidebar.info("No API key - reasoning replays from committed traces. "
                     "All matching and every metric is unaffected.")

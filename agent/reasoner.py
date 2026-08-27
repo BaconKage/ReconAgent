@@ -14,6 +14,10 @@ Three properties are enforced here rather than merely intended:
   never reach the model. The run reports what fraction was handled without one.
 * **It degrades instead of failing.** No API key, no SDK, or an API error yields
   a placeholder investigation and a run that still completes with full metrics.
+* **It is not tied to one vendor.** The model is reached through `agent.llm`,
+  which selects Anthropic or OpenAI from the environment. Swapping providers
+  changes the wording of explanations and nothing else - not one match, not
+  one metric.
 """
 
 from __future__ import annotations
@@ -24,6 +28,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from agent.cache import TraceCache, evidence_key
+from agent.llm import LLMUnavailable, get_provider
 from agent.prompts import INVESTIGATION_SCHEMA, build_user_message, system_prompt
 from core.config import DEFAULT_CONFIG, MatchConfig
 from core.loader import LoadedBatch
@@ -31,7 +36,6 @@ from core.matcher import ReconciliationReport
 from core.models import MatchResult
 from core.normalize import paise_to_rupees
 
-MODEL = "claude-opus-5"
 BATCH_SIZE = 6
 MAX_TOKENS = 16000
 
@@ -44,6 +48,7 @@ class ReasoningStats:
     live_calls: int = 0
     api_errors: int = 0
     unavailable: bool = False
+    provider: str = ""
     elapsed_seconds: float = 0.0
 
     @property
@@ -181,10 +186,9 @@ def select_cases(report: ReconciliationReport) -> list[MatchResult]:
 
 class ExceptionReasoner:
     def __init__(self, cfg: MatchConfig = DEFAULT_CONFIG, *, cache: TraceCache | None = None,
-                 use_llm: bool = True, model: str = MODEL):
+                 use_llm: bool = True):
         self.cfg = cfg
         self.cache = cache if cache is not None else TraceCache()
-        self.model = model
         self.use_llm = use_llm
         self._client = None
         self._client_error: str | None = None
@@ -192,28 +196,21 @@ class ExceptionReasoner:
     # -- client --------------------------------------------------------
 
     def _get_client(self):
-        """Build the Anthropic client lazily, and tolerate its absence.
+        """Resolve a model provider lazily, and tolerate its absence.
 
         A missing key or missing SDK is an ordinary condition here, not an
         error: the cached-trace path is a supported way to run this project.
+        Which vendor answers is decided by `agent.llm` from the environment.
         """
         if self._client is not None or self._client_error is not None:
             return self._client
         if not self.use_llm:
             self._client_error = "llm disabled for this run"
             return None
-        if not os.environ.get("ANTHROPIC_API_KEY"):
-            self._client_error = "ANTHROPIC_API_KEY not set"
-            return None
         try:
-            import anthropic
-        except ImportError:
-            self._client_error = "anthropic SDK not installed"
-            return None
-        try:
-            self._client = anthropic.Anthropic()
-        except Exception as exc:                      # noqa: BLE001 - never fatal
-            self._client_error = f"client init failed: {exc}"
+            self._client = get_provider()
+        except LLMUnavailable as exc:
+            self._client_error = str(exc)
             return None
         return self._client
 
@@ -259,7 +256,7 @@ class ExceptionReasoner:
                                 rid, "model returned no investigation for this case")
                             continue
                         inv["source"] = "live_llm"
-                        inv["model"] = self.model
+                        inv["model"] = stats.provider
                         outcome.investigations[rid] = inv
                         self.cache.put(keys[rid], {k: v for k, v in inv.items()
                                                    if k != "source"})
@@ -274,24 +271,16 @@ class ExceptionReasoner:
 
     # -- api -----------------------------------------------------------
 
-    def _call(self, client, bundles: list[dict[str, Any]],
+    def _call(self, provider, bundles: list[dict[str, Any]],
               stats: ReasoningStats) -> dict[str, dict[str, Any]]:
-        """One batched, schema-constrained request."""
+        """One batched, schema-constrained request through the active provider."""
         try:
-            response = client.messages.create(
-                model=self.model,
+            response = provider.complete_json(
+                system=system_prompt(self.cfg),
+                user=build_user_message(bundles),
+                schema=INVESTIGATION_SCHEMA,
                 max_tokens=MAX_TOKENS,
-                thinking={"type": "adaptive"},
-                system=[{
-                    "type": "text",
-                    "text": system_prompt(self.cfg),
-                    # The system prompt is identical for every batch in a run,
-                    # so caching it turns N batches into one paid prefix.
-                    "cache_control": {"type": "ephemeral"},
-                }],
-                messages=[{"role": "user", "content": build_user_message(bundles)}],
-                output_config={"format": {"type": "json_schema",
-                                          "schema": INVESTIGATION_SCHEMA}},
+                schema_name="reconciliation_investigations",
             )
         except Exception as exc:                      # noqa: BLE001
             # Any API failure degrades this batch to placeholders; the run and
@@ -301,9 +290,9 @@ class ExceptionReasoner:
                     for b in bundles}
 
         stats.live_calls += 1
-        text = next((b.text for b in response.content if b.type == "text"), "")
+        stats.provider = f"{response.provider}/{response.model}"
         try:
-            parsed = json.loads(text)
+            parsed = json.loads(response.text)
         except json.JSONDecodeError:
             stats.api_errors += 1
             return {}

@@ -1,0 +1,312 @@
+{
+  "055d72882ee131bf5cf8747c3d880d7e5b6cc2082d94b982b77db5b9d1dd7aee": {
+    "case_id": "pay_f7atwyam1n",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "0dd0286a55c7d13763c2470a855110c9a45c6b3651e2465af4f8321d99ee8a57": {
+    "case_id": "pay_c2ihoy7dv7",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "0f7d123921e475f5ef60542e7fb1d24409aeebc1a6b1fc005a127f02eb014317": {
+    "case_id": "pay_6iidlrye89",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "1ad68fe09d65c2394d6f5a29d69d77f90598f61c77a58b15ed95154d34499843": {
+    "case_id": "pay_m96zpxvpbl",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "25a82b94965713fe3c0da7d75c0f3d4405f84b43710967465995a244974a82ce": {
+    "case_id": "BNK_00032",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "3e4e8d9874aa69e6fbb93afb081530bed35e1ba36bf9afbbb9ad78fe38ea8ede": {
+    "case_id": "pay_vgiui9kkhz",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "3f4058e8122bc61a23020ce238cc5f8b148fdc4fb848d9daf46af8ceb3f020d2": {
+    "case_id": "BNK_00048",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "40c1683837e25e4c10510b0750b2d712f89663c33c7a69771c29420b905a1661": {
+    "case_id": "BNK_00027",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "603776cbb2b31c5193fe494848f984397e2edf15c8be2ca807ec0f8cd6b94421": {
+    "case_id": "pay_9flv1xxlp8",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "6328754cc8bdfaa178a5c7136c6a180819a15730f7755e0f7d9a59566b9bfa6e": {
+    "case_id": "pay_iaakytt3im",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "6e3170e7d86df74d4b43b9a1d9d6e8e1e8a2eb65ab3638c63543c9ef3b11b57c": {
+    "case_id": "pay_skch8jwwdx",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "794dc9e7ebf85953b9cbafa89ff6d9b791803fd6355931fdd558378f695c5202": {
+    "case_id": "pay_ckeh5sw229",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "87bc68e968dee462711a57c99812ab00e4a46a9688a47fdc592b8e856049fd29": {
+    "case_id": "BNK_00080",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "893c849a3f452cfe5e6a1f8914f9f66ecd22e889a41714020b94930819a2a84c": {
+    "case_id": "pay_xurgowyoo5",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "8cf50e261154411b44b2a998f527c9341af57ca7df47c08205c68f62c48cb4f4": {
+    "case_id": "pay_flse45bg34",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "9555454d7553d2a0a13468c3948ef09bcb91f9f14347467ea13093f9ac953ce9": {
+    "case_id": "BNK_00035",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "a929ea6bddbea26f53b10dee4ffaba47d62e76c941a97848b456c0f4def463c3": {
+    "case_id": "pay_jx8uibrsz1",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "ab83e11eb121f03df89bbb415531368bd5f2ae23f529b18e31d5efd0949c89e5": {
+    "case_id": "pay_m44gv3z6bz",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "b4a2f4acdffa6f0cdf63b3bc7ff34d47dc8d2de3c8d3b0b7b8397fd725f83d6c": {
+    "case_id": "pay_8n7odkef82",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "c415a8b675553d311fc470a2adfdaeb1ff02c388da9aa0a09d74a931a535a591": {
+    "case_id": "pay_0i9g5dzx5q",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "c981a57b7e593dd7c52b32635028c10becde9576aec929619d969e75b45dd80a": {
+    "case_id": "pay_rms3jn050e",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "d3306e8364b80f8227e3a8f5ffcea114b6950098d771b14062311d8fa114649e": {
+    "case_id": "pay_y751yw7nh8",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "d421e5dcfb9218e66eb84b9dc2e121f8741c678d8d711918740552bf8fcac393": {
+    "case_id": "pay_jxnnngbpj4",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "d4efc714264e34982facf66d46f69c54c3564936971a1a483a7ab8fc6ca9be1b": {
+    "case_id": "BNK_00056",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "d7135ec699889d6ed9a86fea179d18b04550c2d310978e2e16f71808961ad110": {
+    "case_id": "pay_g983ep9p9w",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "d8f301cb40dd1f37f26d713462a4b1151d6900225614d3e8351c7b140ee5d7fa": {
+    "case_id": "BNK_00002",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "dcdd4e55582085dc81e844eba385c937abe1897fb514a0362823f44b5a79ad3f": {
+    "case_id": "pay_tr74qgefqj",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "f38c634883abaffab3574481c4d919e3d9c237115e41f6954ae8a01a5491f78f": {
+    "case_id": "pay_59sojuv0gy",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "f6c982d7ecc00cab5562872cbbd268db4003ff486a0820e139c96507c8503eae": {
+    "case_id": "pay_6qceouuyla",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "fce911ab9385323405295a9b26429ae46ff4dba7e49ec27626f4fbe094ccf3a3": {
+    "case_id": "pay_isbo551ldq",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  },
+  "ffaf5b49a2713b6f6394410cca6a026b3484ddd07d8d62db47a6a75d8c53a27c": {
+    "case_id": "pay_jch2vffqot",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "No agent explanation available for this exception (API error: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-fake-********************test. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}). The engine's rule trace above records exactly why it did not match.",
+    "model": "",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "unknown",
+    "sufficient_evidence": false
+  }
+}

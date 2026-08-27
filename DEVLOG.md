@@ -172,3 +172,40 @@ against the *shipped* thresholds, so they could never have caught a label that
 was only conditionally true. Now I sweep the parameter space partly to find
 answers and partly to interrogate the harness, on the principle that a result
 which makes no sense is usually the measurement failing, not the thing measured.
+
+---
+
+### 5. The same stale-API trap, one provider over — Day 5
+
+**What broke.** Nothing, again, and for the same reason as entry 3 — which is
+the point of recording it.
+
+The build switched from an Anthropic key to an OpenAI one. My hands started
+writing `client.chat.completions.create(...)` with
+`response_format={"type": "json_schema", ...}`, because that is the shape I know.
+Current OpenAI structured output goes through the **Responses API**:
+`client.responses.create(..., text={"format": {"type": "json_schema", "name":
+..., "strict": True, "schema": ...}})`. The model IDs I would have reached for
+were stale too; the current family is `gpt-5.6-sol` / `-terra` / `-luna`.
+
+Entry 3 was the identical mistake with Anthropic prefill. Two providers, two
+stale priors, one week apart. The rule I wrote down after the first one - treat
+recall of a fast-moving API as a hypothesis - is the only reason this cost ten
+minutes of reading rather than an evening of debugging.
+
+**What it confirmed about the design.** The swap touched three files and no
+matching code. `core/` cannot import a vendor SDK - there is a test that parses
+its AST and fails the build otherwise - so the blast radius was structurally
+bounded before I started. I replaced the direct client with `agent/llm.py`, a
+shim exposing exactly two operations, and added a test asserting reconciliation
+output is byte-identical under Anthropic, OpenAI, and no provider at all.
+
+That test should be trivially true, since the engine never consults the shim.
+Asserting it anyway is the cheapest possible insurance on the central claim of
+the whole project: the model explains, it does not decide. A provider swap is
+the most direct way that claim could quietly become false, so now it cannot.
+
+**What I changed in how I work.** Nothing new - entry 3's rule held. Worth
+noting that the payoff was not avoiding one bug. It was that "which model
+vendor" turned out to be a genuinely small decision, because the architecture
+had already made it one.
