@@ -31,6 +31,11 @@ FORBIDDEN_MODULES = {
     "langchain", "llama_index", "transformers",
     "requests", "httpx", "urllib3", "aiohttp", "socket", "urllib",
     "agent",
+    # The Razorpay adapter is the only module allowed to make an HTTP request.
+    # It maps a live settlement recon report into the engine's records, which
+    # makes it exactly the import that would look most reasonable to add here
+    # and would silently end the offline guarantee.
+    "integrations",
 }
 
 CORE_MODULES = sorted(p for p in CORE.glob("*.py") if p.name != "__init__.py")

@@ -2,6 +2,10 @@ __pycache__/
 *.pyc
 .pytest_cache/
 audit_trail/*.jsonl
+
+# Batches built from a Razorpay recon report. The fixture and the sample bank
+# export in data/razorpay_sample/ are tracked; what the adapter derives is not.
+data/rzp/
 .venv/
 venv/
 
