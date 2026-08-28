@@ -39,6 +39,11 @@ make_stdout_safe()
 #: into a multiplier for the case mix.
 ROWS_PER_UNIT_MIX = 252
 
+#: Shortest run worth using as the denominator of a scaling ratio. Below this,
+#: timer resolution dominates and the ratio describes the interpreter rather
+#: than the algorithm. See DEVLOG entry 11.
+MEASURABLE_SECONDS = 0.05
+
 
 def scaled_mix(target_rows: int) -> dict:
     """Scale the dev case mix to land near `target_rows` total rows."""
@@ -108,9 +113,15 @@ def main() -> None:
         stats["target"] = target
         stats["gen_s"] = gen_s
         results.append(stats)
+        # Same rule as the scaling verdict below: a rate is only printed when the
+        # run was long enough for it to mean anything. Quoting 177,000 rows/sec
+        # off a sub-millisecond run is the exact overstatement this script was
+        # written to correct.
+        rate = (f"{stats['rows_per_s']:>12,.0f}"
+                if stats["match_s"] >= MEASURABLE_SECONDS else f"{'-':>12}")
         print(f"{target:>9,}{stats['rows']:>9,}{stats['settlements']:>9,}"
               f"{stats['banks']:>9,}{gen_s:>9.1f}{stats['load_s']:>9.2f}"
-              f"{stats['match_s']:>10.2f}{stats['rows_per_s']:>12,.0f}"
+              f"{stats['match_s']:>10.2f}{rate}"
               f"{stats['matched']:>9,}")
 
         if not args.keep:
@@ -127,8 +138,17 @@ def main() -> None:
         for a, b in zip(results, results[1:]):
             rx = b["rows"] / a["rows"]
             tx = b["match_s"] / a["match_s"] if a["match_s"] else float("inf")
-            verdict = ("linear" if tx < rx * 1.4 else
-                       "super-linear" if tx < rx * rx * 0.6 else "quadratic")
+            # A ratio against a baseline too short to measure is not a scaling
+            # result. The 250-row batch matches in under a millisecond, so
+            # dividing by it reports timer noise - and would print "quadratic"
+            # for an engine that is nothing of the sort. Refusing to classify
+            # here is the same discipline as the engine refusing an ambiguous
+            # match: the measurement does not support a verdict.
+            if a["match_s"] < MEASURABLE_SECONDS:
+                verdict = f"(baseline under {MEASURABLE_SECONDS * 1000:.0f} ms - not measurable)"
+            else:
+                verdict = ("linear" if tx < rx * 1.4 else
+                           "super-linear" if tx < rx * rx * 0.6 else "quadratic")
             print(f"  {a['rows']:>7,} -> {b['rows']:>7,}   "
                   f"rows x{rx:>5.1f}   time x{tx:>7.1f}   {verdict}")
 

@@ -48,6 +48,12 @@ from core.normalize import format_inr, rupees_to_paise
 
 AUTO_MATCHABLE = {"matched", "matched_split"}
 
+#: Shortest run worth dividing into a rows/sec figure. Below this, timer
+#: resolution and interpreter warm-up dominate the measurement rather than the
+#: engine. Kept in step with run_demo.py and benchmark.py. See DEVLOG entry 9.
+MEASURABLE_SECONDS = 0.05
+
+
 #: Which engine exception reasons are a correct diagnosis of which ground-truth
 #: case. Used only for the categorisation figure - never for scoring the decision.
 EXPECTED_REASONS = {
@@ -399,13 +405,27 @@ def format_report(ev: EvaluationResult) -> str:
 
     add("")
     add("THROUGHPUT")
+    # Only quote a rate the run was long enough to support. These batches match
+    # in about two milliseconds, and dividing rows by that measures the
+    # interpreter - the error DEVLOG entries 9 and 11 are about. Printing it here
+    # after retracting it in the README would mean the demo contradicts the
+    # confession.
+    def _rate(seconds: float | None, rps: float | None) -> str:
+        if seconds is None or rps is None:
+            return "not measured"
+        if seconds < MEASURABLE_SECONDS:
+            return "too fast at this size to quote a rate"
+        return f"{rps:,.0f} rows/sec"
+
     add(f"  deterministic engine       {ev.deterministic_seconds * 1000:8.1f} ms   "
-        f"{ev.deterministic_rps:,.0f} rows/sec")
+        f"{_rate(ev.deterministic_seconds, ev.deterministic_rps)}")
     if ev.end_to_end_rps is not None:
         add(f"  end-to-end incl. reasoning {ev.end_to_end_seconds * 1000:8.1f} ms   "
-            f"{ev.end_to_end_rps:,.0f} rows/sec")
+            f"{_rate(ev.end_to_end_seconds, ev.end_to_end_rps)}")
         add("  Reported separately on purpose: model latency dominates the second")
         add("  number, and blending them would overstate matching throughput.")
+    add("  Real throughput is a ramp, not a single batch:")
+    add("      python benchmark.py --rows 250 5000 25000")
     if ev.llm_free_groups:
         add(f"  groups needing no model    {ev.llm_free_groups:8d}   "
             f"({ev.llm_free_groups / ev.total_groups:.0%} of the batch)")

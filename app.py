@@ -130,8 +130,11 @@ ev, pos, report, outcome = state["ev"], state["pos"], state["report"], state["ou
 st.sidebar.divider()
 st.sidebar.metric("Rows processed", ev.total_rows)
 st.sidebar.metric("Reconciliation groups", ev.total_groups)
+# No rows/sec here: these batches match in a couple of milliseconds, and a rate
+# divided out of that measures the interpreter rather than the engine. Throughput
+# is a benchmark.py question, not a demo-header question.
 st.sidebar.caption(f"Engine: {ev.deterministic_seconds * 1000:.1f} ms "
-                   f"({ev.deterministic_rps:,.0f} rows/sec)")
+                   f"(too fast at this size to quote a rate)")
 
 # --------------------------------------------------------------------------
 # Main

@@ -30,6 +30,12 @@ make_stdout_safe()
 ROOT = Path(__file__).resolve().parent
 RULE = "=" * 78
 
+#: Shortest run worth dividing into a rows/sec figure. Below this, timer
+#: resolution and interpreter warm-up dominate: the dev batch matches in about
+#: 2 ms, and the 141,000 rows/sec that number implied was a ~50x overstatement
+#: of the rate measured properly over a ramp. See DEVLOG entries 9 and 11.
+MEASURABLE_SECONDS = 0.05
+
 
 def hr(title: str) -> None:
     print(f"\n{RULE}\n{title}\n{RULE}")
@@ -38,6 +44,11 @@ def hr(title: str) -> None:
 def main() -> int:
     ap = argparse.ArgumentParser(description="Run a reconciliation over a synthetic batch.")
     ap.add_argument("--dataset", default="dev", choices=["dev", "holdout"])
+    ap.add_argument("--data", metavar="DIR",
+                    help="reconcile an arbitrary batch directory instead of a named "
+                         "dataset - e.g. one built by integrations.razorpay from a "
+                         "real settlement recon report. Scoring is skipped unless "
+                         "the directory carries its own ground_truth.json.")
     ap.add_argument("--no-llm", action="store_true",
                     help="skip the reasoning layer entirely (engine only)")
     ap.add_argument("--ask", metavar="QUESTION",
@@ -59,14 +70,37 @@ def main() -> int:
         print(ans.answer)
         return 0
 
-    data_dir = ROOT / "data" / args.dataset
-    if not data_dir.exists():
-        print(f"Dataset not found: {data_dir}\nRun: python -m data.generator")
-        return 1
+    if args.data:
+        data_dir = Path(args.data).expanduser().resolve()
+        label = data_dir.name
+        if not data_dir.exists():
+            print(f"Batch directory not found: {data_dir}")
+            return 1
+        missing = [f for f in ("settlement_report.csv", "bank_statement.csv",
+                               "internal_ledger.csv") if not (data_dir / f).exists()]
+        if missing:
+            print(f"Batch directory {data_dir} is missing: {', '.join(missing)}")
+            if "bank_statement.csv" in missing:
+                # The likeliest way to arrive here is straight out of the
+                # Razorpay adapter, which deliberately does not write one.
+                print("\nRazorpay supplies the payout side; the bank statement is your\n"
+                      "own export. Drop it in beside the other two files.")
+            return 1
+        # An arbitrary batch has no labels, so there is nothing to score against.
+        # Silently reporting 100% on an unlabelled batch would be worse than
+        # reporting nothing.
+        if not (data_dir / "ground_truth.json").exists():
+            args.no_eval = True
+    else:
+        data_dir = ROOT / "data" / args.dataset
+        label = args.dataset
+        if not data_dir.exists():
+            print(f"Dataset not found: {data_dir}\nRun: python -m data.generator")
+            return 1
 
     # ---- 1. load -----------------------------------------------------
     batch = load_batch(data_dir)
-    hr(f"ReconAgent - {args.dataset} batch")
+    hr(f"ReconAgent - {label} batch")
     print(f"Loaded {batch.summary()}")
     if batch.rejected:
         print(f"  {len(batch.rejected)} rows could not be parsed and were skipped")
@@ -83,8 +117,20 @@ def main() -> int:
     print(f"  exceptions         {counts.get('unresolved', 0):>4}")
     print(f"  {'-' * 30}")
     print(f"  groups             {len(report.results):>4}")
+    # A rate divided out of a millisecond is interpreter noise, not an
+    # algorithm - which is exactly the error DEVLOG entry 9 is about, and it
+    # would be indefensible to keep printing it here after retracting it in the
+    # README. Below the floor, report the time and say what the rate would need
+    # to be measurable.
     print(f"\n  {report.elapsed_seconds * 1000:.1f} ms for {report.rows_processed} rows "
-          f"({report.throughput:,.0f} rows/sec, no LLM involved)")
+          f"(no LLM involved)")
+    if report.elapsed_seconds >= MEASURABLE_SECONDS:
+        print(f"  {report.throughput:,.0f} rows/sec")
+    else:
+        print(f"  Too fast to quote a rate: a batch this size finishes inside "
+              f"{MEASURABLE_SECONDS * 1000:.0f} ms, so dividing rows by seconds "
+              f"measures\n  the interpreter, not the engine. Real throughput is "
+              f"measured over a ramp:\n      python benchmark.py --rows 250 5000 25000")
 
     # ---- 3. audit trail ----------------------------------------------
     trail = AuditTrail(directory=ROOT / "audit_trail")
