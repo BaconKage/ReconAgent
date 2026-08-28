@@ -16,6 +16,48 @@ truth it never sees, and for everything it cannot resolve produces a
 human-readable investigation of **why** — including the cases where the right
 answer is *"this cannot be determined, send it to a person."*
 
+### The loop it closes
+
+The track asks for one finance-ops loop closed across a 50+ record batch. This is
+that loop, end to end, in a single command:
+
+```
+settlement report + bank statement + ledger        ← three disagreeing sources
+        ↓  deterministic cascade, integer paise
+    matched books                                  ← 63.5% of dev, 0 false positives
+        ↓
+    categorised exception queue                    ← every unmatched row, with why
+        ↓
+    forward cash position                          ← what is in the account, what is
+                                                     owed, what needs a human today
+```
+
+A batch goes in; reconciled books, a triaged work queue and a cash position come
+out, with an append-only audit trail of every decision. Nothing needs a human to
+advance it.
+
+**The model is not in that loop, and that is the design.** A language model
+cannot move a match, change a status, or add a link — enforced by tests that
+parse the engine's AST and by a full run with the network disabled. It explains
+the exceptions the loop hands to a person. Closing a money loop is exactly the
+place where a plausible-sounding guess is most expensive, so the part that
+decides is deterministic and reproducible, and the part that reasons is
+advisory and cited. **58 of 85 groups never reach a model at all.**
+
+### If you have 60 seconds
+
+1. **`python run_demo.py`** — the whole loop, no API key, no setup.
+2. **[Results](#results)** — and the warning directly under the table, where
+   scaling the benchmark showed my own headline precision claim was measured on
+   a sample too small to detect the error rate it was claiming.
+3. **[The case worth looking at](#the-case-worth-looking-at)** — two bank credits,
+   identical amounts, same date, no UTR. The engine refuses and the agent, after
+   going and looking, agrees.
+4. **[DEVLOG.md](DEVLOG.md)** — twelve things that broke, including the one that
+   nearly shipped 31 HTTP 401s into this repo as the demonstration of agent
+   reasoning, and the three claims in entry 12 that a reviewer could have
+   disproved faster than I could have defended them.
+
 ---
 
 ## Quick start
@@ -33,9 +75,12 @@ the Q&A all run offline, replaying 104 committed reasoning traces.
 streamlit run app.py                       # the UI
 python run_demo.py --dataset holdout       # the sealed evaluation set
 python run_demo.py --ask "why didn't pay_f7atwyam1n reconcile?"
-python -m pytest tests/ -q                 # 191 tests
+python -m pytest tests/ -q                 # 206 tests
 python -m evaluation.sensitivity           # threshold trade-off sweep
 python benchmark.py                        # throughput and accuracy vs batch size
+python verify_grounding.py                 # every ID the model wrote, checked
+python -m integrations.razorpay --out data/rzp   # build a batch from a Razorpay
+python run_demo.py --data data/rzp               #   recon report, then run it
 ```
 
 To regenerate reasoning against a live model, install a provider and set a key:
@@ -53,8 +98,17 @@ python run_demo.py
 Measured against ground truth the engine and the model never see. `dev` is the
 tuning set. `holdout` was generated from a different seed with a harder case mix,
 a wider settlement lag and a bank narration format the parser had never seen, and
-was **opened once**, after thresholds were frozen — provable from git history:
-`core/config.py` has not changed since the first commit.
+was **opened once**, after thresholds were frozen — and the freeze is checkable:
+
+```bash
+git log --oneline -- core/config.py     # two commits; diff the second
+```
+
+**No matching threshold has changed since the first commit.** `core/config.py`
+has been touched exactly once since, by `9f520bd`, which *appends* the two
+coincidence-guard parameters described in [At scale](#at-scale) and alters no
+existing value. The amount tolerance, the date window and the split bounds are
+the ones the held-out set was opened against. Diff it rather than taking my word.
 
 | | dev | holdout |
 |---|---|---|
@@ -303,8 +357,20 @@ hard-bounded, and failing to converge escalates rather than guessing
 Every query and every result is written to the audit trail, so a reviewer can walk
 the same path the agent walked.
 
-**Grounding is measured:** across 104 traces the model wrote 264 record IDs, and
-**zero** were absent from the evidence it was shown.
+**Grounding is measured, and the measurement is reproducible:**
+
+```bash
+python verify_grounding.py
+```
+
+Across the 104 committed traces the model wrote **395 record IDs — 127 in its
+explanations, 183 in its citations, 84 in the arguments it chose for tool calls —
+and zero were absent from the evidence it was shown.** Counting the tool
+arguments is deliberate: a model that invents a plausible bank row and then asks
+a tool about it has hallucinated, even if the tool returns nothing and the
+invented ID never reaches the conclusion. That is the first place it would
+surface, so that is where the check looks. The script exits non-zero on any
+ungrounded ID.
 
 The output schema requires a `sufficient_evidence` boolean, and the prompt states
 plainly that "there is not enough here to decide" is a correct and valued answer.
@@ -403,6 +469,79 @@ is made by the cash layer, which knows the settlement window.
 
 ---
 
+## Running it on a real Razorpay settlement report
+
+The obvious objection to everything above is that I generated the data. One half
+of that is now removable: the gateway side of a batch can come from Razorpay's
+own `GET /v1/settlements/recon/combined` response, in the exact field shape the
+API documents, instead of from anything I wrote.
+
+```bash
+python -m integrations.razorpay --out data/rzp      # committed fixture, no key needed
+python run_demo.py --data data/rzp                  # the same engine, unmodified
+```
+
+With test-mode credentials it pulls a live month instead:
+
+```bash
+export RAZORPAY_KEY_ID=rzp_test_...  RAZORPAY_KEY_SECRET=...
+python -m integrations.razorpay --year 2026 --month 7 --out data/rzp
+```
+
+Two things the API shape gives us, and one it deliberately cannot.
+
+**Amounts arrive as integer paise**, which is what the engine already speaks. No
+decimal parse, no float, no rounding on the way in — the CSV path has to convert
+rupee strings and this one does not.
+
+**`settlement_id` reconstructs the payout that actually hits the bank.** A
+settlement covers many payments and lands as a single credit under a single UTR,
+so the adapter aggregates by settlement and the fee-and-GST arithmetic closes in
+paise: `net = Σamount − Σfee − Σtax`. Payment-level detail is not lost — it goes
+to the ledger, where the engine uses it to *explain* a settlement rather than to
+match one. A payment Razorpay has not yet paid out is skipped rather than emitted
+as a settlement, because an unsettled payment is not a missing credit.
+
+**It cannot give you the bank statement, and that is the entire problem.**
+Razorpay knows what it paid out; only your bank knows what landed. If one system
+held both there would be nothing to reconcile. `write_batch_csvs` therefore never
+produces one — an empty statement would reconcile to nothing and look like a
+clean run.
+
+On a **fixture** run the CLI copies the committed sample bank export in so the
+batch is immediately runnable, and prints that it did and that the file is mine.
+On a **live** run it does not, and tells you to drop your own export in. Pairing
+a real settlement report with a sample bank statement would produce a
+reconciliation that was meaningless and looked real, which is the one thing this
+adapter must not do.
+
+On the committed fixture — nine recon entities, four settlements — the unmodified
+engine returns:
+
+| settlement | outcome | why |
+|---|---|---|
+| `setl_RZA` | **matched** | three payments, one payout, exact UTR |
+| `setl_RZC` | **matched (split)** | one payout, two credits, no UTR — assembled by subset-sum |
+| `setl_RZB` | held | UTR matches, credit is short by exactly the ₹1,800 refund |
+| `setl_RZD` | held | settled by the gateway, nothing in the bank — a receivable |
+| `BNK_R0005` | held | an inflow belonging to no settlement |
+
+Nothing in `core/` knows this module exists. `integrations` is on the forbidden
+import list in `tests/test_layer_separation.py` alongside the model SDKs, for the
+same reason: this is the only module in the project that can open a socket, and
+the matching engine must not be able to reach it.
+
+**What is and is not verified.** The mapping is tested against the documented
+field shape and end-to-end through the real loader and matcher (15 tests in
+`tests/test_razorpay_integration.py`), and the fixture is asserted to carry
+exactly the documented fields so it cannot drift into a shape the API never
+sends. The live fetch path refuses `rzp_live_` keys by default and raises rather
+than falling back to the fixture — a silent fallback would let a live demo show
+canned data. **I have not run it against a live Razorpay account**; the fixture
+is synthetic data in Razorpay's schema, not a capture.
+
+---
+
 ## Test data
 
 Synthetic, seeded, reproducible: `python -m data.generator`.
@@ -440,6 +579,14 @@ from a different seed with a different mix, thresholds frozen in git before it w
 opened, and a sensitivity sweep across the parameter space. It is a real
 mitigation, not a cure. Real bank statements are messier than anything here.
 
+The [Razorpay adapter](#running-it-on-a-real-razorpay-settlement-report) removes
+the gateway half of this: settlements can come from a real
+`settlements/recon/combined` response rather than from my generator. It does not
+remove the bank half, which is where the genuine mess lives — narration formats,
+partial credits, banks on their own settlement cycles. **The accuracy figures in
+this README are all measured on synthetic batches**, and the Razorpay path
+changes where the data comes from, not what the numbers prove.
+
 **The held-out recall gap is unfixed by choice.** 84.2%, all split settlements
 beyond the configured window. See above.
 
@@ -455,7 +602,8 @@ be decidable. The engine currently uses amount, date and UTR only.
 
 **The reasoning layer is advisory and unverified.** Its recommendations are not
 checked against ground truth, because it does not make decisions. Grounding is
-measured (0/264 ungrounded IDs); usefulness is not.
+measured and reproducible (`verify_grounding.py`: 0 of 395 IDs ungrounded);
+usefulness is not.
 
 **Scale is now tested, and it found two things.** Matching is quadratic, so the
 throughput headline was a ~50x overstatement; and the false-positive rate is ~0.5%
@@ -497,10 +645,12 @@ split detection rather than an implementation accident.
 ```
 core/         deterministic engine — no LLM, no network, integer paise
   index.py      date-bucketed, amount-sorted credit lookup
-  config.py     thresholds, frozen in git since the first commit
+  config.py     thresholds; no matching threshold changed since commit 1
   loader.py     CSV to typed records, UTR recovery with provenance
   matcher.py    the tiered cascade
   splits.py     bounded subset-sum, refuses when the answer is not unique
+integrations/ the only module that may open a socket
+  razorpay.py   settlement recon report -> the engine's records
 agent/        the reasoning layer — explains, never matches
   llm.py        provider shim: Anthropic or OpenAI, chosen from the environment
   prompts.py    system prompt + output schema
@@ -512,9 +662,11 @@ agent/        the reasoning layer — explains, never matches
 audit/        append-only JSONL decision trail
 evaluation/   metrics + threshold sensitivity — the only reader of ground truth
 benchmark.py  throughput and accuracy as a function of batch size
+verify_grounding.py  every ID the model wrote, checked against its evidence
 cash/         forward cash position
 data/         seeded generator, dev and holdout batches
-tests/        191 tests
+  razorpay_sample/  recon-report fixture + a sample bank export
+tests/        206 tests
 DEVLOG.md     what actually broke, and what I did about it
 ```
 

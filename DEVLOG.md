@@ -546,3 +546,76 @@ in its own before-and-after rather than being slipped into a speed change.
 **What I changed in how I work.** When verifying that an optimisation is
 behaviour-preserving, compare everything the system emits, not just the fields
 that feed the metrics. The metrics were identical in the version I nearly shipped.
+
+
+---
+
+### 12. Three claims a reviewer could have disproved faster than I could defend - Day 9
+
+**What broke.** Nothing in the engine. Three things in the *evidence*, which on
+this project is the product.
+
+**First: I invited a check that failed.** The README said, twice, that
+`core/config.py` had not changed since the first commit, and told the reader it
+was provable from git history. It was not:
+
+```
+$ git log --oneline -- core/config.py
+9f520bd Coincidence guard: halve the tier-3 false positives
+9c41d6d Phases 1-3: synthetic data, deterministic engine, reasoning layer
+```
+
+The coincidence guard appended two new parameters. It altered no existing
+threshold, so the claim I *meant* - that nothing was tuned against the held-out
+set - was true the whole time. But the sentence I actually wrote was checkable in
+ten seconds and false, on the one page where being checkable is the point. Anyone
+who ran that command would have been right to distrust every other number.
+
+The fix was to say the true thing, which is stronger: no *matching* threshold has
+changed, config was touched exactly once, here is the commit, diff it.
+
+**Second: my grounding number was not reproducible.** "Across 104 traces the
+model wrote 264 record IDs and zero were ungrounded" was in bold, and nothing in
+the repository computed it. Counting the committed traces every plausible way
+gives 183 cited IDs, 199 unique per trace, 310 including prose, 752 across the
+whole blob. Never 264. I no longer know where the figure came from - most likely
+a run whose traces were later regenerated.
+
+This is entry 9's mistake wearing different clothes. There, I quoted a rate my
+sample could not measure. Here, I quoted a count nothing recomputed. Both are the
+same failure: an assertion that had stopped being attached to a measurement, in a
+document whose entire argument is that its assertions are attached to
+measurements.
+
+So I wrote `verify_grounding.py`, which rebuilds each case's evidence bundle
+through the real `build_evidence_bundle`, and checks every ID the model wrote
+against what it was actually shown - including tool-call *arguments*, which the
+old figure did not cover. A model that invents a bank row and then queries a tool
+about it has hallucinated, even if the tool returns nothing and the invented ID
+never reaches the answer. That is where it would surface first.
+
+The honest number is **395 IDs, 0 ungrounded** - larger than the claim it
+replaces, under a stricter definition, and now reproducible by one command that
+exits non-zero if it ever stops being true.
+
+**Third: I retracted a number in the README and kept printing it.** Entry 9
+established that the throughput headline was interpreter noise measured over
+1.8 ms. The README said so. `run_demo.py` went on printing `120,563 rows/sec` off
+a 2 ms run, `app.py` put a rate in the sidebar, and `benchmark.py` labelled the
+250 -> 5,000 step **quadratic** - a verdict produced by dividing by a
+sub-millisecond baseline, which is the exact error the script exists to correct.
+
+A judge who read the README saw the retraction. A judge who ran the code saw the
+fiction. The demo was quietly contradicting the confession.
+
+All three now refuse to quote a rate below a 50 ms floor and say why. The
+benchmark declines to classify scaling against an unmeasurable baseline, which is
+the same discipline the engine applies to an ambiguous match: the measurement
+does not support a verdict, so it does not render one.
+
+**What I changed in how I work.** A retraction is not finished when the prose
+changes. It is finished when nothing in the system still emits the retracted
+claim - and the place to look is the output a reviewer sees before they read
+anything. More generally: every number I put in bold now needs a command that
+regenerates it. If I cannot write that command, the number is a memory, not a
+measurement, and it should not be in bold.
