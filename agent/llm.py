@@ -22,40 +22,21 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any, Protocol
+
+from envfile import load_env_files
 
 # Defaults are overridable so a user can pick a tier they actually have access to.
 ANTHROPIC_DEFAULT_MODEL = "claude-opus-5"
 OPENAI_DEFAULT_MODEL = "gpt-5.6-terra"
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-#: Checked in order; the first hit wins and never overrides a real env var.
-ENV_FILES = (".env.local", ".env")
-
-_env_loaded = False
-
 
 def _load_env_files() -> None:
-    """Read .env.local / .env once, without overriding the real environment.
+    """Read .env.local / .env once. See `envfile.load_env_files` for the rules.
 
-    Skipped entirely under pytest: the suite must never pick up a developer's
-    real key from a file on disk and turn itself into live API spend.
+    Kept as a thin alias so the two call sites below read the same as before.
     """
-    global _env_loaded
-    if _env_loaded:
-        return
-    _env_loaded = True
-    if os.environ.get("PYTEST_CURRENT_TEST") or os.environ.get("PYTEST_VERSION"):
-        return
-    try:
-        from dotenv import load_dotenv
-    except ImportError:
-        return
-    for name in ENV_FILES:
-        path = REPO_ROOT / name
-        if path.exists():
-            load_dotenv(path, override=False)
+    load_env_files()
 
 
 def _usable(value: str | None) -> bool:

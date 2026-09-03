@@ -56,6 +56,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from core.models import LedgerRecord, SettlementRecord
+from envfile import load_env_files
 
 API_ROOT = "https://api.razorpay.com/v1"
 RECON_COMBINED = "/settlements/recon/combined"
@@ -92,7 +93,14 @@ class RazorpayError(RuntimeError):
 # --------------------------------------------------------------------------
 
 def credentials() -> tuple[str, str] | None:
-    """Razorpay API credentials from the environment, or None."""
+    """Razorpay API credentials from the environment, or None.
+
+    `.env.local` is read first, matching how model keys are configured, so a key
+    put where the README says to put it is actually found. Without this the
+    adapter reported "not set" for a key sitting in the file it told you to use -
+    a failure indistinguishable from a wrong key.
+    """
+    load_env_files()
     key_id = os.environ.get("RAZORPAY_KEY_ID", "").strip()
     secret = os.environ.get("RAZORPAY_KEY_SECRET", "").strip()
     if key_id and secret:

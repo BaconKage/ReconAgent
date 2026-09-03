@@ -18,6 +18,7 @@ from __future__ import annotations
 import ast
 import csv
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -238,3 +239,42 @@ def test_core_cannot_import_the_network_adapter():
                     assert not a.name.startswith("integrations"), f"{path.name}"
             elif isinstance(node, ast.ImportFrom) and node.module:
                 assert not node.module.startswith("integrations"), f"{path.name}"
+
+
+# --------------------------------------------------------------------------
+# Credential loading
+# --------------------------------------------------------------------------
+
+def test_credentials_come_from_the_environment(monkeypatch):
+    monkeypatch.setenv("RAZORPAY_KEY_ID", "rzp_test_ABC")
+    monkeypatch.setenv("RAZORPAY_KEY_SECRET", "shhh")
+    assert razorpay.credentials() == ("rzp_test_ABC", "shhh")
+
+    # A half-configured pair is not credentials. Returning the key alone would
+    # produce an auth failure that reads like a bad key rather than a missing one.
+    monkeypatch.delenv("RAZORPAY_KEY_SECRET")
+    assert razorpay.credentials() is None
+
+
+def test_the_suite_never_reads_a_developers_dotenv(tmp_path, monkeypatch):
+    """Hermeticity: a real key on disk must not leak into the tests.
+
+    `envfile.load_env_files` short-circuits under pytest precisely so that a
+    populated .env.local cannot turn a test run into a live API call against
+    someone's real Razorpay account. This asserts that guard rather than trusting
+    it, because the failure mode is silent and expensive.
+    """
+    import envfile
+
+    monkeypatch.setattr(envfile, "REPO_ROOT", tmp_path)
+    (tmp_path / ".env.local").write_text(
+        "RAZORPAY_KEY_ID=rzp_test_LEAKED\nRAZORPAY_KEY_SECRET=leaked\n",
+        encoding="utf-8")
+    monkeypatch.delenv("RAZORPAY_KEY_ID", raising=False)
+    monkeypatch.delenv("RAZORPAY_KEY_SECRET", raising=False)
+
+    envfile.load_env_files(force=True)
+
+    assert os.environ.get("RAZORPAY_KEY_ID") is None, (
+        "a .env.local on disk leaked into the test environment")
+    assert razorpay.credentials() is None
