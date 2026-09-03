@@ -550,8 +550,20 @@ field shape and end-to-end through the real loader and matcher (15 tests in
 exactly the documented fields so it cannot drift into a shape the API never
 sends. The live fetch path refuses `rzp_live_` keys by default and raises rather
 than falling back to the fixture — a silent fallback would let a live demo show
-canned data. **I have not run it against a live Razorpay account**; the fixture
-is synthetic data in Razorpay's schema, not a capture.
+canned data.
+
+**It has been run against a live test-mode account, and here is exactly what that
+proved.** The call to `settlements/recon/combined` returned HTTP 200 with a valid
+envelope, so authentication, the endpoint path and the response parsing are
+verified against the real API rather than against my reading of the docs. A
+deliberately wrong secret returns `HTTP 401 Authentication failed`, which is how I
+know the 200 was genuine auth and not an endpoint that answers anyone.
+
+**What it did not prove is the data.** The account returned **zero entities** — a
+test-mode account accrues no settlement history on its own, so there was nothing
+to reconcile. The batch in the table above still comes from the committed fixture,
+which is synthetic data in Razorpay's schema, not a capture. The transport is
+real; the records are not.
 
 ---
 

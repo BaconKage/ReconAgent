@@ -368,8 +368,28 @@ def main() -> int:
     if args.year:
         if not args.month:
             ap.error("--month is required with --year")
-        entities = fetch_recon_report(args.year, args.month,
-                                      allow_live_keys=args.allow_live_keys)
+        try:
+            entities = fetch_recon_report(args.year, args.month,
+                                          allow_live_keys=args.allow_live_keys)
+        except RazorpayError as e:
+            # A wrong key, an unreachable API and a refused live key are all
+            # expected operator errors, not bugs. A traceback here would bury the
+            # one line that says which of them happened.
+            print("Could not fetch the recon report.")
+            print()
+            print(f"  {e}")
+            print()
+            msg = str(e)
+            if "401" in msg or "Authentication failed" in msg:
+                print("  Authentication failed, so the pair was read but rejected. Check")
+                print("  that RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET come from the SAME")
+                print("  generated pair, and that both are Test Mode.")
+            elif "not set" in msg:
+                print("  Put them in .env.local (see .env.example), or export them.")
+            print()
+            print("  The committed fixture needs no credentials:")
+            print("      python -m integrations.razorpay --out data/rzp")
+            return 1
         source = f"live recon report {args.year}-{args.month:02d}"
     else:
         entities = load_fixture()
@@ -383,7 +403,20 @@ def main() -> int:
     print(f"  -> {Path(args.out).resolve()}")
     print()
 
-    if args.year:
+    if args.year and not entities:
+        # An empty month is the normal result on a test account, and saying so
+        # matters: the call still proved the credentials, the endpoint and the
+        # response shape. A bare "0 settlements" reads like a failure when it is
+        # the opposite - it is a successful call to an account with no history.
+        print("  The API answered and returned no entities for this period.")
+        print("  Authentication, the endpoint and the response shape are verified;")
+        print("  this account simply has no settlements in that month. Test-mode")
+        print("  accounts do not accrue settlement history on their own.")
+        print()
+        print("  To watch the engine run, use the committed fixture:")
+        print("      python -m integrations.razorpay --out data/rzp")
+        print("      python run_demo.py --data data/rzp")
+    elif args.year:
         # Live data. Never pair a real settlement report with a sample bank
         # export - the reconciliation would be meaningless and would look real.
         print("  bank_statement.csv is NOT written: Razorpay knows what it paid out,")
