@@ -54,7 +54,9 @@ model at all.**
 3. **[The case worth looking at](#the-case-worth-looking-at)** — two bank credits,
    identical amounts, same date, no UTR. The engine refuses and the agent, after
    going and looking, agrees.
-4. **[DEVLOG.md](DEVLOG.md)** — twelve things that broke, including the one that
+4. **[ARCHITECTURE.md](ARCHITECTURE.md)** — the boundary the whole design rests
+   on, and how it is enforced rather than asserted.
+5. **[DEVLOG.md](DEVLOG.md)** — twelve things that broke, including the one that
    nearly shipped 31 HTTP 401s into this repo as the demonstration of agent
    reasoning, and the three claims in entry 12 that a reviewer could have
    disproved faster than I could have defended them.
@@ -261,6 +263,10 @@ python benchmark.py --rows 250 5000 25000
 ---
 
 ## Architecture
+
+Design rationale — the layer boundaries, why the cascade is ordered the way it
+is, and what each decision defends against — is in **[ARCHITECTURE.md](ARCHITECTURE.md)**.
+The data flow is below.
 
 ```mermaid
 flowchart TB
@@ -674,6 +680,7 @@ cash/         forward cash position
 data/         seeded generator, dev and holdout batches
   razorpay_sample/  recon-report fixture + a sample bank export
 tests/        206 tests
+ARCHITECTURE.md  design rationale and the layer boundaries
 DEVLOG.md     what actually broke, and what I did about it
 ```
 
