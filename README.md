@@ -25,6 +25,11 @@ truth it never sees, and for everything it cannot resolve produces a
 human-readable investigation of **why** — including the cases where the right
 answer is *"this cannot be determined, send it to a person."*
 
+![The exception view: what the engine did, the candidates it declined, and the agent's investigation](docs/exceptions.png)
+
+*Two bank credits. Identical amounts, identical dates, no UTR on either. The
+engine refuses, and the agent goes and looks before agreeing.*
+
 ### The loop it closes
 
 The track asks for one finance-ops loop closed across a 50+ record batch. This is
@@ -154,6 +159,9 @@ precision loss on this data. The right value is a property of the bank you
 reconcile against, not of a test set.
 
 ### The two errors are not the same error
+
+![Overview: precision, recall, and the two error types reported apart](docs/overview.png)
+
 
 Precision and recall are reported separately, and so are their causes, because
 collapsing them into one accuracy number lets a system trade the expensive
@@ -508,6 +516,8 @@ asserted to sum exactly to the bank total.
 | unattributed inflows | ₹155,490.18 | | |
 | | **74% explained** | **needs a human today** | **₹478,279.24** |
 
+![Cash position](docs/cash.png)
+
 "In flight" and "overdue" are kept apart deliberately: a settlement at T+1 with no
 credit is normal; the same settlement at T+9 is an incident. The engine cannot
 tell those apart — both are simply an absent credit — so that temporal judgement
@@ -721,6 +731,7 @@ audit/        append-only JSONL decision trail
 evaluation/   metrics + threshold sensitivity — the only reader of ground truth
 benchmark.py  throughput and accuracy as a function of batch size
 verify_grounding.py  every ID the model wrote, checked against its evidence
+docs/         README screenshots + the script that regenerates them
 cash/         forward cash position
 data/         seeded generator, dev and holdout batches
   razorpay_sample/  recon-report fixture + a sample bank export
