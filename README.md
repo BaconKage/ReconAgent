@@ -450,15 +450,39 @@ so no threshold setting anywhere can separate them
 
 ### Refusal is not a dead end
 
-The agent recommended `auto_resolve` on 8 exceptions, all partial refunds:
+Across both datasets the agent recommended `auto_resolve` on **4 exceptions** —
+2 in dev, 2 in holdout — and `escalate_to_human` on the other 100. The engine
+still holds all four. The agent explained away four benign items **without moving
+a single match**, which is the entire design in one line.
 
-> BNK_00042 carries the same UTR as the settlement and was credited on
-> 2026-07-08, but its Rs 4,009.22 credit is Rs 1,858.69 below the Rs 5,867.91
-> expected net. The linked ledger order is marked partially refunded, so the
-> shortfall is consistent with a legitimate partial refund.
+What makes those four interesting is not that it cleared them. It is that it
+cleared them **by closing the arithmetic**:
 
-The engine still holds all 8 as exceptions. The agent explained away 8 benign
-items **without moving a single match** — which is the entire design in one line.
+> BNK_00065 is the bank credit for this settlement: the exact UTR and same-day
+> value date identify it. The Rs 1,464.97 difference is the partial refund:
+> Rs 9,052.75 minus Rs 1,464.97, then less the Rs 181.06 fee and Rs 32.59 GST,
+> equals the credited Rs 7,374.13.
+>
+> → `auto_resolve` · confidence **high** · `sufficient_evidence: true`
+
+Now compare a case that looks identical from the outside — exact UTR match, credit
+short of the net, order marked partially refunded — where it did **not** clear:
+
+> BNK_00042 carries the exact settlement UTR 577192955782 on 2026-07-08, but its
+> credit of Rs 4,009.22 is Rs 1,858.69 below the documented expected net of
+> Rs 5,867.91. The order is marked partially refunded, but no refund amount or
+> adjustment record was provided to explain that exact shortfall; no other
+> unmatched credit was found in the wider Rs 5,367.91 to Rs 6,367.91 search range.
+>
+> → `escalate_to_human` · `sufficient_evidence: false`
+
+Same case type, opposite recommendation. The difference is whether the numbers
+actually reconcile: in the first, refund plus fee plus GST lands exactly on the
+credited amount; in the second, the order is *labelled* refunded but no amount
+exists to check the shortfall against, so "consistent with a refund" would be a
+guess wearing an explanation's clothes. **That distinction — between a shortfall
+it can account for and one it can only find plausible — is the behaviour the
+`sufficient_evidence` field exists to force.**
 
 ---
 

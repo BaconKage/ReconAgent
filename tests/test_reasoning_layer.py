@@ -400,3 +400,40 @@ def test_qa_still_refuses_an_id_that_exists_in_no_run(tmp_path, pipeline):
         trail.append_decision(r)
     ans = ReconciliationQA(trail.path).ask("why didn't pay_neverexisted reconcile?")
     assert ans.found is False and ans.source == "not_found"
+
+
+def test_the_readme_quotes_traces_that_say_what_it_claims():
+    """Pin the two traces the README quotes, and the auto_resolve counts.
+
+    The README once claimed the agent auto-resolved "8 exceptions, all partial
+    refunds" and quoted BNK_00042 as an example. There were four auto-resolves,
+    not eight; they were not all partial refunds; and the BNK_00042 trace
+    actually recommends escalate_to_human - so the quote argued the opposite of
+    what the trace says. All three were checkable against committed data by
+    anyone who looked.
+
+    A number in the README that no test recomputes is a number that has already
+    started drifting.
+    """
+    import collections
+    from agent.cache import TraceCache
+
+    cache = TraceCache()
+    by_case = {t.get("case_id"): t for t in cache._data.values()}
+
+    counts = collections.Counter(
+        t.get("recommended_action") for t in cache._data.values())
+    assert counts["auto_resolve"] == 4, (
+        f"README says 4 auto-resolves across both datasets, traces say "
+        f"{counts['auto_resolve']}")
+
+    # The trace quoted as the agent clearing a shortfall it could account for.
+    cleared = by_case["pay_qenf91mx9j"]
+    assert cleared["recommended_action"] == "auto_resolve"
+    assert cleared["sufficient_evidence"] is True
+
+    # The trace quoted as the contrast: same case shape, refused.
+    refused = by_case["pay_59sojuv0gy"]
+    assert refused["recommended_action"] == "escalate_to_human"
+    assert refused["sufficient_evidence"] is False
+    assert "BNK_00042" in refused["hypothesis"]
