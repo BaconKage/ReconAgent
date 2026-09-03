@@ -2,7 +2,16 @@
 
 **Three-way payment reconciliation with an honest exception list.**
 
+[![CI](https://github.com/BaconKage/ReconAgent/actions/workflows/ci.yml/badge.svg)](https://github.com/BaconKage/ReconAgent/actions/workflows/ci.yml)
+[![tests](https://img.shields.io/badge/tests-211-brightgreen)](tests/)
+[![python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
+[![license](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
+
 Razorpay AI Buildathon — Track 04, AI Finance Controller.
+
+> CI runs every command in this README, on two Python versions, with **no API key
+> and no model SDK installed**. If the offline guarantee ever breaks, the badge
+> above goes red.
 
 Every merchant on a payment gateway has to reconcile three systems of record each
 settlement cycle: the gateway's settlement report, the bank statement, and their
