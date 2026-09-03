@@ -42,7 +42,8 @@ parse the engine's AST and by a full run with the network disabled. It explains
 the exceptions the loop hands to a person. Closing a money loop is exactly the
 place where a plausible-sounding guess is most expensive, so the part that
 decides is deterministic and reproducible, and the part that reasons is
-advisory and cited. **58 of 85 groups never reach a model at all.**
+advisory and cited. **58 of the engine's 89 result groups (65%) never reach a
+model at all.**
 
 ### If you have 60 seconds
 
@@ -61,6 +62,8 @@ advisory and cited. **58 of 85 groups never reach a model at all.**
 ---
 
 ## Quick start
+
+Python 3.10 or newer.
 
 ```bash
 pip install -r requirements.txt
@@ -329,7 +332,11 @@ This is not a convention. It is enforced:
 - `tests/test_llm_provider.py` asserts reconciliation output is identical under
   Anthropic, OpenAI, and no provider at all.
 
-**The result:** 58 of 85 groups (65%) never reach a model at all.
+**The result:** 58 of the engine's 89 result groups — 65% — never reach a model
+at all. (89, not the 85 ground-truth groups: an orphan bank credit becomes its
+own result, so the engine emits more groups than ground truth defines. Counting
+over one population and dividing by the other is a mistake this repo made and
+`test_llm_free_share_uses_the_engine_denominator` now prevents.)
 
 ### Where I did use one
 

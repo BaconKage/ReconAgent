@@ -229,3 +229,31 @@ def test_counts_partition_every_group(gt_dir):
                  + sum(1 for d in ev.false_positive_detail
                        if d["kind"] == "forced_a_match_that_should_have_been_held"))
         assert total == ev.total_groups
+
+
+def test_llm_free_share_uses_the_engine_denominator():
+    """The same fact must not be reported as two different percentages.
+
+    `llm_free_groups` is counted over engine results, of which there are more
+    than there are ground-truth groups: an orphan bank credit becomes its own
+    result. Dividing it by `total_groups` mixed the two populations, so a single
+    run printed 65% in the reasoning summary and 68% in the metrics block,
+    twenty lines apart, for the same 58 groups.
+    """
+    from core.loader import load_batch
+    from core.matcher import reconcile
+    from evaluation.metrics import format_report
+
+    data_dir = Path(__file__).resolve().parents[1] / "data" / "dev"
+    batch = load_batch(data_dir)
+    report = reconcile(batch)
+    ev = evaluate(report, data_dir, batch=batch, llm_free_groups=58)
+
+    assert ev.engine_groups == len(report.results)
+    assert ev.engine_groups != ev.total_groups, (
+        "this test is only meaningful while the two populations differ")
+
+    # The share the metrics block renders must equal the share the reasoning
+    # layer computes over its own record count - the two must never diverge.
+    rendered = format_report(ev)
+    assert f"({ev.llm_free_groups / len(report.results):.0%} of the batch)" in rendered

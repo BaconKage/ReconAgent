@@ -85,7 +85,13 @@ class CaseTypeBreakdown:
 @dataclass
 class EvaluationResult:
     dataset: str = ""
+    #: Ground-truth groups. The denominator for every accuracy figure.
     total_groups: int = 0
+    #: Groups the *engine* produced. Differs from total_groups - an orphan bank
+    #: credit becomes its own result, so the engine emits more groups than ground
+    #: truth defines. Any figure counted over engine results must be divided by
+    #: this, not by total_groups, or it mixes two populations and inflates.
+    engine_groups: int = 0
     total_rows: int = 0
 
     # Decision-level classification
@@ -192,6 +198,7 @@ def evaluate(report: ReconciliationReport, dataset_dir: Path | str, *,
     ev = EvaluationResult(
         dataset=Path(dataset_dir).name,
         total_groups=len(groups),
+        engine_groups=len(report.results),
         total_rows=report.rows_processed,
         deterministic_seconds=report.elapsed_seconds,
         llm_free_groups=llm_free_groups,
@@ -427,8 +434,11 @@ def format_report(ev: EvaluationResult) -> str:
     add("  Real throughput is a ramp, not a single batch:")
     add("      python benchmark.py --rows 250 5000 25000")
     if ev.llm_free_groups:
+        # Counted over engine results, so divided by engine results. Dividing by
+        # total_groups (ground truth) mixed two populations and printed 68% here
+        # while run_demo printed 65% for the same fact, twenty lines apart.
         add(f"  groups needing no model    {ev.llm_free_groups:8d}   "
-            f"({ev.llm_free_groups / ev.total_groups:.0%} of the batch)")
+            f"({ev.llm_free_groups / ev.engine_groups:.0%} of the batch)")
 
     add("")
     add("VALUE RECONCILED")
