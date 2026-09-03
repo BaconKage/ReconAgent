@@ -290,7 +290,13 @@ with tab_exceptions:
             st.write(f"**Recommended action:** `{inv.get('recommended_action')}`")
             st.write(f"**Confidence:** {inv.get('confidence')}")
             if inv.get("rupee_impact") and inv["rupee_impact"] != "unknown":
-                st.write(f"**Amount at stake:** Rs {inv['rupee_impact']}")
+                # The model is free to write "Rs 48,615.93" or just "48615.93",
+                # and it does both. Prefixing unconditionally rendered "Rs Rs
+                # 48,615.93" on screen, so only add the unit when it is absent.
+                impact = str(inv["rupee_impact"]).strip()
+                if not impact.lower().startswith(("rs", "₹")):
+                    impact = f"Rs {impact}"
+                st.write(f"**Amount at stake:** {impact}")
             if inv.get("evidence_cited"):
                 st.write(f"**Cites:** {', '.join(inv['evidence_cited'])}")
 
