@@ -228,6 +228,21 @@ def test_both_envelope_shapes_are_accepted():
         razorpay.normalise_payload("not a collection")
 
 
+def test_the_envelope_the_live_api_actually_returns():
+    """The exact body observed from settlements/recon/combined, HTTP 200.
+
+    Captured from a live test-mode account with no settlement history. Pinning
+    the real bytes matters because `normalise_payload` returns [] both for a
+    valid empty collection and for a shape it does not recognise - so "we called
+    it and got no rows" would otherwise be indistinguishable from "we called it
+    and silently failed to parse the answer". This asserts the `items` key is
+    genuinely there.
+    """
+    observed = json.loads('{"entity":"collection","count":0,"items":[]}')
+    assert "items" in observed
+    assert razorpay.normalise_payload(observed) == []
+
+
 def test_core_cannot_import_the_network_adapter():
     """Belt and braces with test_layer_separation - stated here too because this
     is the module that would break the offline guarantee if it ever leaked in."""
