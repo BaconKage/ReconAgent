@@ -155,7 +155,17 @@ with tab_overview:
               help="Of what it auto-matched, the share that was exactly right")
     c3.metric("Recall", f"{ev.recall:.1%}",
               help="Of what was matchable, the share it found")
-    c4.metric("Throughput", f"{ev.deterministic_rps:,.0f}/s", help="Deterministic engine")
+    # Not throughput. These batches match in a couple of milliseconds, and a rate
+    # divided out of that measures the interpreter - the overstatement DEVLOG
+    # entry 9 retracts. A headline metric card is the worst possible place to
+    # keep printing a number the README takes back, so this shows the honest
+    # figure instead and sends throughput to the ramp that can measure it.
+    c4.metric("Adversarial pairs conflated",
+              f"{ev.adversarial_conflated} / {ev.adversarial_pairs}",
+              help="Near-duplicate transactions the engine could have merged and did not. "
+                   "Throughput is deliberately not shown: a batch this size finishes in "
+                   "milliseconds, so a rows/sec figure would measure the interpreter. "
+                   "Run benchmark.py --rows 250 5000 25000 for a real ramp.")
 
     st.divider()
     left, right = st.columns(2)
