@@ -1,4 +1,18 @@
 {
+  "012aa1fdf49587c5df6d59f9736c83acf79d07dee24fa3c4ad64dae0253178df": {
+    "case_id": "pay_796nfy9711",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00032",
+      "BNK_00077",
+      "order_t68sqq9845"
+    ],
+    "hypothesis": "The settlement net of Rs 10,468.71 has two equally valid bank credits on 2026-07-24: BNK_00032 and BNK_00077. Both are for the exact amount and date, so the available records cannot identify which credit belongs to this settlement.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "10468.71",
+    "sufficient_evidence": false
+  },
   "0398bdc1e25dcfa1004f35b9ea3c41876b6c9d7ace16a43aff37c75ea6dfb24e": {
     "case_id": "BNK_00007",
     "confidence": "low",
@@ -6,6 +20,19 @@
       "BNK_00007"
     ],
     "hypothesis": "A Razorpay-described bank credit of Rs 183.55 landed on 2026-07-03, but no settlement record claimed it and the row contains no UTR. This cannot be resolved from the bank narration and amount alone.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "183.55",
+    "sufficient_evidence": false
+  },
+  "05a7591f240662c19d964d57320724b285cf3f4670fc4f373a54438645f0d320": {
+    "case_id": "pay_zwfq9duprw",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00007",
+      "BNK_00056"
+    ],
+    "hypothesis": "The Rs 183.55 net settlement is consistent with the Rs 187.99 order less Rs 3.76 fee and Rs 0.68 GST, but two bank credits for exactly Rs 183.55 landed on 2026-07-03. Neither bank credit carries UTR 964291958164, so the evidence cannot determine which credit belongs to this settlement.",
     "model": "openai/gpt-5.6-terra",
     "recommended_action": "escalate_to_human",
     "rupee_impact": "183.55",
@@ -83,6 +110,20 @@
       "search_credits"
     ]
   },
+  "0b1d2693420d77c6b2bc4d1b4b6f7cdec25ff74b1c2716c47f277ee7b23c267d": {
+    "case_id": "pay_3gdlk5mdf7",
+    "confidence": "high",
+    "evidence_cited": [
+      "pay_3gdlk5mdf7",
+      "BNK_00029",
+      "BNK_00062"
+    ],
+    "hypothesis": "Settlement pay_3gdlk5mdf7 expects Rs 2,830.83 on 2026-07-22, and both BNK_00029 and BNK_00062 are credits of exactly Rs 2,830.83 on that date. Neither credit has the settlement UTR, so the evidence cannot determine which one belongs to this settlement.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "2830.83",
+    "sufficient_evidence": false
+  },
   "0b38bfb1da335afed7d2d1e91361a5a6129a2220a7d534de196cf0b7b61be60c": {
     "case_id": "pay_jch2vffqot",
     "confidence": "high",
@@ -152,6 +193,20 @@
       "credits_near_settlement",
       "search_credits"
     ]
+  },
+  "0b8c6fc664bb4113b9307a5a6404cbde4805f6a8959b854366d46c2e35c264f0": {
+    "case_id": "pay_aexmmscgzm",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00095",
+      "order_v42599owod",
+      "pay_aexmmscgzm"
+    ],
+    "hypothesis": "BNK_00095 is not an eligible match: its Rs 5,845.32 credit is Rs 1.35 below the Rs 5,846.67 settlement net and landed on 2026-07-30, six days after the 2026-07-24 settlement date. This exceeds both the Rs 0.50 amount tolerance and the two-day date window, so it cannot establish the payout's location.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "5846.67",
+    "sufficient_evidence": false
   },
   "0bb8307e43864a153f65be212e6df4efca1293ca28d5b476b039d5c6d6c8a3cb": {
     "case_id": "pay_43nbg008cv",
@@ -245,6 +300,18 @@
       "search_credits",
       "search_credits"
     ]
+  },
+  "0c20ae620ac8b0b3fa9d34ab73a450eaa3108b35c72c1873fdc3aca7a7fcd073": {
+    "case_id": "BNK_00070",
+    "confidence": "low",
+    "evidence_cited": [
+      "BNK_00070"
+    ],
+    "hypothesis": "Bank credit BNK_00070 for Rs 3,431.07 on 2026-07-24 is an orphan Razorpay settlement credit: no settlement record or UTR is present in this case to identify what it relates to.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "3431.07",
+    "sufficient_evidence": false
   },
   "0c7ea9fc1f59e09e3ad9c06bafcb84e8417a0799eaebc32291175e1feebac9c7": {
     "case_id": "pay_amg1iju7g4",
@@ -358,6 +425,18 @@
       "BNK_00048"
     ],
     "hypothesis": "Bank credit BNK_00048 for Rs 9,605.00 on 2026-07-12 has no settlement counterpart in the supplied records, and its Razorpay settlement narration contains no recoverable UTR. The source settlement or payment reference is therefore missing.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "9605.00",
+    "sufficient_evidence": false
+  },
+  "0e60673b3acc9210be5b20ca0fd37faa4127cac0231781793898d9bf7d023b63": {
+    "case_id": "BNK_00048",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00048"
+    ],
+    "hypothesis": "Bank credit BNK_00048 of Rs 9,605.00 landed on 2026-07-12 with a Razorpay settlement narration, but no matching settlement record or UTR is supplied. Human review of the gateway settlement report and bank reference is needed.",
     "model": "openai/gpt-5.6-terra",
     "recommended_action": "escalate_to_human",
     "rupee_impact": "9605.00",
@@ -554,6 +633,33 @@
       "search_credits"
     ]
   },
+  "0fc5d1acfd0adba236ce624dfb13771842b70fc69378720fa2006c2bd890e2c4": {
+    "case_id": "pay_wbzlblcqe1",
+    "confidence": "high",
+    "evidence_cited": [
+      "pay_wbzlblcqe1",
+      "order_0cjxu8m471",
+      "BNK_00058"
+    ],
+    "hypothesis": "The Rs 14,163.11 bank credit on 2026-07-03 has the same UTR as the settlement, but is Rs 6,993.28 below the expected net of Rs 21,156.39. The ledger marks the Rs 21,667.75 order as partially refunded, which explains the short credit.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "auto_resolve",
+    "rupee_impact": "6993.28",
+    "sufficient_evidence": true
+  },
+  "127098ec3e60a4f084f2ed22b8f1d1ea13fa81f976eeae4cec35322ead57e46d": {
+    "case_id": "pay_43nbg008cv",
+    "confidence": "medium",
+    "evidence_cited": [
+      "order_dbl3itmy91",
+      "pay_43nbg008cv"
+    ],
+    "hypothesis": "The paid Rs 3,221.00 order has a settlement net expectation of Rs 3,144.98 on 2026-07-28, but no bank credit with UTR 448118931446, no eligible split credits, and no similar credit were found. The payout may be missing, delayed beyond the reviewed bank batch, or recorded outside the available data.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "3144.98",
+    "sufficient_evidence": false
+  },
   "12d2df258f3a8f8375c219bf7e534c5b911f946ca6d6ab9c5007bc8a9f92937c": {
     "case_id": "pay_hbggiw8c5r",
     "confidence": "high",
@@ -625,6 +731,21 @@
       "credits_near_settlement"
     ]
   },
+  "12fa2c0043442d157bd8b1d32f6208e97088159b23c65ac597dd2ea4fc6b0e5b": {
+    "case_id": "pay_5knfouzeu7",
+    "confidence": "high",
+    "evidence_cited": [
+      "order_9os6hdqxab",
+      "BNK_00070",
+      "BNK_00073",
+      "pay_5knfouzeu7"
+    ],
+    "hypothesis": "The Rs 3,514.00 paid order correctly implies a Rs 3,431.07 net payout, but both BNK_00070 and BNK_00073 credited exactly Rs 3,431.07 on 2026-07-24. Neither credit carries UTR 222578823127, so there is no evidence to determine which credit belongs to this settlement.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "3431.07",
+    "sufficient_evidence": false
+  },
   "157eaa9ce6e3fd5ae5088a358e0988bec601c2ba9f5d7c4fa8cf325faaa191b8": {
     "case_id": "BNK_00056",
     "confidence": "low",
@@ -635,6 +756,19 @@
     "model": "openai/gpt-5.6-terra",
     "recommended_action": "escalate_to_human",
     "rupee_impact": "183.55",
+    "sufficient_evidence": false
+  },
+  "16a1ed45c67272c66ab4d142451064f9ee9ba0652c706cf84225e236b01b8a79": {
+    "case_id": "pay_9flv1xxlp8",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00035",
+      "BNK_00080"
+    ],
+    "hypothesis": "The Rs 5,781.26 net settlement on 2026-07-26 is consistent with the Rs 5,921.00 ledger gross less Rs 118.42 fee and Rs 21.32 GST, but there are two indistinguishable same-day bank credits for that amount. Neither bank credit carries UTR 327744651009, so the correct credit cannot be identified.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "5781.26",
     "sufficient_evidence": false
   },
   "172a1d80f96a4d425acff76691272e99f2a3ab02071bd37996f2dd8135f4ce5f": {
@@ -659,6 +793,44 @@
     "rupee_impact": "Rs 7,374.13 credited; Rs 1,464.97 partial refund; Rs 213.65 fee and GST.",
     "sufficient_evidence": true,
     "tools_used": []
+  },
+  "1b1350cd49c91a3c6693802d8d690844c6b990ecc728f6aaec6a721f2c361b9b": {
+    "case_id": "BNK_00035",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00035"
+    ],
+    "hypothesis": "Bank credit BNK_00035 of Rs 5,781.26 landed on 2026-07-26 with a Razorpay narration, but there is no settlement counterpart or UTR in the case. The source of the credit therefore cannot be confirmed automatically.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "5781.26",
+    "sufficient_evidence": false
+  },
+  "1b2d649dfb9c1e8dc5d41c2287d290d9b1fccde249c02a9a7a7d36505cede31f": {
+    "case_id": "pay_1xihka4zf0",
+    "confidence": "low",
+    "evidence_cited": [
+      "pay_1xihka4zf0",
+      "order_8fnlcnvr9r"
+    ],
+    "hypothesis": "The paid ledger order and settlement agree at Rs 10,017.00, with Rs 9,780.60 expected in the bank on 2026-07-15, but there is no bank credit carrying UTR 638836157321 and no similar credit in the available batch. The bank receipt is therefore missing from the supplied evidence.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "9780.60",
+    "sufficient_evidence": false
+  },
+  "1c320d5cd6cef0d002e0423d5c6c58bf0040a83e6fc69a2ce6408631920fc2d7": {
+    "case_id": "pay_7mx7ko7w4v",
+    "confidence": "high",
+    "evidence_cited": [
+      "pay_7mx7ko7w4v",
+      "order_wu9yx9ua8i"
+    ],
+    "hypothesis": "No bank credit or combination of up to four bank credits was found for the Rs 48,329.12 settlement net dated 2026-07-02, and no bank row carries UTR 684494035772. The records do not establish whether the payout is missing, delayed beyond the available batch, or recorded outside the supplied bank data.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "48329.12",
+    "sufficient_evidence": false
   },
   "1cb771f42cd750ad2c6b6354b0625d1907c8e5326e58a3a059e5533a5a00a9e5": {
     "case_id": "pay_70862zwk8k",
@@ -732,6 +904,18 @@
       "credits_near_settlement",
       "find_utr"
     ]
+  },
+  "1d5a1bacf084cca6e6b3b390b34b3633bf18d6c94a529e681f198624d9527383": {
+    "case_id": "BNK_00038",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00038"
+    ],
+    "hypothesis": "Bank credit BNK_00038 for Rs 387.15 on 2026-07-28 is described as a Razorpay payout settlement credit, but no settlement counterpart or UTR is present in this case. The source data cannot identify what it should be linked to.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "387.15",
+    "sufficient_evidence": false
   },
   "1da70027d5983a92049b7b91c18ede499ffc1be6864ed15dffd7c50b476a3936": {
     "case_id": "pay_ui3vl4k74l",
@@ -833,6 +1017,42 @@
       "get_credit"
     ]
   },
+  "1e670e982b57706340cc742c7cec551dd12bb922ceb4644bbd2ad60f6143ae72": {
+    "case_id": "pay_iv1m32tlpu",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "The paid ledger order and settlement agree at Rs 1,412.00, but no bank credit in the available batch matches the expected net payout of Rs 1,378.68 on 2026-07-17 through 2026-07-19. The settlement UTR 545602041811 is also absent from the bank records.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "1378.68",
+    "sufficient_evidence": false
+  },
+  "1ec05c7b4d43efe82767a2ae2322fb5800aac7c9eecb647a24d9fe0336f0bb4a": {
+    "case_id": "BNK_00022",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00022"
+    ],
+    "hypothesis": "Bank credit BNK_00022 for Rs 759.74 on 2026-07-18 has no settlement counterpart in the supplied records. Its Razorpay payout narration does not establish which settlement paid it because no UTR was recovered.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "759.74",
+    "sufficient_evidence": false
+  },
+  "2064446fbeec0c3e81991fb74b4437f4cf28f766b35235bd8deb8e49d48dca09": {
+    "case_id": "pay_euw2ovikds",
+    "confidence": "high",
+    "evidence_cited": [
+      "pay_euw2ovikds",
+      "order_up6bvolozn",
+      "BNK_00093"
+    ],
+    "hypothesis": "BNK_00093 carries the settlement UTR 818381350077 and credited Rs 19,281.49 on 2026-07-22, which is Rs 9,937.03 below the expected net of Rs 29,218.52. The ledger status is partially_refunded, so this shortfall is consistent with a partial refund rather than an unmatched bank payment.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "auto_resolve",
+    "rupee_impact": "9937.03",
+    "sufficient_evidence": true
+  },
   "20f7a51646d06e5b06b1386c05a8ca0846fc584c4391d0331bb5b630d2de1582": {
     "case_id": "BNK_00071",
     "confidence": "low",
@@ -844,6 +1064,20 @@
     "recommended_action": "escalate_to_human",
     "rupee_impact": "3661.77",
     "sufficient_evidence": false
+  },
+  "21a205c97fa68c75cbc8a13eca928ba230dd5989aa0bb9ee240de8f860fc670d": {
+    "case_id": "pay_g7k6pic8dn",
+    "confidence": "high",
+    "evidence_cited": [
+      "pay_g7k6pic8dn",
+      "order_op8jgw9zev",
+      "BNK_00082"
+    ],
+    "hypothesis": "BNK_00082 carries the settlement UTR 940845081079 and credited Rs 1,321.18 on 2026-07-08, which is Rs 410.95 below the expected net of Rs 1,732.13. The ledger status is partially_refunded, so this shortfall is consistent with a partial refund.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "auto_resolve",
+    "rupee_impact": "410.95",
+    "sufficient_evidence": true
   },
   "231dbeb5b91682778a388709271f0a31376bd69c2270fb554b8f87deddc51958": {
     "case_id": "pay_euw2ovikds",
@@ -944,6 +1178,19 @@
       "get_settlement",
       "get_credit"
     ]
+  },
+  "2439380c04155aa98eee082bf050211552437322490201c85671ae6ddfe0b0b6": {
+    "case_id": "pay_m96zpxvpbl",
+    "confidence": "high",
+    "evidence_cited": [
+      "pay_m96zpxvpbl",
+      "order_m2zbppfo5m"
+    ],
+    "hypothesis": "The paid order and settlement expect Rs 42,398.71 in the bank on 2026-07-06, but no bank credit carrying UTR 470021381099 or resembling that amount was available. The evidence cannot determine whether the payout failed, is missing from the bank extract, or was paid outside the available data.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "42398.71",
+    "sufficient_evidence": false
   },
   "258edadab8f490ca5662222b36aaf54ebb345910e1af760bacd9beb48d56c3c2": {
     "case_id": "BNK_00035",
@@ -1063,6 +1310,18 @@
       "search_credits",
       "search_credits"
     ]
+  },
+  "260e2bfebf9da416fcb57774b4fadeaf30b0f5e24cc8be03637f84a540698945": {
+    "case_id": "BNK_00020",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00020"
+    ],
+    "hypothesis": "Bank credit BNK_00020 for Rs 683.32 on 2026-07-19 has no settlement counterpart in the supplied records. Although the narration names Razorpay Software Pvt Ltd, no UTR was recovered to tie it to one settlement.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "683.32",
+    "sufficient_evidence": false
   },
   "27022e6ad0b9bc5c246718893280ac065eca71b7f6c76945fab1a917fd6f75db": {
     "case_id": "pay_5knfouzeu7",
@@ -1865,6 +2124,43 @@
       "credits_near_settlement"
     ]
   },
+  "3235878cd601a9eff4f5cf5fa39c024cac8ef4b70ab3f02295194c9bd4c9d109": {
+    "case_id": "BNK_00056",
+    "confidence": "low",
+    "evidence_cited": [
+      "BNK_00056"
+    ],
+    "hypothesis": "Bank credit BNK_00056 for Rs 183.55 on 2026-07-03 is an orphan Razorpay settlement credit: no settlement record or UTR is present in this case to identify what it relates to.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "183.55",
+    "sufficient_evidence": false
+  },
+  "332dab71b698e7ec73d907e89a8664c47599de0422dbb7dd8f5a70fe4a419bb2": {
+    "case_id": "pay_6qceouuyla",
+    "confidence": "high",
+    "evidence_cited": [
+      "pay_6qceouuyla",
+      "BNK_00079"
+    ],
+    "hypothesis": "BNK_00079 carries the same UTR as the settlement and credited Rs 35,212.61 on the settlement date, rather than the expected Rs 45,514.16. The Rs 10,301.55 reduction is consistent with the ledger status of partially refunded for this Rs 46,614.25 order.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "auto_resolve",
+    "rupee_impact": "10301.55",
+    "sufficient_evidence": true
+  },
+  "33a09593e19e85a2ed20639e2f155477a44b4f19e3d5b2433a5ed9a7d8692c15": {
+    "case_id": "BNK_00062",
+    "confidence": "low",
+    "evidence_cited": [
+      "BNK_00062"
+    ],
+    "hypothesis": "Bank credit BNK_00062 for Rs 2,830.83 on 2026-07-22 is an orphan Razorpay settlement credit: no settlement record or UTR is present in this case to identify what it relates to.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "2830.83",
+    "sufficient_evidence": false
+  },
   "33fc03386956d7ea85b5823c2753331bdf037a762a984ef95d4f75a59afc97df": {
     "case_id": "pay_1yn6n4ps31",
     "confidence": "high",
@@ -2185,6 +2481,72 @@
       "search_credits"
     ]
   },
+  "3645a619a9b412de0387f1c82e4ddd6ac72af7ffccfcef73f86808faf16a822f": {
+    "case_id": "pay_jx8uibrsz1",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00014",
+      "order_z2sf6f7low",
+      "pay_jx8uibrsz1"
+    ],
+    "hypothesis": "BNK_00014 carries the same UTR on 2026-07-18 but credits Rs 24,463.87 rather than the expected net of Rs 33,241.53, a shortfall of Rs 8,777.66. The ledger marks the Rs 34,044.99 order as partially refunded, which uniquely explains the reduced credit.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "auto_resolve",
+    "rupee_impact": "8777.66",
+    "sufficient_evidence": true
+  },
+  "3975a586bf83206fc738ba384c099de500d8caf1533101834f012dc03a9ad6d9": {
+    "case_id": "BNK_00002",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00002"
+    ],
+    "hypothesis": "Bank credit BNK_00002 for Rs 466.33 landed on 2026-07-06 with a Razorpay settlement narration, but no settlement record in this case was available to explain or link it. The UTR is absent, so the source settlement cannot be identified uniquely.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "466.33",
+    "sufficient_evidence": false
+  },
+  "3987fda7588d5c7e5f56b9c288c9eed93053c1b538f577b609a6d023aa2fa840": {
+    "case_id": "BNK_00010",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00010"
+    ],
+    "hypothesis": "Bank credit BNK_00010 for Rs 686.46 on 2026-07-20 has no settlement counterpart in the supplied records. Its narration suggests a Razorpay payout, but no UTR was recovered, so the source settlement cannot be identified.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "686.46",
+    "sufficient_evidence": false
+  },
+  "3a139d74d298ef60e98e6ae0b5be619b83200ae11b47942111a982addad832ad": {
+    "case_id": "pay_4taowhtram",
+    "confidence": "high",
+    "evidence_cited": [
+      "order_kfagtdbcsr",
+      "BNK_00007",
+      "BNK_00056",
+      "pay_4taowhtram"
+    ],
+    "hypothesis": "The Rs 187.99 paid order correctly implies a Rs 183.55 net payout, but both BNK_00007 and BNK_00056 credited exactly Rs 183.55 on 2026-07-03. Neither credit carries UTR 618413195475, so the available evidence cannot identify which one belongs to this settlement.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "183.55",
+    "sufficient_evidence": false
+  },
+  "3c133ca857de2e7e13e15e44b6c3b5ca6fce0d36789ac06df7d6d515ba8c8e3c": {
+    "case_id": "pay_0i9g5dzx5q",
+    "confidence": "high",
+    "evidence_cited": [
+      "pay_0i9g5dzx5q",
+      "BNK_00027"
+    ],
+    "hypothesis": "The settlement expected Rs 1,474.36 on 2026-07-23, but the only nearby credit, BNK_00027, is Rs 1,473.30, short by Rs 1.06, and arrived six days later on 2026-07-29. This is outside both the Rs 0.50 amount tolerance and the permitted T+0 to T+2 arrival window, so it cannot be treated as the settlement credit.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "1474.36",
+    "sufficient_evidence": false
+  },
   "3cf20ee6ded8d318946699c9692c5ea4476fa9c1c9b51a4c3448476473219a1f": {
     "case_id": "BNK_00078",
     "confidence": "low",
@@ -2197,6 +2559,21 @@
     "rupee_impact": "3607.68",
     "sufficient_evidence": false
   },
+  "40541fc3b341c7287747512121f8a86b4b7df1c9676e9a0d7a71b3f5b1f75020": {
+    "case_id": "pay_isbo551ldq",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00032",
+      "BNK_00056",
+      "order_rsb4gf16ye",
+      "pay_isbo551ldq"
+    ],
+    "hypothesis": "Two different bank credits, BNK_00032 and BNK_00056, each credit exactly Rs 48,615.93 on 2026-07-17, matching the settlement net. Neither contains the settlement UTR, so the evidence cannot identify which credit belongs to this Rs 49,791.00 order.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "48615.93",
+    "sufficient_evidence": false
+  },
   "41d7dd60daf16f2d4078f4a2f896918ba3bbb6e1d316db4c0a16a1d6284755b7": {
     "case_id": "BNK_00001",
     "confidence": "low",
@@ -2207,6 +2584,16 @@
     "model": "openai/gpt-5.6-terra",
     "recommended_action": "escalate_to_human",
     "rupee_impact": "690.10",
+    "sufficient_evidence": false
+  },
+  "432797f92de271500a121d8920939d65689cd30a9b1e9974db12ccb8ceb621a8": {
+    "case_id": "pay_j39pw1abs7",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "The paid ledger order and settlement agree at Rs 5,727.25, but no bank credit in the available batch matches the expected net payout of Rs 5,592.09 on 2026-07-12 through 2026-07-14. The settlement UTR 036532465580 is also absent from the bank records.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "5592.09",
     "sufficient_evidence": false
   },
   "47ebe017ffaa1c5a826c29dc55206b62fa4258acbe5836bb5c74afbb1f7ade31": {
@@ -2320,6 +2707,58 @@
       "get_credit",
       "get_settlement"
     ]
+  },
+  "489ee0c597497c50958c7fee2c7cbf90e70231ea00a77c2cb9c48fa9e9eceea2": {
+    "case_id": "pay_amg1iju7g4",
+    "confidence": "high",
+    "evidence_cited": [
+      "pay_amg1iju7g4",
+      "order_15w80pegsu"
+    ],
+    "hypothesis": "No bank credit or combination of up to four bank credits was found for the Rs 21,535.47 settlement net dated 2026-07-29, and no bank row carries UTR 485485757369. The available records cannot determine whether the payout is missing, delayed, or absent from the supplied bank-data batch.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "21535.47",
+    "sufficient_evidence": false
+  },
+  "48a30dfe9ebcc38be0bdf7b9ab4a06821d699ed0965ec98acf67469f8c42ed05": {
+    "case_id": "pay_rms3jn050e",
+    "confidence": "high",
+    "evidence_cited": [
+      "pay_rms3jn050e",
+      "BNK_00035",
+      "BNK_00080"
+    ],
+    "hypothesis": "Two separate bank credits, BNK_00035 and BNK_00080, each credited Rs 5,781.26 on 2026-07-26, exactly matching the Rs 5,781.26 settlement net. Neither credit contains UTR 229160661010, so the available evidence cannot identify which one belongs to this settlement.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "5781.26",
+    "sufficient_evidence": false
+  },
+  "493fef395729affa4fbe3d6499f6f4cc0ef56bdad062a1e1c5cd575f0b4844ea": {
+    "case_id": "BNK_00056",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00056"
+    ],
+    "hypothesis": "Bank credit BNK_00056 of Rs 48,615.93 landed on 2026-07-17 with an IMPS Razorpay settlement narration, but no settlement record or UTR is available in this case. The evidence does not identify a specific payout to which this credit can be assigned.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "48615.93",
+    "sufficient_evidence": false
+  },
+  "4b1590028ed0428cf343d9bcb6c19f8db440b76983ddb7deae129cd464bea3f3": {
+    "case_id": "pay_qenf91mx9j",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00065",
+      "order_ws5u43ztgc"
+    ],
+    "hypothesis": "BNK_00065 carries the same UTR as this 2026-07-16 settlement but credits Rs 7,374.13, which is Rs 1,464.97 below the Rs 8,839.10 expected net. The ledger marks the Rs 9,052.75 order as partially refunded, which uniquely explains the reduced payout.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "auto_resolve",
+    "rupee_impact": "1464.97",
+    "sufficient_evidence": true
   },
   "4cd21fe9121312807929490e9c1aa648e813c2ccd6eace8d154ae420d4e958ec": {
     "case_id": "pay_k4vejvtavz",
@@ -2455,6 +2894,34 @@
       "get_settlement"
     ]
   },
+  "4cd8b56a54141b1122cecb9dcdcdd21a7bc1d76e202ad31f0c25252837bb8f9d": {
+    "case_id": "pay_hbggiw8c5r",
+    "confidence": "high",
+    "evidence_cited": [
+      "pay_hbggiw8c5r",
+      "order_331dh6vjku",
+      "BNK_00032",
+      "BNK_00077"
+    ],
+    "hypothesis": "The settlement net is Rs 10,468.71 on 2026-07-24, but both BNK_00032 and BNK_00077 credit exactly Rs 10,468.71 on that date. Neither bank row carries UTR 236051310482, so there is no evidence to determine which credit is this settlement.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "10468.71",
+    "sufficient_evidence": false
+  },
+  "509f35aaad85cce931689bdcf6b5b427ad445cd0b5d32cf733b6ff81f93e1fae": {
+    "case_id": "pay_78ds482rdg",
+    "confidence": "medium",
+    "evidence_cited": [
+      "order_kwpgvj9g17",
+      "pay_78ds482rdg"
+    ],
+    "hypothesis": "The paid Rs 36,725.50 order has a settlement net expectation of Rs 35,858.78 on 2026-07-15, but no bank credit with UTR 238694431049, no eligible split credits, and no similar credit were found. The payout may be missing, delayed beyond the reviewed bank batch, or recorded outside the available data.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "35858.78",
+    "sufficient_evidence": false
+  },
   "528891b7511eccb02470ec050fbd69d4b9d763289caa20b7e767cda13bd7622f": {
     "case_id": "BNK_00010",
     "confidence": "low",
@@ -2465,6 +2932,18 @@
     "model": "openai/gpt-5.6-terra",
     "recommended_action": "escalate_to_human",
     "rupee_impact": "686.46",
+    "sufficient_evidence": false
+  },
+  "532ca40a5dcfe0e0b7ec90a81272f614ad3d71708c59fcf9d032554a95b6b27f": {
+    "case_id": "BNK_00094",
+    "confidence": "low",
+    "evidence_cited": [
+      "BNK_00094"
+    ],
+    "hypothesis": "Bank credit BNK_00094 for Rs 11,209.53 landed on 2026-07-03 with a Razorpay RTGS narration, but no settlement counterpart or UTR is available in this case to identify what it relates to.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "11209.53",
     "sufficient_evidence": false
   },
   "53f0be0d1ca7d6d3c0fddf610a66b5d861e4ae3c4763b3625d2dba3881b8e04b": {
@@ -2569,6 +3048,18 @@
       "search_credits"
     ]
   },
+  "5439ec142ba6ace0d820b07b034012b15cc5a7fd992805896210bd42a3c3f3f4": {
+    "case_id": "BNK_00029",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00029"
+    ],
+    "hypothesis": "Bank credit BNK_00029 for Rs 2,830.83 on 2026-07-22 has no settlement counterpart in the supplied records. Its Razorpay payout narration cannot be tied to a specific settlement because no UTR was recovered.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "2830.83",
+    "sufficient_evidence": false
+  },
   "5443f7ee5d45b34cec2ca12e4cdbb8f47efad245d4a0c088d7290ba2f35537f2": {
     "case_id": "pay_4taowhtram",
     "confidence": "high",
@@ -2663,6 +3154,30 @@
     "tools_used": [
       "credits_near_settlement"
     ]
+  },
+  "552621c0fb45fa72faca8f98e9396ebe58c080c695ff54a3fa93fe9ce8cc2a08": {
+    "case_id": "pay_z31tsvgtdp",
+    "confidence": "high",
+    "evidence_cited": [
+      "pay_z31tsvgtdp",
+      "order_4e1ip1cwug",
+      "BNK_00001"
+    ],
+    "hypothesis": "The only nearby credit, BNK_00001 for Rs 690.10 on 2026-07-08, is Rs 1.44 below the expected net of Rs 691.54 and arrived T+5. It has no UTR and is outside both the Rs 0.50 amount tolerance and the T+2 date window, so it cannot be identified as this settlement.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "691.54",
+    "sufficient_evidence": false
+  },
+  "573004d57de89562a91b7fbcd77051de89666c4c1ec5ca7593e055b12995ae9f": {
+    "case_id": "pay_ckeh5sw229",
+    "confidence": "high",
+    "evidence_cited": [],
+    "hypothesis": "The paid ledger order and settlement agree at Rs 40,387.75 gross, and Rs 39,434.59 was expected in the bank on 2026-07-28 after Rs 807.76 fee and Rs 145.40 GST. No bank row carries UTR 434392416664, and no credit or combination of up to four credits in the permitted window totals Rs 39,434.59.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "39434.59",
+    "sufficient_evidence": false
   },
   "587992eb3f09c03af5672d02ec95790a6c776ef8904dc35fc825019b6b5cbca2": {
     "case_id": "BNK_00016",
@@ -2896,6 +3411,18 @@
       "search_credits"
     ]
   },
+  "5acea9a12c4cec76c43afdfc60d9f956f1577b331512a9bacf717ebe23f0c096": {
+    "case_id": "pay_pt1vafdrbc",
+    "confidence": "high",
+    "evidence_cited": [
+      "order_u7n3baht1t"
+    ],
+    "hypothesis": "The Rs 1,462.64 net settlement dated 2026-07-27 has no bank credit carrying UTR 322099126756 or resembling the expected payout in the available batch. The evidence cannot determine whether the payout is missing or delayed beyond the available bank data.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "1462.64",
+    "sufficient_evidence": false
+  },
   "5b37ee3106190f56875eacb69fb081cbd736dd67c1a5bdeb65ad70587d04e2ec": {
     "case_id": "pay_g983ep9p9w",
     "confidence": "high",
@@ -3071,6 +3598,117 @@
       "search_credits",
       "search_credits"
     ]
+  },
+  "5babaac3c91ac9bb1254fab02cd8ed63df98fe3ad3493c5d2f9ad2d50129ea01": {
+    "case_id": "pay_70862zwk8k",
+    "confidence": "medium",
+    "evidence_cited": [
+      "order_jm0kbja18u",
+      "pay_70862zwk8k"
+    ],
+    "hypothesis": "The paid Rs 20,133.00 order has a settlement net expectation of Rs 19,657.86 on 2026-07-05, but no bank credit with UTR 490652867559, no eligible split credits, and no similar credit were found. The payout may be missing, delayed beyond the reviewed bank batch, or recorded outside the available data.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "19657.86",
+    "sufficient_evidence": false
+  },
+  "5c8d0c1008d5baeff91d20bae8bf709898258f325f224b0e37b728c595daa717": {
+    "case_id": "pay_vmpc68lduw",
+    "confidence": "low",
+    "evidence_cited": [
+      "pay_vmpc68lduw",
+      "order_0v1wpww5rz"
+    ],
+    "hypothesis": "No bank credit carries UTR 494033612005 or matches the expected net of Rs 7,386.46 on 2026-07-29 through T+2, including any permitted split. The records do not identify the reason the payout is absent from the available bank batch.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "7386.46",
+    "sufficient_evidence": false
+  },
+  "5cc17fedaef60a0473a1bdf6f6fda076aa7924cd72cc663ba48b90748b94ba9e": {
+    "case_id": "pay_iy3syi55yf",
+    "confidence": "low",
+    "evidence_cited": [],
+    "hypothesis": "The paid ledger order and settlement agree at Rs 44,341.25, but no bank credit in the available batch matches the expected net payout of Rs 43,294.80 on 2026-07-02 through 2026-07-04. The settlement UTR 733319550888 is also absent from the bank records.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "43294.80",
+    "sufficient_evidence": false
+  },
+  "5f90ea84e86b1ef60095d47f74bcda205fd50596a7ab9e5c8a858ab793aa7057": {
+    "case_id": "pay_iaakytt3im",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00050",
+      "order_ubmc97c7bo",
+      "pay_iaakytt3im"
+    ],
+    "hypothesis": "BNK_00050 carries the same UTR on 2026-07-15 but credits Rs 3,160.67 rather than the expected net of Rs 4,119.18, a shortfall of Rs 958.51. The ledger marks the Rs 4,218.75 order as partially refunded, which uniquely explains the reduced credit.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "auto_resolve",
+    "rupee_impact": "958.51",
+    "sufficient_evidence": true
+  },
+  "606c38db13999edf77933dab7243e6cfa7ce17d0bd7af020829e07e470f0a661": {
+    "case_id": "BNK_00027",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00027"
+    ],
+    "hypothesis": "Bank credit BNK_00027 for Rs 225.21 on 2026-07-05 has no settlement counterpart in the supplied records. The Razorpay payout narration is insufficient to resolve it without a recovered UTR or identifiable settlement record.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "225.21",
+    "sufficient_evidence": false
+  },
+  "619416765fdc2426c6245471da46727c00256b70b17fc211998ef106b9633e2f": {
+    "case_id": "BNK_00089",
+    "confidence": "low",
+    "evidence_cited": [
+      "BNK_00089"
+    ],
+    "hypothesis": "Bank credit BNK_00089 for Rs 1,987.50 landed on 2026-07-11 with a settlement-style narration, but no settlement counterpart or UTR is available in this case to identify what it relates to.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "1987.50",
+    "sufficient_evidence": false
+  },
+  "61c69d0ace2fe79f310d8225b3357af50dff46afe478d0df7de4e6e31a777926": {
+    "case_id": "BNK_00032",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00032"
+    ],
+    "hypothesis": "Bank credit BNK_00032 for Rs 10,468.71 on 2026-07-24 is described as a Razorpay payout settlement credit, but no settlement counterpart or UTR is present in this case. The source data cannot identify what it should be linked to.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "10468.71",
+    "sufficient_evidence": false
+  },
+  "630db146afc75712203532eb0c834ad51fb58d4b44579919ea29ed3f11e18ad9": {
+    "case_id": "pay_qda7n5odbx",
+    "confidence": "high",
+    "evidence_cited": [
+      "order_thxqgl00xg"
+    ],
+    "hypothesis": "No bank credit carries UTR 991471670653, and no combination of available credits equals the Rs 1,348.16 net settlement dated 2026-07-03. The evidence cannot determine whether this payout is missing, delayed outside the available data, or paid by an unrecorded method.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "1348.16",
+    "sufficient_evidence": false
+  },
+  "641adc26aea45b62c8f34228fbab8b11378ae208ae531a6a91dbb7003cd578ea": {
+    "case_id": "pay_zqxs4hfek3",
+    "confidence": "low",
+    "evidence_cited": [
+      "pay_zqxs4hfek3",
+      "order_ymxlzxsv7v"
+    ],
+    "hypothesis": "No bank credit carries UTR 744322392286 or matches the expected net of Rs 35,478.46 on 2026-07-28 through T+2, including any permitted split. The records do not establish whether the payout was delayed, missing, or recorded outside this bank batch.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "35478.46",
+    "sufficient_evidence": false
   },
   "64868160b8dfa3a1c09f66fadc469130c5f20cb2d94e11779d961ef4cd83de33": {
     "case_id": "pay_pt1vafdrbc",
@@ -3272,6 +3910,44 @@
     "rupee_impact": "683.32",
     "sufficient_evidence": false
   },
+  "68ac4cc35a9024066b3ae79530fbfdce50022ae106ff8048b1dd26546789619a": {
+    "case_id": "pay_rswnh4e4cn",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00054",
+      "order_vzxjce64dj"
+    ],
+    "hypothesis": "BNK_00054 carries the same UTR as this 2026-07-26 settlement but credits Rs 3,583.05, which is Rs 2,162.09 below the Rs 5,745.14 expected net. The ledger marks the Rs 5,884.00 order as partially refunded, which uniquely explains the reduced payout.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "auto_resolve",
+    "rupee_impact": "2162.09",
+    "sufficient_evidence": true
+  },
+  "68e4f19cf7bbdfe9ae009dcc1268c8880cf123ee95236eab73f4d6c7e8b59ac9": {
+    "case_id": "pay_99qlivqlrg",
+    "confidence": "high",
+    "evidence_cited": [
+      "pay_99qlivqlrg",
+      "order_4v7v88qpjj"
+    ],
+    "hypothesis": "No bank credit or combination of up to four bank credits was found for the Rs 1,604.22 settlement net dated 2026-07-28, and no bank row carries UTR 624192631402. The supplied records cannot determine whether this payout is missing, delayed, or absent from the bank-data batch.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "1604.22",
+    "sufficient_evidence": false
+  },
+  "693bab241ea3fbcfdafbad43fae5b3c7015715049a58f8e1eccfb0fca31d9f8a": {
+    "case_id": "BNK_00080",
+    "confidence": "low",
+    "evidence_cited": [
+      "BNK_00080"
+    ],
+    "hypothesis": "Bank credit BNK_00080 for Rs 5,781.26 landed on 2026-07-26 with a Razorpay narration, but no settlement counterpart or UTR is available. The available evidence cannot determine whether this is an omitted settlement, a non-settlement receipt, or another exception.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "5781.26",
+    "sufficient_evidence": false
+  },
   "6949938bfd1f044627944baff2e9c1b5be2054cba9a47cb6ef32e29c6a8849be": {
     "case_id": "pay_isbo551ldq",
     "confidence": "high",
@@ -3398,6 +4074,32 @@
     "tools_used": [
       "credits_near_settlement"
     ]
+  },
+  "6dcd4aa88fe5215b50d8092cf2883bce6b906ee4b2e8fb7ec2e2387aae9ded46": {
+    "case_id": "BNK_00035",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00035"
+    ],
+    "hypothesis": "Bank credit BNK_00035 for Rs 22,313.27 on 2026-07-16 is labelled as a Razorpay settlement, but no settlement counterpart or UTR is present in this case. The source data cannot identify what it should be linked to.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "22313.27",
+    "sufficient_evidence": false
+  },
+  "70b8e00711d1b324e49b1dd5cfe3031ef671a7f77e4983baeb74aa0fb9015d61": {
+    "case_id": "pay_9x5vztrpb3",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00079",
+      "order_79kyd7573i",
+      "pay_9x5vztrpb3"
+    ],
+    "hypothesis": "BNK_00079 carries the settlement UTR and credited Rs 4,415.55 on 2026-07-22, which is Rs 1,193.14 below the Rs 5,608.69 expected net. The linked order is marked partially refunded, so the shortfall is consistent with a legitimate partial refund rather than an unmatched payout.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "auto_resolve",
+    "rupee_impact": "1193.14",
+    "sufficient_evidence": true
   },
   "7170d269cde306b4466b876f38f81c93a953257732eaa511656993d79570fbe2": {
     "case_id": "pay_796nfy9711",
@@ -3662,6 +4364,18 @@
       "credits_near_settlement",
       "get_credit"
     ]
+  },
+  "752c718a5c49d1d069766860442df02ce99ac1f66f670a0b306a434f3ef1302d": {
+    "case_id": "BNK_00027",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00027"
+    ],
+    "hypothesis": "Bank credit BNK_00027 of Rs 1,473.30 landed on 2026-07-29 with a Razorpay settlement narration, but no settlement counterpart or UTR is available in this case. A human should obtain the settlement report or bank reference before assigning the credit.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "1473.30",
+    "sufficient_evidence": false
   },
   "7582b8f99e7d3c49d8e0895fcbe8ef7ac3a0a163a07e54418dccf8f1fc218241": {
     "case_id": "pay_m96zpxvpbl",
@@ -4082,6 +4796,18 @@
       "get_credit"
     ]
   },
+  "7d60551a84e7a88b081176a7dc0b485c25abdf8e3f73ce630fb547072b9edfe5": {
+    "case_id": "BNK_00030",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00030"
+    ],
+    "hypothesis": "Bank credit BNK_00030 for Rs 40,815.50 on 2026-07-25 appears to be a Razorpay settlement from its narration, but no settlement counterpart or UTR is present in this case. The source data cannot identify what it should be linked to.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "40815.50",
+    "sufficient_evidence": false
+  },
   "7df87709adf445951991c3cfc10777d79d845f1dba9fd2a24160961e77a743d3": {
     "case_id": "BNK_00075",
     "confidence": "low",
@@ -4187,6 +4913,18 @@
       "credits_near_settlement",
       "search_credits"
     ]
+  },
+  "80bd48c2f44aa4cae184c7e9023e1353dd7f699fdf1c7c066eb8a6245d78d64c": {
+    "case_id": "BNK_00064",
+    "confidence": "low",
+    "evidence_cited": [
+      "BNK_00064"
+    ],
+    "hypothesis": "Bank credit BNK_00064 for Rs 92.40 on 2026-07-16 is an orphan Razorpay settlement credit: no settlement record or UTR is present in this case to identify what it relates to.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "92.40",
+    "sufficient_evidence": false
   },
   "80c32f06ba630cbd933e249939abaf16291cec842377f84ebecdad2f59e49c91": {
     "case_id": "pay_y751yw7nh8",
@@ -4311,6 +5049,18 @@
     "model": "openai/gpt-5.6-terra",
     "recommended_action": "escalate_to_human",
     "rupee_impact": "3431.07",
+    "sufficient_evidence": false
+  },
+  "84314f079abd598472c626ad29cee604c639cd68f512c5d92762848836ed64db": {
+    "case_id": "BNK_00045",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00045"
+    ],
+    "hypothesis": "Bank credit BNK_00045 for Rs 8.90 on 2026-07-21 is described as a Razorpay payout settlement credit, but no settlement counterpart or UTR is present in this case. The source data cannot identify what it should be linked to.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "8.90",
     "sufficient_evidence": false
   },
   "846ea52001caa9ad05e8cbb8fa509a17b79f2ada80a5cbe74ce74e5f702c5094": {
@@ -4511,6 +5261,31 @@
       "get_credit"
     ]
   },
+  "8699c51d6a6c038e46aa770b978abbde59c81844b63ec7675daa81de15bcd059": {
+    "case_id": "pay_fid9ke5k8k",
+    "confidence": "high",
+    "evidence_cited": [
+      "pay_fid9ke5k8k",
+      "order_13hazldv62"
+    ],
+    "hypothesis": "No bank credit carries UTR 789513101732, and no credit or split of up to four credits resembles the Rs 4,223.66 settlement net in the available batch. The payout may be absent from the bank data or require investigation outside the available records.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "4223.66",
+    "sufficient_evidence": false
+  },
+  "8700797b08f04a76cc1d728af9c4b25ebfee33c407e1726115e527d1d8659fae": {
+    "case_id": "BNK_00032",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00032"
+    ],
+    "hypothesis": "Bank credit BNK_00032 of Rs 48,615.93 landed on 2026-07-17 with a Razorpay settlement narration, but this case contains no settlement record and no UTR. The credit cannot be assigned to a specific settlement from the evidence provided.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "48615.93",
+    "sufficient_evidence": false
+  },
   "89eef3f5971c406ae72a0afdc0d268705b2547e337e14fde336ab3b017639f1a": {
     "case_id": "pay_3gdlk5mdf7",
     "confidence": "high",
@@ -4699,6 +5474,18 @@
       "get_credit",
       "search_credits"
     ]
+  },
+  "8c582ea66330bb068c3d9059a3967df9a5783ff6c3108df21f5cda713774d877": {
+    "case_id": "BNK_00008",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00008"
+    ],
+    "hypothesis": "Bank credit BNK_00008 for Rs 37,476.88 landed on 2026-07-05 with a Razorpay narration, but no settlement record in this case was available to explain or link it. The UTR is absent, so the source settlement cannot be identified uniquely.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "37476.88",
+    "sufficient_evidence": false
   },
   "8c5b3891593abeac4351e9463dcb03ddd5249867e8e07755760dcb6e6fbf882f": {
     "case_id": "pay_c2ihoy7dv7",
@@ -4896,6 +5683,33 @@
       "get_credit"
     ]
   },
+  "94437ea34598ebb61cb6692b5f60c02372d89d4d860d145fb157aa811fa54384": {
+    "case_id": "pay_1yn6n4ps31",
+    "confidence": "low",
+    "evidence_cited": [
+      "pay_1yn6n4ps31",
+      "order_eia0x3gk6i"
+    ],
+    "hypothesis": "The paid ledger order and settlement agree at Rs 4,234.00, with Rs 4,134.08 expected in the bank on 2026-07-28, but there is no bank credit carrying UTR 346435816550, no qualifying split of credits, and no similar credit in the available batch. The bank receipt is therefore missing from the supplied evidence.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "4134.08",
+    "sufficient_evidence": false
+  },
+  "94de7f6e37b327c0ff1cfbb0d5bfd1bfcd24023cdab02db21a44ee4295a96cef": {
+    "case_id": "pay_ui3vl4k74l",
+    "confidence": "high",
+    "evidence_cited": [
+      "pay_ui3vl4k74l",
+      "order_5kea1wov62",
+      "BNK_00072"
+    ],
+    "hypothesis": "The Rs 30,893.64 bank credit on 2026-07-07 has the same UTR as the settlement, but is Rs 10,023.37 below the expected net of Rs 40,917.01. The ledger marks the Rs 41,905.99 order as partially refunded, which explains the short credit.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "auto_resolve",
+    "rupee_impact": "10023.37",
+    "sufficient_evidence": true
+  },
   "960391633e4b2b75f48176314d6bc79f2c60a8ec5e1d8135363b2f87000ce607": {
     "case_id": "BNK_00094",
     "confidence": "high",
@@ -4906,6 +5720,30 @@
     "model": "openai/gpt-5.6-terra",
     "recommended_action": "escalate_to_human",
     "rupee_impact": "11209.53",
+    "sufficient_evidence": false
+  },
+  "98ec8ce843b47c013dce962dc1aebfdd47894c9a4f39eb0e06960e2470127f02": {
+    "case_id": "BNK_00075",
+    "confidence": "low",
+    "evidence_cited": [
+      "BNK_00075"
+    ],
+    "hypothesis": "The Rs 15,360.08 bank credit dated 2026-07-07 is described as a Razorpay payout settlement credit, but no UTR or settlement counterpart is available in the supplied records. The evidence cannot establish which settlement, if any, produced this credit.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "15360.08",
+    "sufficient_evidence": false
+  },
+  "99f593f1ff6c4247f6fed896c345889d6e81134405b7a855ae03c65ea6ef0a67": {
+    "case_id": "BNK_00077",
+    "confidence": "low",
+    "evidence_cited": [
+      "BNK_00077"
+    ],
+    "hypothesis": "The Rs 10,468.71 bank credit dated 2026-07-24 has a Razorpay settlement narration but no UTR and no settlement counterpart in the supplied records. It may reflect a missing settlement record or another payout, and cannot be resolved from this evidence.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "10468.71",
     "sufficient_evidence": false
   },
   "9a1f4b3c69091cbcdf50f98faea69f61efa74cbe581ad6a7435f373638f815af": {
@@ -5031,6 +5869,112 @@
     "sufficient_evidence": true,
     "tools_used": []
   },
+  "9f0ea4764432306c7b4b589a327993f65e3121a49bae4efd193505ecdeea02c8": {
+    "case_id": "pay_59sojuv0gy",
+    "confidence": "high",
+    "evidence_cited": [
+      "pay_59sojuv0gy",
+      "BNK_00042"
+    ],
+    "hypothesis": "BNK_00042 carries the same UTR as the settlement and credited Rs 4,009.22 on the settlement date, rather than the expected Rs 5,867.91. The Rs 1,858.69 reduction is consistent with the ledger status of partially refunded for this Rs 6,009.75 order.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "auto_resolve",
+    "rupee_impact": "1858.69",
+    "sufficient_evidence": true
+  },
+  "9f984b2f79218f667f3789c5117e35b9b9a5b0a8fda7974e5f72ae97ddf6fd33": {
+    "case_id": "pay_mqk4lbj5c5",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00029",
+      "BNK_00062"
+    ],
+    "hypothesis": "Both BNK_00029 and BNK_00062 credit exactly Rs 2,830.83 on the 2026-07-22 settlement date, matching the expected net payout. With no UTR on either row, the evidence cannot establish which credit belongs to this settlement.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "2830.83",
+    "sufficient_evidence": false
+  },
+  "9fb2d4896b3f1b6102b9527c05bd394295d905397dbee957ac1f9f0142681725": {
+    "case_id": "pay_f7atwyam1n",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00032",
+      "BNK_00056"
+    ],
+    "hypothesis": "The Rs 48,615.93 net settlement on 2026-07-17 is consistent with the Rs 49,791.00 ledger gross less Rs 995.82 fee and Rs 179.25 GST, but two same-day credits have exactly that amount. Neither candidate carries UTR 327723997757, so the correct credit cannot be identified.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "48615.93",
+    "sufficient_evidence": false
+  },
+  "a03c1d7e91965cca7a30b8e54b06b2b1108e9f18ea3d304d818d034c6b5b8576": {
+    "case_id": "BNK_00006",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00006"
+    ],
+    "hypothesis": "Bank credit BNK_00006 for Rs 1,442.00 landed on 2026-07-04 with a Razorpay settlement narration, but no settlement record in this case was available to explain or link it. The UTR is absent, so the source settlement cannot be identified uniquely.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "1442.00",
+    "sufficient_evidence": false
+  },
+  "a229a9f37e42f8a9e1551b52737e030b0bc5fe87d1e8759f4d698f85a93a73d9": {
+    "case_id": "pay_4zx3yynwfc",
+    "confidence": "medium",
+    "evidence_cited": [
+      "order_necnzk4xic",
+      "BNK_00026",
+      "pay_4zx3yynwfc"
+    ],
+    "hypothesis": "BNK_00026 carries the settlement UTR and credited Rs 6,593.69 on 2026-07-06, which is Rs 2,419.71 below the expected Rs 9,013.40. The ledger marks the Rs 9,231.25 order as partially refunded, so the short credit is consistent with a partial refund, but the refund amount is not provided to prove this conclusively.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "2419.71",
+    "sufficient_evidence": false
+  },
+  "a2b2647f25008d5614480797b9309a6c640ea452e2af41b2dcf9af962c7cb0e9": {
+    "case_id": "pay_skch8jwwdx",
+    "confidence": "high",
+    "evidence_cited": [
+      "pay_skch8jwwdx",
+      "BNK_00008",
+      "BNK_00031",
+      "BNK_00082"
+    ],
+    "hypothesis": "This settlement was paid as three credits: Rs 44.58 on 2026-07-22, Rs 1,008.96 on 2026-07-22, and Rs 404.22 on 2026-07-23. They total Rs 1,457.76 exactly, matching the settlement net, with the final leg arriving two days after the 2026-07-21 settlement date.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "auto_resolve",
+    "rupee_impact": "1457.76",
+    "sufficient_evidence": true
+  },
+  "a36d34eee7b88495530484df51aec57deba3cde792b57849d7df29c27836185d": {
+    "case_id": "pay_6iidlrye89",
+    "confidence": "high",
+    "evidence_cited": [
+      "pay_6iidlrye89",
+      "BNK_00063"
+    ],
+    "hypothesis": "BNK_00063 carries the same UTR as the settlement and credited Rs 24,176.40 on the settlement date, rather than the expected Rs 30,121.94. The Rs 5,945.54 reduction is consistent with the ledger status of partially refunded for this Rs 30,850.00 order.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "auto_resolve",
+    "rupee_impact": "5945.54",
+    "sufficient_evidence": true
+  },
+  "a4d2b3552777e270542e31f4daf1f9ed0fdf5322ddbece601628c9696703e76c": {
+    "case_id": "pay_pix24bzj7x",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00013",
+      "order_cqktm087k5"
+    ],
+    "hypothesis": "BNK_00013 carries the same UTR as this 2026-07-17 settlement but credits Rs 1,387.59, which is Rs 753.65 below the Rs 2,141.24 expected net. The ledger marks the Rs 2,192.99 order as partially refunded, which uniquely explains the reduced payout.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "auto_resolve",
+    "rupee_impact": "753.65",
+    "sufficient_evidence": true
+  },
   "a699f755a0d4a5ba68651220f472e9a38175380e6330a4d3f3c8fc2bdf1a1752": {
     "case_id": "BNK_00080",
     "confidence": "high",
@@ -5123,6 +6067,18 @@
     "model": "openai/gpt-5.6-terra",
     "recommended_action": "escalate_to_human",
     "rupee_impact": "37476.88",
+    "sufficient_evidence": false
+  },
+  "aa0da213ac6d641b16fc1727970c610dd40f9ed6e29190342429429c490e8509": {
+    "case_id": "BNK_00002",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00002"
+    ],
+    "hypothesis": "Bank credit BNK_00002 of Rs 35,617.50 landed on 2026-07-02 with a Razorpay narration, but there is no settlement record or UTR in this case to identify what it pays out. The available evidence cannot determine whether this is an omitted settlement, a delayed/unavailable record, or another receipt.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "35617.50",
     "sufficient_evidence": false
   },
   "aacefba45c7f1a388ab2eb4aa1f42604d2a606da421d99c0b1173c4546058aa5": {
@@ -5238,6 +6194,18 @@
       "get_credit"
     ]
   },
+  "aaeb3406d55b0d91e435cbf3010ba23fbb3665a63c32d42696d6a1cb85fc32cf": {
+    "case_id": "BNK_00081",
+    "confidence": "low",
+    "evidence_cited": [
+      "BNK_00081"
+    ],
+    "hypothesis": "The Rs 4,320.53 bank credit dated 2026-07-27 has a Razorpay settlement narration but no UTR and no settlement counterpart in the supplied records. A human should obtain the payout or bank reference before assigning it.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "4320.53",
+    "sufficient_evidence": false
+  },
   "abda40120dd35c40b7d4ddba649fda7be80eacf4788146e5a2015e4ad50b6d5f": {
     "case_id": "BNK_00056",
     "confidence": "high",
@@ -5248,6 +6216,19 @@
     "model": "openai/gpt-5.6-terra",
     "recommended_action": "escalate_to_human",
     "rupee_impact": "48615.93",
+    "sufficient_evidence": false
+  },
+  "abe11663bc7d7e14526cb9ea88cb1e581b3da50fe1bc0706531c0d466f732f27": {
+    "case_id": "pay_m44gv3z6bz",
+    "confidence": "high",
+    "evidence_cited": [
+      "order_r2muljavb3",
+      "pay_m44gv3z6bz"
+    ],
+    "hypothesis": "No bank credit in the available batch carries the settlement UTR, and no combination of available credits matches the expected net of Rs 41,899.53 for the 2026-07-28 settlement. The evidence cannot determine whether the payout is delayed, missing, or absent from the bank data.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "41899.53",
     "sufficient_evidence": false
   },
   "ac194dab57972f605f6761ab09daf342d73e7fe85c075ce147454536dd78a996": {
@@ -5273,6 +6254,16 @@
     "sufficient_evidence": false,
     "tools_used": []
   },
+  "af78424f8538b43eb74849e2610e049ad7b6d0d50b5ead533b4c1747f6ae397d": {
+    "case_id": "pay_g983ep9p9w",
+    "confidence": "high",
+    "evidence_cited": [],
+    "hypothesis": "The paid ledger order and settlement agree at Rs 39,435.75 gross, and Rs 38,505.06 was expected in the bank on 2026-07-19 after Rs 788.72 fee and Rs 141.97 GST. No bank row carries UTR 840975986617, and no credit or combination of up to four credits in the permitted window totals Rs 38,505.06.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "38505.06",
+    "sufficient_evidence": false
+  },
   "af8323927f71840a743a29eb1bc8fea0a9a258fa51c1f5b59f4530c4e1b386d3": {
     "case_id": "BNK_00027",
     "confidence": "low",
@@ -5283,6 +6274,32 @@
     "model": "openai/gpt-5.6-terra",
     "recommended_action": "escalate_to_human",
     "rupee_impact": "225.21",
+    "sufficient_evidence": false
+  },
+  "b06551b313370f18e364d143e3d1aacb4511a2ba11c17d604cffcac91d3d1762": {
+    "case_id": "pay_lew3cxjse2",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00055",
+      "BNK_00066",
+      "BNK_00068"
+    ],
+    "hypothesis": "This settlement was paid in three bank credits: Rs 1,035.45 on 2026-07-12, followed by Rs 198.91 and Rs 54.48 on 2026-07-13. These total exactly Rs 1,288.84, the expected net payout, with the final credit arriving T+2.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "auto_resolve",
+    "rupee_impact": "1288.84",
+    "sufficient_evidence": true
+  },
+  "b173e74546ccfb202900a2ae1234bbd6d1b5bf264286aa8b0f785b52b6fc5e85": {
+    "case_id": "BNK_00007",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00007"
+    ],
+    "hypothesis": "Bank credit BNK_00007 for Rs 183.55 landed on 2026-07-03 with a Razorpay narration, but no settlement record in this case was available to explain or link it. The UTR is absent, so the source settlement cannot be identified uniquely.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "183.55",
     "sufficient_evidence": false
   },
   "b178ccaf491b402d2947a7a03b35e678138e523b3f1d74a3d1cddfa5ffcc55c8": {
@@ -5319,6 +6336,16 @@
     "rupee_impact": "8.90",
     "sufficient_evidence": false
   },
+  "b354cd65837c3de7bae4b3a26977ce874671c6d028b1691158798c9c5be9031a": {
+    "case_id": "pay_flse45bg34",
+    "confidence": "high",
+    "evidence_cited": [],
+    "hypothesis": "The paid ledger order and settlement both show Rs 5,734.75 gross, with Rs 5,599.40 expected in the bank on 2026-07-25 after Rs 114.70 fee and Rs 20.65 GST. No bank credit in the batch resembles Rs 5,599.40 and no bank row carries UTR 824612877885.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "5599.40",
+    "sufficient_evidence": false
+  },
   "b3a8f383b0bb36eb55cdd1ac7426f7c90d6f3a25e711faf143bfe8e45e2c5dea": {
     "case_id": "BNK_00035",
     "confidence": "high",
@@ -5341,6 +6368,16 @@
     "model": "openai/gpt-5.6-terra",
     "recommended_action": "escalate_to_human",
     "rupee_impact": "2830.83",
+    "sufficient_evidence": false
+  },
+  "b7ec036181177202601ecaaaab8140f8dde10b9ac386f2483f795dc5169def37": {
+    "case_id": "pay_c2ihoy7dv7",
+    "confidence": "high",
+    "evidence_cited": [],
+    "hypothesis": "The paid ledger order and settlement both show Rs 3,494.75 gross, with Rs 3,412.27 expected in the bank on 2026-07-29 after Rs 69.90 fee and Rs 12.58 GST. No bank credit in the batch resembles Rs 3,412.27 and no bank row carries UTR 562904472481.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "3412.27",
     "sufficient_evidence": false
   },
   "bc41e2e976e3554b3bf77ef1abb4c1ed81631fb8b00c0e9d13b3078b58879791": {
@@ -5618,6 +6655,96 @@
     "rupee_impact": "35617.50",
     "sufficient_evidence": false
   },
+  "c42b5ce3465cede99723502f08408a78fd2b300d1da522c7e0669919082ba2ba": {
+    "case_id": "pay_vgiui9kkhz",
+    "confidence": "high",
+    "evidence_cited": [
+      "pay_vgiui9kkhz",
+      "order_uzgppohswq",
+      "BNK_00028"
+    ],
+    "hypothesis": "BNK_00028 carries the settlement UTR and credited Rs 15,515.00 on 2026-07-18, which is Rs 5,037.73 below the expected Rs 20,552.73 net. The linked order is marked partially refunded, so the short credit is consistently explained by a partial refund.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "auto_resolve",
+    "rupee_impact": "5037.73",
+    "sufficient_evidence": true
+  },
+  "c66461cbdcfe0d905fdc7eeefbdb4ed66d468b30a78c2310cf792b7546679cba": {
+    "case_id": "pay_tr74qgefqj",
+    "confidence": "high",
+    "evidence_cited": [
+      "pay_tr74qgefqj",
+      "order_x1kkc1xi04",
+      "BNK_00046"
+    ],
+    "hypothesis": "BNK_00046 carries the settlement UTR and credited Rs 136.47 on 2026-07-27, which is Rs 35.38 below the expected Rs 171.85 net. The linked order is marked partially refunded, so the short credit is consistently explained by a partial refund rather than a normal fee or GST deduction.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "auto_resolve",
+    "rupee_impact": "35.38",
+    "sufficient_evidence": true
+  },
+  "c697e347c100a631fc2ac7d4e80d1c6775920f8c57eb5010999d8d4cdc2e8181": {
+    "case_id": "pay_iu2fjnbdzz",
+    "confidence": "high",
+    "evidence_cited": [
+      "pay_iu2fjnbdzz",
+      "order_8pme2jgs0c"
+    ],
+    "hypothesis": "No bank credit carries UTR 111004001914, and no credit or split of up to four credits resembles the Rs 9,768.87 settlement net in the available batch. The payout may be absent from the bank data or require investigation outside the available records.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "9768.87",
+    "sufficient_evidence": false
+  },
+  "c87c6655b72dcecb576771bd8066b87aaed0500bb7570239a6b8c1d33cecf855": {
+    "case_id": "BNK_00001",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00001"
+    ],
+    "hypothesis": "Bank credit BNK_00001 for Rs 690.10 landed on 2026-07-08 with a Razorpay narration, but no settlement record in this case was available to explain or link it. The UTR is absent, so the source settlement cannot be identified uniquely.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "690.10",
+    "sufficient_evidence": false
+  },
+  "c9384bd613fbf1be81f19693e8126a1abd93613ecfd62b49efdda50b067be58e": {
+    "case_id": "BNK_00069",
+    "confidence": "low",
+    "evidence_cited": [
+      "BNK_00069"
+    ],
+    "hypothesis": "Bank credit BNK_00069 for Rs 16.86 on 2026-07-18 is an orphan Razorpay settlement credit: no settlement record or UTR is present in this case to identify what it relates to.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "16.86",
+    "sufficient_evidence": false
+  },
+  "c9875dd08cded5ef54ccf8db7fd2e95353c18bca5f1e7109eb0e09ead21c02e1": {
+    "case_id": "pay_oa02v9u54v",
+    "confidence": "high",
+    "evidence_cited": [
+      "order_nuqnwxi89f"
+    ],
+    "hypothesis": "The Rs 869.00 net settlement dated 2026-07-14 has no bank credit carrying UTR 868617115524 or resembling the expected payout in the available batch. The evidence cannot determine whether the payout is missing or will arrive outside the available bank data.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "869.00",
+    "sufficient_evidence": false
+  },
+  "cbe2f175be051d3d2804f8147fda0714e502d613e69bb890d0530ce8c12f9ab6": {
+    "case_id": "pay_jch2vffqot",
+    "confidence": "high",
+    "evidence_cited": [
+      "order_p89fkbi4o6",
+      "pay_jch2vffqot"
+    ],
+    "hypothesis": "No bank credit in the available batch carries the settlement UTR or resembles the expected net credit of Rs 17,832.48 for the 2026-07-28 settlement. The available evidence cannot determine whether the payout is missing, delayed, or absent from the bank data.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "17832.48",
+    "sufficient_evidence": false
+  },
   "cbf45582bd1a987df4cd901055b18f4dd75a0748f43830b44c14eced9cc369e8": {
     "case_id": "BNK_00030",
     "confidence": "high",
@@ -5721,6 +6848,31 @@
       "credits_near_settlement",
       "search_credits"
     ]
+  },
+  "d1292668e53d5b069a949c4bc12a2a323e67b792cb1add11022ac8bcece6a060": {
+    "case_id": "pay_jxnnngbpj4",
+    "confidence": "high",
+    "evidence_cited": [
+      "order_ot7txkdotr",
+      "pay_jxnnngbpj4"
+    ],
+    "hypothesis": "No bank credit in the available batch carries the settlement UTR or resembles the expected net credit of Rs 7,724.30 for the 2026-07-10 settlement. The evidence cannot establish whether this payout is delayed, missing, or not included in the supplied bank data.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "7724.30",
+    "sufficient_evidence": false
+  },
+  "d34e810cd6784d4727c0f4c169766a36d8a15bab003aa5df4b9ed7177f463c9f": {
+    "case_id": "BNK_00016",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00016"
+    ],
+    "hypothesis": "Bank credit BNK_00016 for Rs 32,085.27 on 2026-07-06 has no settlement counterpart in the supplied records. The IMPS Razorpay settlement narration is not enough to identify a specific settlement because no UTR was recovered.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "32085.27",
+    "sufficient_evidence": false
   },
   "d38fef28509aa5c923a2c3809d7e2f30ba8e3db2f2d315b5c9de1b8a6320b452": {
     "case_id": "pay_1xihka4zf0",
@@ -5848,6 +7000,18 @@
     "rupee_impact": "1075.49",
     "sufficient_evidence": false
   },
+  "d6fc5973f88a13b64cdc711ff8e770754a7891178217cccd4e283237c1f77974": {
+    "case_id": "pay_k4vejvtavz",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00038"
+    ],
+    "hypothesis": "BNK_00038 is not a valid payout match: its Rs 387.15 credit is Rs 18.06 below the expected net of Rs 405.21, and it arrived on 2026-07-28, seven days after the 2026-07-21 settlement date. Both the amount and date fall outside the permitted limits.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "405.21",
+    "sufficient_evidence": false
+  },
   "d75693b14b91435bd76a632b3a5d9c1a07b26e931d81ad604244386746f9866c": {
     "case_id": "BNK_00062",
     "confidence": "low",
@@ -5860,6 +7024,19 @@
     "rupee_impact": "2830.83",
     "sufficient_evidence": false
   },
+  "d85c801a1b08e1a69becd9718fc35e23860d31c74278d4669343464a9f029981": {
+    "case_id": "pay_xurgowyoo5",
+    "confidence": "high",
+    "evidence_cited": [
+      "pay_xurgowyoo5",
+      "order_j66cnoljq5"
+    ],
+    "hypothesis": "The paid order and settlement expect Rs 11,351.63 in the bank on 2026-07-14, but no bank credit carrying UTR 155911778882 or resembling that amount was available. The evidence cannot determine whether the payout failed, is absent from the bank extract, or was paid outside the available data.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "11351.63",
+    "sufficient_evidence": false
+  },
   "d8af80adceac40bfaed58d5eb33983093ac53b9fb44e454acae0e63acce80c0b": {
     "case_id": "BNK_00050",
     "confidence": "high",
@@ -5870,6 +7047,30 @@
     "model": "openai/gpt-5.6-terra",
     "recommended_action": "escalate_to_human",
     "rupee_impact": "13545.51",
+    "sufficient_evidence": false
+  },
+  "d994795dee4fe9f6bb15e7f4751b6b1ac249c41eb4ee85b6cabf7e4a0a43ec28": {
+    "case_id": "BNK_00095",
+    "confidence": "low",
+    "evidence_cited": [
+      "BNK_00095"
+    ],
+    "hypothesis": "Bank credit BNK_00095 for Rs 5,845.32 landed on 2026-07-30 with a Razorpay RTGS narration, but no settlement counterpart or UTR is available in this case to identify what it relates to.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "5845.32",
+    "sufficient_evidence": false
+  },
+  "daf0f05617b415dcb2ce77f94b608d8d3c7b1d24e2a466ff56f6d241a9e2d39b": {
+    "case_id": "pay_8n7odkef82",
+    "confidence": "high",
+    "evidence_cited": [
+      "pay_8n7odkef82"
+    ],
+    "hypothesis": "The Rs 2,271.11 net settlement dated 2026-07-28 has no bank credit carrying its UTR and no amount-and-date candidate elsewhere in the batch. The evidence does not establish whether the payout is pending, missing from the bank extract, or failed.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "2271.11",
     "sufficient_evidence": false
   },
   "df8428fe2fcf76c087182ed55860158c58d2805d9f7684d6892c870cb62f9cf0": {
@@ -6007,6 +7208,18 @@
       "get_settlement",
       "get_credit"
     ]
+  },
+  "e3d0d2975cfdc329fc2e4bc79236d5e5c9e11026e8b554f3487a606bfa6d9d6c": {
+    "case_id": "BNK_00073",
+    "confidence": "low",
+    "evidence_cited": [
+      "BNK_00073"
+    ],
+    "hypothesis": "The Rs 3,431.07 bank credit dated 2026-07-24 has a Razorpay settlement narration but no UTR and no settlement counterpart in the supplied records. It may be a missing settlement export or an unrelated payout, so its source cannot be determined.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "3431.07",
+    "sufficient_evidence": false
   },
   "e4f60642b52837c0963801c2c0a11a3a5deb7b18574614eb7f93669eb401f31d": {
     "case_id": "pay_qda7n5odbx",
@@ -6150,6 +7363,30 @@
     "rupee_impact": "10468.71",
     "sufficient_evidence": false
   },
+  "e9eb300860370dccf3cd4a87b201c07eb985c0a086c13a6d16030068bbef674d": {
+    "case_id": "BNK_00050",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00050"
+    ],
+    "hypothesis": "Bank credit BNK_00050 for Rs 13,545.51 on 2026-07-18 appears to be a Razorpay payment from its narration, but no settlement counterpart or UTR is present in this case. The source data cannot identify what it should be linked to.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "13545.51",
+    "sufficient_evidence": false
+  },
+  "ea8689178ae9d25f5fc86360ff39f4edec199880e2af3e3f124990ec50b9403e": {
+    "case_id": "BNK_00086",
+    "confidence": "low",
+    "evidence_cited": [
+      "BNK_00086"
+    ],
+    "hypothesis": "The Rs 1,075.49 bank credit dated 2026-07-30 is described as a Razorpay payout settlement credit, but no UTR or corresponding settlement record is available in the supplied records. Its origin cannot be determined uniquely.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "1075.49",
+    "sufficient_evidence": false
+  },
   "eb8d3894a905d5a039dafac62cac7a5f928d5d6b64558d60e9e90e3d7659a1f9": {
     "case_id": "pay_z31tsvgtdp",
     "confidence": "high",
@@ -6253,6 +7490,58 @@
       "get_credit"
     ]
   },
+  "ebb7a5d9fd13b1851721fc365b428396eedcc2e9131f02abc0d92753dafbf98e": {
+    "case_id": "pay_d61jwy1ux4",
+    "confidence": "high",
+    "evidence_cited": [
+      "pay_d61jwy1ux4",
+      "order_i1nrgdv9dr",
+      "BNK_00070",
+      "BNK_00073"
+    ],
+    "hypothesis": "The settlement net is Rs 3,431.07 on 2026-07-24, but both BNK_00070 and BNK_00073 credit exactly Rs 3,431.07 on that date. Neither bank row carries UTR 977000744520, so the evidence cannot identify which credit belongs to this settlement.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "3431.07",
+    "sufficient_evidence": false
+  },
+  "eea952719408785deebabaeed3b90f5a8bbc486684e133b01e2772fbee5a1c85": {
+    "case_id": "BNK_00071",
+    "confidence": "low",
+    "evidence_cited": [
+      "BNK_00071"
+    ],
+    "hypothesis": "Bank credit BNK_00071 for Rs 3,661.77 on 2026-07-02 is an orphan Razorpay settlement credit: no settlement record or UTR is present in this case to identify what it relates to.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "3661.77",
+    "sufficient_evidence": false
+  },
+  "f52607bd02f125af7604409979276377dedf3f20695eba1c67586e63e96163c0": {
+    "case_id": "BNK_00078",
+    "confidence": "low",
+    "evidence_cited": [
+      "BNK_00078"
+    ],
+    "hypothesis": "The Rs 3,607.68 bank credit dated 2026-07-09 is described as a Razorpay payout settlement credit, but it has no UTR and no settlement counterpart in the supplied records. There is not enough evidence to identify a single source.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "3607.68",
+    "sufficient_evidence": false
+  },
+  "f60d1a86fd3613cf54804ee95bc486aa30a8415806651126c82fc9a069f2b57d": {
+    "case_id": "pay_u2tjgc6jrq",
+    "confidence": "low",
+    "evidence_cited": [
+      "pay_u2tjgc6jrq",
+      "order_b97r8mwgrx"
+    ],
+    "hypothesis": "No bank credit carries UTR 278460614613 or matches the expected net of Rs 41,138.65 on 2026-07-01 through T+2, including any permitted split. The available records do not establish whether the payout was delayed, missing, or recorded outside this bank batch.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "41138.65",
+    "sufficient_evidence": false
+  },
   "f6705e38217bc34dcb09a7f73d3f4785594e39bbe87ab9552d22acd50ef7e9df": {
     "case_id": "pay_skch8jwwdx",
     "confidence": "high",
@@ -6268,6 +7557,32 @@
     "recommended_action": "auto_resolve",
     "rupee_impact": "1457.76",
     "sufficient_evidence": true
+  },
+  "fb89bfc4ad0928b8a30ae08864024b36df65a2c9130318e0d4f68cfb76ae1fd9": {
+    "case_id": "pay_y751yw7nh8",
+    "confidence": "medium",
+    "evidence_cited": [
+      "BNK_00038",
+      "order_u1g463sdyg",
+      "pay_y751yw7nh8"
+    ],
+    "hypothesis": "The settlement expected Rs 377.87 after fees, but the bank credited Rs 266.98 on 2026-07-09 using the matching UTR, a shortfall of Rs 110.89. The ledger order is marked partially refunded, which could explain the short credit, but no refund amount is provided to confirm that Rs 110.89 was refunded.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "110.89",
+    "sufficient_evidence": false
+  },
+  "fcd09588e1edee360ff95033a3a8c5aa1070f454c6f7830b0691998999b22c34": {
+    "case_id": "BNK_00009",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_00009"
+    ],
+    "hypothesis": "Bank credit BNK_00009 for Rs 5,448.34 landed on 2026-07-26 with a Razorpay payout settlement narration, but no settlement record in this case was available to explain or link it. The UTR is absent, so the source settlement cannot be identified uniquely.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "5448.34",
+    "sufficient_evidence": false
   },
   "fed943c1cf18284373d951dcd4f6a0a948e2a210117021f3fb26f2c7801b1ba5": {
     "case_id": "BNK_00070",

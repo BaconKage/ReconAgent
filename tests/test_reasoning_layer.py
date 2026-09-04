@@ -403,37 +403,35 @@ def test_qa_still_refuses_an_id_that_exists_in_no_run(tmp_path, pipeline):
 
 
 def test_the_readme_quotes_traces_that_say_what_it_claims():
-    """Pin the two traces the README quotes, and the auto_resolve counts.
+    """Pin the two traces the README quotes, and the shipped arm's auto-resolves.
 
     The README once claimed the agent auto-resolved "8 exceptions, all partial
-    refunds" and quoted BNK_00042 as an example. There were four auto-resolves,
-    not eight; they were not all partial refunds; and the BNK_00042 trace
-    actually recommends escalate_to_human - so the quote argued the opposite of
-    what the trace says. All three were checkable against committed data by
-    anyone who looked.
+    refunds" and quoted BNK_00042 as an example. There were four; they were not
+    all partial refunds; and the BNK_00042 trace actually recommends
+    escalate_to_human, so the quote argued the opposite of what the trace says.
 
-    A number in the README that no test recomputes is a number that has already
-    started drifting.
+    Counted over the *shipped* arm only. The cache also holds the one-shot answers
+    generated for the baseline comparison, and those clear far more cases - which
+    is the comparison's finding, not a change in what the product does.
     """
-    import collections
     from agent.cache import TraceCache
+    from evaluation import agent_eval as ae
 
-    cache = TraceCache()
-    by_case = {t.get("case_id"): t for t in cache._data.values()}
+    cases, _ = ae.load_cases()
+    shipped = [c.arms["deep"] for c in cases if "deep" in c.arms]
+    auto = sum(1 for t in shipped if t.get("recommended_action") == "auto_resolve")
+    assert auto == 4, (
+        f"README says 4 auto-resolves on the shipped arm, traces say {auto}")
 
-    counts = collections.Counter(
-        t.get("recommended_action") for t in cache._data.values())
-    assert counts["auto_resolve"] == 4, (
-        f"README says 4 auto-resolves across both datasets, traces say "
-        f"{counts['auto_resolve']}")
+    by_case = {t.get("case_id"): t for t in TraceCache()._data.values()
+               if t.get("investigation_trace") or t.get("case_id") in
+               {"pay_qenf91mx9j", "pay_59sojuv0gy"}}
 
-    # The trace quoted as the agent clearing a shortfall it could account for.
-    cleared = by_case["pay_qenf91mx9j"]
+    cleared = next(c.arms["deep"] for c in cases if c.record_id == "pay_qenf91mx9j")
     assert cleared["recommended_action"] == "auto_resolve"
     assert cleared["sufficient_evidence"] is True
 
-    # The trace quoted as the contrast: same case shape, refused.
-    refused = by_case["pay_59sojuv0gy"]
+    refused = next(c.arms["deep"] for c in cases if c.record_id == "pay_59sojuv0gy")
     assert refused["recommended_action"] == "escalate_to_human"
     assert refused["sufficient_evidence"] is False
     assert "BNK_00042" in refused["hypothesis"]

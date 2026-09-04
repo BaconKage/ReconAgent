@@ -48,10 +48,11 @@ Every figure below has a command beside it. Nothing here is asserted.
 | **AGENT** | | |
 | **unsafe auto-resolves** | **0** | `python -m evaluation.agent_eval` |
 | unverified auto-resolves | 2 | same — partial refunds cleared on circular arithmetic |
-| recommendation accuracy | 97.2% | same — against **100%** for a policy that escalates everything |
+| recommendation accuracy | 97.2% | same — vs **79.2%** one-shot, **100%** rules-only |
+| unverifiable clears vs one-shot | **2 vs 15** | `--compare` — the tool loop's measured value |
 | recovery of engine misses | **0 / 30** | same — the agent never assembled a group the engine missed |
 | sufficient-evidence accuracy | 95.1% | same — scored on 41 of 104; no discriminating power yet |
-| grounding violations | **0 / 395** | `python verify_grounding.py` |
+| grounding violations | **0 / 644** | `python verify_grounding.py` |
 | **SYSTEM** | | |
 | records reconciled | 252 dev · 290 holdout · 100,000 benchmarked | `python benchmark.py` |
 | cash position | every rupee attributed to one bucket | `python run_demo.py` |
@@ -73,7 +74,7 @@ would be right half the time and **report certainty every time**.
 pip install -r requirements.txt && python run_demo.py
 ```
 
-No API key. No LLM SDK. The whole demo replays 104 committed reasoning traces.
+No API key. No LLM SDK. The demo replays 104 committed reasoning traces.
 
 | | |
 |---|---|
@@ -173,7 +174,9 @@ python run_demo.py
 
 That is the whole setup. **No API key is required** and no LLM SDK is installed —
 the deterministic engine, every metric, the exception list, the cash position and
-the Q&A all run offline, replaying 104 committed reasoning traces.
+the Q&A all run offline, replaying 208 committed reasoning traces — 104 from the
+shipped multi-turn path, plus 104 one-shot answers kept so the baseline
+comparison below replays without a key too.
 
 ```bash
 streamlit run app.py                       # the UI
@@ -480,10 +483,10 @@ the same path the agent walked.
 python verify_grounding.py
 ```
 
-Across the 104 committed traces the model wrote **395 record IDs — 183 in its
-citations, 127 in its explanations, 84 in the arguments it chose for tool calls,
-and 1 in a stated reason for a query — and zero were absent from the evidence it
-was shown.** Counting the tool
+Across all 208 committed traces — both arms — the model wrote **644 record IDs:
+361 in its citations, 198 in its explanations, 84 in the arguments it chose for
+tool calls, and 1 in a stated reason for a query. Zero were absent from the
+evidence it was shown.** Counting the tool
 arguments is deliberate: a model that invents a plausible bank row and then asks
 a tool about it has hallucinated, even if the tool returns nothing and the
 invented ID never reaches the conclusion. That is the first place it would
@@ -495,6 +498,41 @@ plainly that "there is not enough here to decide" is a correct and valued answer
 Without that, a model asked to explain an unmatched transaction reliably invents a
 match — it reads the task as *find the answer* rather than *judge whether an
 answer exists*.
+
+---
+
+### Why an agent instead of one prompt
+
+The question deserves a number rather than an argument, so the same 104 cases were
+run through four policies and scored identically.
+`python -m evaluation.agent_eval --compare` reproduces it.
+
+| arm | action accuracy | unverifiable clears | evidence cited |
+|---|---|---|---|
+| rules-only lookup table (no model) | **100%** | 0 | 0.43 |
+| always escalate (looks at nothing) | **100%** | 0 | 0.00 |
+| one-shot LLM | 79.2% | **15** | 1.71 |
+| **multi-turn agent with read-only tools** | **97.2%** | **2** | 1.76 |
+
+Two findings, and the first is uncomfortable.
+
+**A model made this worse.** The one-shot arm clears fifteen partial refunds it has
+no way to corroborate — the ledger records refund *status* and never refund
+*amount*. Handed an exception and asked to explain it, a model reaches for the
+plausible story. On this task a lookup table that escalates everything is strictly
+safer than one prompt.
+
+**Tools and a turn budget recover almost all of it.** The same model, given
+read-only queries and up to four turns, drops from 15 unverifiable clears to 2 —
+because it can go and look, find nothing corroborating the shortfall, and say so.
+That gap is the measured value of the agent loop, and it is the honest answer to
+why the turns are there.
+
+**Neither beats the table on action**, because on this corpus "escalate" is correct
+for every scored case and a table says that for free. What a table cannot do is
+tell a finance operator *why*, cite the rows it looked at, or leave a trail someone
+can walk. That is the agent's remaining claim, and it is not one this evaluation
+can score.
 
 ---
 
@@ -780,14 +818,21 @@ be decidable. The engine currently uses amount, date and UTR only.
 **The reasoning layer is advisory, and now measured — the results are mixed.**
 `python -m evaluation.agent_eval` scores its recommendations against the same
 ground truth the engine is scored against. It has made **0 unsafe auto-resolves**
-across 104 cases, and 0 of 395 record IDs it wrote were ungrounded. But a
+across 104 cases, and 0 of 644 record IDs it wrote were ungrounded. But a
 deterministic lookup table that escalates everything and looks at nothing scores
 **100%** on recommendation accuracy against the agent's **97.2%**, and the agent
 has recovered **0 of 30** matches the engine missed. On the metrics that can be
-labelled from this data, the multi-turn agent does not beat a fixed rule. Its
-remaining case rests on the explanation a table cannot write, and the usefulness
-of *that* is still unmeasured — there is no ground truth for prose, and proxying
-it with a confidence score would be measuring the wrong thing.
+labelled from this data, the multi-turn agent does not beat a fixed rule.
+
+**But it decisively beats one prompt, which is the comparison actually in
+question.** The identical cases through a single-shot call score **79.2%** and
+clear **15** partial refunds the data cannot corroborate, against the tool-using
+loop's **97.2%** and **2**. Adding a model to this problem makes it *worse* than
+adding no model at all; adding tools and a turn budget claws almost all of that
+back. The agent's remaining gap to the rules-only table is the explanation a table
+cannot write, and the usefulness of *that* is still unmeasured — there is no
+ground truth for prose, and proxying it with a confidence score would be measuring
+the wrong thing.
 
 **Two auto-resolves rest on circular arithmetic.** On a partial refund the agent
 computes the shortfall, names it "the refund", and presents the identity as
@@ -849,7 +894,9 @@ agent/        the reasoning layer — explains, never matches
   investigator.py  bounded multi-turn loop for the hard cases
   reasoner.py   routes each exception to the deep or the cheap path
   qa.py         retrieval over the audit trail
-  cache/        104 committed traces, so the repo demos offline
+  cache/        208 committed traces, so the repo demos offline:
+                104 from the shipped path + 104 one-shot, for the
+                baseline comparison
 audit/        append-only JSONL decision trail
 evaluation/   metrics + threshold sensitivity — the only reader of ground truth
 benchmark.py  throughput and accuracy as a function of batch size

@@ -88,18 +88,29 @@ def test_the_devlog_entry_count_matches_the_devlog():
 
 
 def test_the_grounding_itemisation_sums_to_its_headline():
-    """127 + 183 + 84 = 394, against a stated total of 395.
+    """The itemisation once read 127 + 183 + 84 against a stated total of 395.
 
     The missing 1 was the `thought` bucket, dropped from a list that reads as
-    exhaustive. Small, and exactly the kind of small that this project cannot
-    afford: the arithmetic is checkable in three seconds by anyone.
+    exhaustive. Small, and exactly the kind of small this project cannot afford:
+    the arithmetic is checkable in three seconds by anyone. Both the total and the
+    parts are now recomputed from the cache rather than compared to each other.
     """
-    block = re.search(r"the model wrote \*\*395 record IDs(.{0,400}?)\*\*",
-                      README, re.S)
-    assert block, "the grounding claim should still be in the README"
-    parts = [int(n) for n in re.findall(r"(\d+) in ", block.group(1))]
-    assert sum(parts) == 395, (
-        f"itemisation {parts} sums to {sum(parts)}, not the stated 395")
+    from agent.cache import TraceCache
+    from evaluation.grounding import written_ids
+
+    actual = sum(len(ids) for t in TraceCache()._data.values()
+                 for ids in written_ids(t).values())
+
+    m = re.search(r"the model wrote \*\*(\d+) record IDs:?(.{0,400}?)\*\*",
+                  README, re.S)
+    assert m, "the grounding claim should still be in the README"
+    stated_total = int(m.group(1))
+    assert stated_total == actual, (
+        f"README states {stated_total} record IDs; the cache holds {actual}")
+
+    parts = [int(n) for n in re.findall(r"(\d+) in ", m.group(2))]
+    assert sum(parts) == stated_total, (
+        f"itemisation {parts} sums to {sum(parts)}, not the stated {stated_total}")
 
 
 def test_the_readme_quotes_the_featured_trace_verbatim():
@@ -141,12 +152,28 @@ def test_the_agent_eval_headline_matches_the_readme():
                 f"agent_eval measures {res.unsafe_clears}")
 
 
-def test_the_committed_trace_count_is_the_stated_one():
-    traces = json.loads((ROOT / "agent" / "cache" / "traces.json")
-                        .read_text(encoding="utf-8"))
-    stated = {int(n) for n in re.findall(r"(\d+) committed (?:reasoning )?traces",
-                                         README)}
+def test_the_committed_trace_counts_are_the_stated_ones():
+    """Two different true numbers live in this README, so both are checked.
+
+    The cache holds every arm: the shipped multi-turn answers plus the one-shot
+    answers kept so the baseline comparison replays offline. The demo and the
+    grounding check both run over the shipped arm alone. Asserting one number
+    against both facts would force the README to say something false about one of
+    them, so each is checked against the quantity it actually describes.
+    """
+    from agent.cache import TraceCache
+    from evaluation import agent_eval as ae
+
+    total = len(TraceCache())
+    cases, _ = ae.load_cases()
+    shipped = sum(1 for c in cases if "deep" in c.arms)
+
+    stated = {int(n) for n in re.findall(
+        r"(\d+) committed (?:reasoning )?traces", README)}
     stated |= {int(n) for n in re.findall(r"the (\d+) committed traces", README)}
     assert stated, "the README should state how many traces are committed"
-    assert all(n == len(traces) for n in stated), (
-        f"README claims {sorted(stated)} traces; the cache holds {len(traces)}")
+
+    unexplained = stated - {total, shipped}
+    assert not unexplained, (
+        f"README states {sorted(unexplained)} traces; the cache holds {total} "
+        f"in total and {shipped} on the shipped arm")
