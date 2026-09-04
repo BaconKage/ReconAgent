@@ -13,8 +13,10 @@ in candidate collisions, which is precisely how false positives are born.
 
 So instead of changing the default, this module measures the trade. It sweeps the
 two thresholds across both datasets and reports what each setting costs and buys.
-The shipped configuration is unchanged by anything found here; `core/config.py`
-has not been modified since the first commit, which is checkable in git history.
+The shipped configuration is unchanged by anything found here. No matching
+threshold has changed since the first commit: `core/config.py` was touched once,
+by 9f520bd, which appends the coincidence-guard parameters and alters no existing
+value. Checkable with `git log --oneline -- core/config.py`.
 
     python -m evaluation.sensitivity
 """

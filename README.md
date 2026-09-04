@@ -3,7 +3,7 @@
 **Three-way payment reconciliation with an honest exception list.**
 
 [![CI](https://github.com/BaconKage/ReconAgent/actions/workflows/ci.yml/badge.svg)](https://github.com/BaconKage/ReconAgent/actions/workflows/ci.yml)
-[![tests](https://img.shields.io/badge/tests-211-brightgreen)](tests/)
+[![tests](https://img.shields.io/badge/tests-244-brightgreen)](tests/)
 [![python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![license](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -94,7 +94,7 @@ the Q&A all run offline, replaying 104 committed reasoning traces.
 streamlit run app.py                       # the UI
 python run_demo.py --dataset holdout       # the sealed evaluation set
 python run_demo.py --ask "why didn't pay_f7atwyam1n reconcile?"
-python -m pytest tests/ -q                 # 206 tests
+python -m pytest tests/ -q                 # 244 tests
 python -m evaluation.sensitivity           # threshold trade-off sweep
 python benchmark.py                        # throughput and accuracy vs batch size
 python verify_grounding.py                 # every ID the model wrote, checked
@@ -393,9 +393,10 @@ the same path the agent walked.
 python verify_grounding.py
 ```
 
-Across the 104 committed traces the model wrote **395 record IDs — 127 in its
-explanations, 183 in its citations, 84 in the arguments it chose for tool calls —
-and zero were absent from the evidence it was shown.** Counting the tool
+Across the 104 committed traces the model wrote **395 record IDs — 183 in its
+citations, 127 in its explanations, 84 in the arguments it chose for tool calls,
+and 1 in a stated reason for a query — and zero were absent from the evidence it
+was shown.** Counting the tool
 arguments is deliberate: a model that invents a plausible bank row and then asks
 a tool about it has hallucinated, even if the tool returns nothing and the
 invented ID never reaches the conclusion. That is the first place it would
@@ -422,10 +423,10 @@ Refusing to guess - picking the closest would be a coin flip reported as a match
 Both candidates match the amount **exactly**. Both landed on the **right date**.
 The engine claims neither, and the agent agrees:
 
-> The Rs 48,615.93 net settlement dated 2026-07-17 has two identical same-day
-> candidate credits, BNK_00032 and BNK_00056, and neither carries UTR
-> 327723997757. Their different narrations do not establish which credit belongs
-> to this settlement.
+> Settlement pay_f7atwyam1n expects Rs 48,615.93 on 2026-07-17. BNK_00032 and
+> BNK_00056 are both unmatched credits for exactly Rs 48,615.93 on that date,
+> with no UTR available to connect either row to the settlement. The data does
+> not identify which bank credit belongs to this settlement.
 >
 > → `escalate_to_human` · confidence **high** · `sufficient_evidence: false`
 
@@ -588,7 +589,7 @@ same reason: this is the only module in the project that can open a socket, and
 the matching engine must not be able to reach it.
 
 **What is and is not verified.** The mapping is tested against the documented
-field shape and end-to-end through the real loader and matcher (15 tests in
+field shape and end-to-end through the real loader and matcher (18 tests in
 `tests/test_razorpay_integration.py`), and the fixture is asserted to carry
 exactly the documented fields so it cannot drift into a shape the API never
 sends. The live fetch path refuses `rzp_live_` keys by default and raises rather
@@ -735,11 +736,11 @@ docs/         README screenshots + the script that regenerates them
 cash/         forward cash position
 data/         seeded generator, dev and holdout batches
   razorpay_sample/  recon-report fixture + a sample bank export
-tests/        206 tests
+tests/        244 tests
 ARCHITECTURE.md  design rationale and the layer boundaries
 DEVLOG.md     what actually broke, and what I did about it
 ```
 
-`DEVLOG.md` is worth reading alongside the code. It records six real failures from
+`DEVLOG.md` is worth reading alongside the code. It records twelve real failures from
 this build, including a cache-poisoning bug that would have shipped 31 HTTP 401s
 into this repository as the project's demonstration of agent reasoning.
