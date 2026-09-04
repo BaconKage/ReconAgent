@@ -23,6 +23,7 @@ from pathlib import Path
 import pytest
 
 from evaluation import agent_eval as ae
+from verify_grounding import build_case_index
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -319,13 +320,35 @@ def test_grounding_agrees_with_verify_grounding(real):
     """Two scripts asserting the same invariant must not disagree about it."""
     from agent.cache import TraceCache
     from evaluation.grounding import ungrounded_in
-    from verify_grounding import build_case_index
 
     cases, _ = real
     index = build_case_index(["dev", "holdout"])
+    # .get, not [], mirroring verify_grounding: a trace whose case is not in
+    # these datasets is reported as not-checkable, never a crash. A live run over
+    # some other batch - the Razorpay fixture, say - can legitimately add one.
     standalone = sum(len(ungrounded_in(index[key], trace))
-                     for key, trace in TraceCache()._data.items())
+                     for key, trace in TraceCache()._data.items()
+                     if key in index)
     assert ae.score(cases, "deep").ids_ungrounded == standalone
+
+
+def test_the_committed_corpus_is_exactly_the_dev_and_holdout_cases():
+    """Guards the corpus every measured claim is computed over.
+
+    Running the demo over another batch with a key present writes traces for that
+    batch into the same committed cache. Three Razorpay-fixture traces got in
+    that way and quietly moved the corpus from 104 to 107 - which is not wrong,
+    but it is not what "104 committed traces" means, and every rate in the README
+    is computed over the dev+holdout set.
+    """
+    from agent.cache import TraceCache
+
+    index = build_case_index(["dev", "holdout"])
+    stray = [t.get("case_id") for k, t in TraceCache()._data.items()
+             if k not in index]
+    assert not stray, (
+        f"traces for cases outside dev/holdout are in the committed cache: "
+        f"{sorted(set(stray))}. Remove them, or widen the corpus deliberately.")
 
 
 def test_report_is_ascii(real):

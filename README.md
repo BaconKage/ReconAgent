@@ -3,7 +3,7 @@
 **Three-way payment reconciliation with an honest exception list.**
 
 [![CI](https://github.com/BaconKage/ReconAgent/actions/workflows/ci.yml/badge.svg)](https://github.com/BaconKage/ReconAgent/actions/workflows/ci.yml)
-[![tests](https://img.shields.io/badge/tests-244-brightgreen)](tests/)
+[![tests](https://img.shields.io/badge/tests-245-brightgreen)](tests/)
 [![python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![license](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
 
@@ -179,7 +179,7 @@ the Q&A all run offline, replaying 104 committed reasoning traces.
 streamlit run app.py                       # the UI
 python run_demo.py --dataset holdout       # the sealed evaluation set
 python run_demo.py --ask "why didn't pay_f7atwyam1n reconcile?"
-python -m pytest tests/ -q                 # 244 tests
+python -m pytest tests/ -q                 # 245 tests
 python -m evaluation.sensitivity           # threshold trade-off sweep
 python benchmark.py                        # throughput and accuracy vs batch size
 python verify_grounding.py                 # every ID the model wrote, checked
@@ -863,7 +863,7 @@ docs/         README screenshots + the script that regenerates them
 cash/         forward cash position
 data/         seeded generator, dev and holdout batches
   razorpay_sample/  recon-report fixture + a sample bank export
-tests/        244 tests
+tests/        245 tests
 ARCHITECTURE.md  design rationale and the layer boundaries
 DEVLOG.md     what actually broke, and what I did about it
 ```
