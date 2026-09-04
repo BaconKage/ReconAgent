@@ -33,13 +33,14 @@ Exit code is non-zero if anything is ungrounded, so it can run in CI.
 from __future__ import annotations
 
 import argparse
-import json
-import re
 import sys
 from pathlib import Path
 
-from agent.cache import TraceCache
+from agent.cache import TraceCache, evidence_key
+from agent.investigator import system_prompt as investigation_system_prompt
+from agent.prompts import system_prompt
 from agent.reasoner import build_evidence_bundle, select_cases
+from evaluation.grounding import permitted_ids, written_ids
 from core.config import DEFAULT_CONFIG
 from core.loader import load_batch
 from core.matcher import reconcile
@@ -49,62 +50,30 @@ make_stdout_safe()
 
 ROOT = Path(__file__).resolve().parent
 
-#: The three record-ID shapes this domain uses. Anything matching one of these
-#: in model-written text is a factual claim about a record, and is checkable.
-ID_PATTERN = re.compile(r"\b(?:pay_[a-z0-9]+|order_[a-z0-9]+|BNK_\d+)\b")
-
-
-def ids_in(obj: object) -> set[str]:
-    """Every record ID appearing anywhere in a nested structure.
-
-    Serialising and regexing rather than walking the shape deliberately: the
-    point is to catch an ID *wherever* it appears, including in a narration
-    string or a nested tool observation, and a structural walk would need
-    updating every time either shape changed.
-    """
-    if obj is None:
-        return set()
-    blob = obj if isinstance(obj, str) else json.dumps(obj, default=str)
-    return set(ID_PATTERN.findall(blob))
-
-
-def permitted_ids(bundle: dict, trace: dict) -> set[str]:
-    """What the model was allowed to know about, from its own point of view."""
-    seen = ids_in(bundle)
-    for step in trace.get("investigation_trace") or []:
-        # Only the observation - the params are the model's own choice and are
-        # therefore a claim to be checked, not a source to be trusted.
-        seen |= ids_in(step.get("observation"))
-    return seen
-
-
-def written_ids(trace: dict) -> dict[str, set[str]]:
-    """What the model asserted, split by where it asserted it."""
-    out = {
-        "hypothesis": ids_in(trace.get("hypothesis")),
-        "evidence_cited": set(trace.get("evidence_cited") or []),
-        "thought": set(),
-        "tool_params": set(),
-    }
-    for step in trace.get("investigation_trace") or []:
-        out["thought"] |= ids_in(step.get("thought"))
-        out["tool_params"] |= ids_in(step.get("params"))
-    return out
-
-
 def build_case_index(datasets: list[str]) -> dict[str, dict]:
-    """Map every case ID to the evidence bundle the reasoner would have built.
+    """Map every cache key to the evidence bundle that produced it.
 
-    Rebuilt from the committed CSVs through the real ``build_evidence_bundle``,
-    so this verifies against the bundle the model actually got rather than a
-    reconstruction that could drift from it.
+    Keyed by the cache key, not by record id. Five bank row ids - BNK_00002,
+    BNK_00027, BNK_00032, BNK_00035, BNK_00056 - exist in both dev and holdout
+    with different rows behind them, so a record-id index silently let the
+    holdout bundle overwrite the dev one and checked those traces against
+    evidence they were never shown. It reported zero either way, which is
+    exactly why it went unnoticed: a check that is accidentally right is
+    indistinguishable from one that is right on purpose.
+
+    The cache key is a hash of the bundle plus the instructions, so it is unique
+    per (case, prompt) by construction and cannot collide across datasets.
     """
     index: dict[str, dict] = {}
+    shallow = system_prompt(DEFAULT_CONFIG)
+    deep = shallow + investigation_system_prompt(DEFAULT_CONFIG)
     for name in datasets:
         batch = load_batch(ROOT / "data" / name)
         report = reconcile(batch, DEFAULT_CONFIG)
         for case in select_cases(report):
-            index[case.record_id] = build_evidence_bundle(case, batch, DEFAULT_CONFIG)
+            bundle = build_evidence_bundle(case, batch, DEFAULT_CONFIG)
+            for instructions in (shallow, deep):
+                index[evidence_key(bundle, instructions)] = bundle
     return index
 
 
@@ -125,9 +94,9 @@ def main() -> int:
     unresolved: list[str] = []
     failures: list[tuple[str, str, str]] = []
 
-    for trace in cache._data.values():
+    for key, trace in cache._data.items():
         case_id = trace.get("case_id")
-        bundle = index.get(case_id)
+        bundle = index.get(key)
         if bundle is None:
             # A trace whose case is not in these datasets cannot be checked
             # here. Reported rather than dropped - a silent skip would let the
