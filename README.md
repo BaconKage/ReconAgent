@@ -78,7 +78,7 @@ No API key. No LLM SDK. The demo replays 104 committed reasoning traces.
 
 | | |
 |---|---|
-| **Live demo** | _(deployment ready — see [Deploying](#deploying-the-demo); URL to be added)_ |
+| **Live demo** | **[reconagent.streamlit.app](https://reconagent.streamlit.app)** — no key, runs on committed traces. Cold-starts in ~20s if idle. |
 | **Demo video** | _(to be added)_ |
 | **Architecture** | [ARCHITECTURE.md](ARCHITECTURE.md) |
 
@@ -777,6 +777,12 @@ safe - there is nothing to leak, because there is nothing to set.
    repo, branch `main`, main file `app.py`.
 3. Deploy. `.streamlit/config.toml` carries the theme and server settings.
 4. Paste the URL into the **Live demo** row at the top of this README.
+
+Deployed at **[reconagent.streamlit.app](https://reconagent.streamlit.app)**,
+running with no API key: the sidebar reads *"No API key - reasoning replays from
+committed traces. All matching and every metric is unaffected."* The live figures
+are the same ones this README states, which is the point of a demo that needs no
+secret to run.
 
 **Do not add secrets.** The app is designed to run without them. If you ever want
 live reasoning on a deployment, Streamlit's `st.secrets` is the only correct
