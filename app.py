@@ -23,6 +23,7 @@ from cash.position import compute_position
 from core.loader import load_batch
 from core.matcher import reconcile
 from core.normalize import format_inr, paise_to_rupees
+from evaluation import agent_eval as ae
 from evaluation.metrics import evaluate
 
 ROOT = Path(__file__).resolve().parent
@@ -68,8 +69,15 @@ def run_pipeline(dataset: str, use_llm: bool):
                   reasoning_seconds=outcome.stats.elapsed_seconds if use_llm else None,
                   llm_free_groups=outcome.stats.never_touched_llm)
     pos = compute_position(report, batch)
+    # Score the reasoning layer for this batch too. It is cheap here because the
+    # reconciliation is already done, and a measurement that only exists in a
+    # terminal is one a reviewer will never see.
+    agent_cases, _ = ae.load_cases((dataset,))
+    agent = ae.score(agent_cases, "deep")
+    control = ae.score(agent_cases, "always_escalate")
     return {"batch": batch, "report": report, "outcome": outcome, "ev": ev,
-            "pos": pos, "trail": trail, "dataset": dataset}
+            "pos": pos, "trail": trail, "dataset": dataset,
+            "agent": agent, "control": control}
 
 
 def results_frame(state) -> pd.DataFrame:
@@ -199,6 +207,42 @@ with tab_overview:
                     "whose legs arrive later than the configured T+2 window.")
 
     st.divider()
+    st.divider()
+    st.subheader("Is the reasoning layer any good?")
+    st.caption("Its recommendations scored against the same ground truth the "
+               "engine is scored against - `python -m evaluation.agent_eval`.")
+    agent, control = state["agent"], state["control"]
+    g1, g2, g3, g4 = st.columns(4)
+    g1.metric("Unsafe auto-resolves", agent.unsafe_clears,
+              help="Cleared an item where NO correct resolution exists: an "
+                   "ambiguous twin, an unmatchable row, or money still in "
+                   "transit. This is the number that fails the build.")
+    g2.metric("Unverified auto-resolves", agent.unverified_clears,
+              help="Cleared a partial refund. A correct resolution exists, but "
+                   "the ledger records refund status and never refund amount, "
+                   "so nothing in the sources can corroborate the gap.")
+    g3.metric("Recommendation accuracy",
+              f"{agent.action_accuracy:.1%}" if agent.action_accuracy is not None else "n/a",
+              delta=(f"{(agent.action_accuracy - control.action_accuracy):+.1%} vs "
+                     f"always-escalate"
+                     if None not in (agent.action_accuracy, control.action_accuracy)
+                     else None),
+              delta_color="normal",
+              help="Against a policy that escalates every case and looks at "
+                   "nothing. If the trivial policy ties it, the number is not "
+                   "evidence the agent is doing work.")
+    g4.metric("Recovered engine misses",
+              f"{agent.recovery_full} / {agent.recovery_available}",
+              help="Groups the engine failed to match where the agent named the "
+                   "complete true set of bank legs. An incomplete group is a "
+                   "wrong group, not partial credit.")
+    if agent.recovery_available and not agent.recovery_full:
+        st.info("The agent has not yet recovered a single match the engine "
+                "missed. Published here rather than omitted - it is the honest "
+                "answer to whether the reasoning layer earns its place on "
+                "evidence-finding, and today it does not.")
+
+    st.divider()
     st.subheader("Where the model is and is not used")
     m1, m2, m3 = st.columns(3)
     stats = outcome.stats
@@ -250,11 +294,41 @@ with tab_exceptions:
                 -nets.get(r.record_id, 0), r.record_id)
 
     ordered = sorted(unresolved, key=sort_key)
-    labels = {
-        f"{r.record_id}  -  {REASON_LABEL.get(r.exception_reason or '', r.exception_reason)}": r
-        for r in ordered
+
+    # Two cases carry the whole argument, and hunting for them in a list of
+    # thirty during a demo is how a three-minute walkthrough becomes six. They
+    # are pinned to the top and labelled, so the contrast can be shown in two
+    # clicks: one the data cannot decide, and one where the agent accounts for
+    # the discrepancy arithmetically and says so.
+    FEATURED = {
+        "ambiguous_candidates": "refuses - two identical credits, no UTR",
+        "identifier_match_amount_discrepancy": "UTR matches, amount short",
     }
-    picked = st.selectbox("Exception", list(labels))
+
+    def is_featured(r):
+        inv = outcome.investigations.get(r.record_id, {})
+        if r.exception_reason == "ambiguous_candidates":
+            return True
+        return inv.get("recommended_action") == "auto_resolve"
+
+    ordered = sorted(ordered, key=lambda r: not is_featured(r))
+
+    def label_for(r):
+        base = (f"{r.record_id}  -  "
+                f"{REASON_LABEL.get(r.exception_reason or '', r.exception_reason)}")
+        if not is_featured(r):
+            return base
+        inv = outcome.investigations.get(r.record_id, {})
+        if inv.get("recommended_action") == "auto_resolve":
+            return f"[start here] {base}  -  agent accounts for the gap"
+        return f"[start here] {base}  -  undecidable from the data"
+
+    labels = {label_for(r): r for r in ordered}
+    picked = st.selectbox(
+        "Exception", list(labels),
+        help="The two cases marked [start here] are the contrast worth showing: "
+             "one the data cannot decide at any tolerance, and one where the "
+             "agent closes the arithmetic and clears it.")
     r = labels[picked]
     inv = outcome.investigations.get(r.record_id, {})
 
@@ -287,8 +361,24 @@ with tab_exceptions:
             else:
                 st.caption(f"source: {src}")
             st.write(inv.get("hypothesis", ""))
-            st.write(f"**Recommended action:** `{inv.get('recommended_action')}`")
-            st.write(f"**Confidence:** {inv.get('confidence')}")
+            # The verdict is the point of this panel, so it gets its own row
+            # rather than another line of prose. sufficient_evidence is the
+            # field that makes "I cannot tell" a first-class answer.
+            # st.metric truncates a long value to fit its column, and
+            # "escalate_to_human" rendered as "escal..." - the single most
+            # important word on the panel, unreadable. Short labels, with the
+            # full value in the tooltip.
+            SHORT = {"escalate_to_human": "escalate",
+                     "auto_resolve": "auto-resolve",
+                     "flag_duplicate": "flag dup"}
+            action = inv.get("recommended_action", "-")
+            v1, v2, v3 = st.columns(3)
+            v1.metric("Action", SHORT.get(action, action), help=str(action))
+            v2.metric("Confidence", str(inv.get("confidence", "-")))
+            v3.metric("Evidence sufficient",
+                      "yes" if inv.get("sufficient_evidence") else "no",
+                      help="Whether the agent judged the evidence enough to "
+                           "decide. 'no' is a correct and valued answer.")
             if inv.get("rupee_impact") and inv["rupee_impact"] != "unknown":
                 # The model is free to write "Rs 48,615.93" or just "48615.93",
                 # and it does both. Prefixing unconditionally rendered "Rs Rs

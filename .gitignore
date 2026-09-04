@@ -13,3 +13,7 @@ venv/
 .env
 .env.*
 !.env.example
+
+# Streamlit secrets. The deployed demo needs no key at all - it replays committed
+# traces - but if one is ever set locally it must not be committed.
+.streamlit/secrets.toml

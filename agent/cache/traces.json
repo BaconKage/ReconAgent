@@ -554,6 +554,85 @@
       "search_credits"
     ]
   },
+  "111888d7d7fd3a1a459ab7cb1821c413b85af8099bc9ea3c1c4a8aa6ba5ff932": {
+    "case_id": "setl_RZB",
+    "confidence": "high",
+    "evidence_cited": [
+      "setl_RZB",
+      "BNK_R0002"
+    ],
+    "hypothesis": "BNK_R0002 carries the same UTR as settlement setl_RZB and was credited on 2026-07-06, but the amount is Rs 4,208.77 versus the documented expected net of Rs 6,008.77, a shortfall of Rs 1,800.00. The order is marked partially refunded, but no refund amount or settlement adjustment is recorded to explain the exact shortfall; no other unlinked near-date credit was found. Do not auto-match the bank row without supporting refund or adjustment evidence.",
+    "investigation_trace": [
+      {
+        "action": "credits_near_settlement",
+        "observation": {
+          "credits": [],
+          "criteria": {
+            "end_date": "2026-07-16",
+            "include_matched": false,
+            "max_amount": "6508.77",
+            "min_amount": "5508.77",
+            "start_date": "2026-07-05"
+          },
+          "found": true,
+          "settlement_date": "2026-07-06",
+          "settlement_net": "6008.77",
+          "showing": 0,
+          "tool": "credits_near_settlement",
+          "total_found": 0
+        },
+        "params": {
+          "record_id": "setl_RZB"
+        },
+        "thought": "I will inspect all credits plausibly near this settlement to determine whether the shortfall is explained by another row or whether a different counterpart exists.",
+        "turn": 1
+      },
+      {
+        "action": "get_settlement",
+        "observation": {
+          "found": true,
+          "ledger_order": {
+            "customer": "Nisha Iyer",
+            "order_date": "2026-07-04",
+            "order_id": "order_RZ004",
+            "order_value_gross": "6154.00",
+            "status": "partially_refunded"
+          },
+          "settlement": {
+            "fee": "123.08",
+            "gross": "6154.00",
+            "gst_on_fee": "22.15",
+            "net_expected_in_bank": "6008.77",
+            "order_id": "order_RZ004",
+            "settlement_date": "2026-07-06",
+            "transaction_id": "setl_RZB",
+            "utr": "327811009834"
+          },
+          "tool": "get_settlement"
+        },
+        "params": {
+          "record_id": "setl_RZB"
+        },
+        "thought": "I will inspect the settlement's full ledger and adjustment details to determine whether the exact Rs 1,800.00 shortfall is an identified refund or another documented deduction.",
+        "turn": 2
+      },
+      {
+        "action": "conclude",
+        "observation": null,
+        "params": {},
+        "thought": "The UTR-matched credit is Rs 1,800.00 below the documented settlement net, and the settlement record does not identify an adjustment explaining that gap.",
+        "turn": 3
+      }
+    ],
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "Rs 1,800.00 unexplained shortfall",
+    "sufficient_evidence": false,
+    "tools_used": [
+      "credits_near_settlement",
+      "get_settlement"
+    ]
+  },
   "12d2df258f3a8f8375c219bf7e534c5b911f946ca6d6ab9c5007bc8a9f92937c": {
     "case_id": "pay_hbggiw8c5r",
     "confidence": "high",
@@ -831,6 +910,134 @@
       "credits_near_settlement",
       "get_settlement",
       "get_credit"
+    ]
+  },
+  "1dd0f9d52faeacb49c49351ed582a29aace1310b947f99f093414d8adf3b6a40": {
+    "case_id": "setl_RZD",
+    "confidence": "high",
+    "evidence_cited": [
+      "setl_RZD",
+      "setl_RZA",
+      "setl_RZB",
+      "setl_RZC",
+      "BNK_R0001",
+      "BNK_R0002"
+    ],
+    "hypothesis": "Settlement setl_RZD for Rs 7,377.68 dated 2026-07-12 has no identifiable bank credit. No unmatched credit was found from Rs 6,877.68 to Rs 7,877.68 between 2026-07-11 and 2026-07-22, and no bank row carries UTR 327811021900. The related UTR-prefix search identified other settlements and bank rows only; it does not provide evidence for this settlement.",
+    "investigation_trace": [
+      {
+        "action": "credits_near_settlement",
+        "observation": {
+          "credits": [],
+          "criteria": {
+            "end_date": "2026-07-22",
+            "include_matched": false,
+            "max_amount": "7877.68",
+            "min_amount": "6877.68",
+            "start_date": "2026-07-11"
+          },
+          "found": true,
+          "settlement_date": "2026-07-12",
+          "settlement_net": "7377.68",
+          "showing": 0,
+          "tool": "credits_near_settlement",
+          "total_found": 0
+        },
+        "params": {
+          "record_id": "setl_RZD"
+        },
+        "thought": "I will inspect all credits around the 12 July settlement to identify candidates beyond the engine's normal window.",
+        "turn": 1
+      },
+      {
+        "action": "find_utr",
+        "observation": {
+          "credits": [
+            {
+              "already_matched_to_another_settlement": true,
+              "bank_row_id": "BNK_R0001",
+              "credit": "25691.53",
+              "narration": "NEFT CR-RAZORPAY SOFTWARE PVT LTD-SETTLEMENT",
+              "utr_recovered": "327811004521",
+              "utr_reference": "327811004521",
+              "value_date": "2026-07-03"
+            },
+            {
+              "already_matched_to_another_settlement": false,
+              "bank_row_id": "BNK_R0002",
+              "credit": "4208.77",
+              "narration": "NEFT CR-RAZORPAY-SETTLEMENT-327811009834",
+              "utr_recovered": "327811009834",
+              "utr_reference": "(none)",
+              "value_date": "2026-07-06"
+            }
+          ],
+          "fragment": "327811",
+          "settlements": [
+            {
+              "fee": "526.25",
+              "gross": "26312.50",
+              "gst_on_fee": "94.72",
+              "net_expected_in_bank": "25691.53",
+              "order_id": null,
+              "settlement_date": "2026-07-03",
+              "transaction_id": "setl_RZA",
+              "utr": "327811004521"
+            },
+            {
+              "fee": "123.08",
+              "gross": "6154.00",
+              "gst_on_fee": "22.15",
+              "net_expected_in_bank": "6008.77",
+              "order_id": "order_RZ004",
+              "settlement_date": "2026-07-06",
+              "transaction_id": "setl_RZB",
+              "utr": "327811009834"
+            },
+            {
+              "fee": "688.10",
+              "gross": "34405.00",
+              "gst_on_fee": "123.86",
+              "net_expected_in_bank": "33593.04",
+              "order_id": null,
+              "settlement_date": "2026-07-09",
+              "transaction_id": "setl_RZC",
+              "utr": "327811015277"
+            },
+            {
+              "fee": "151.12",
+              "gross": "7556.00",
+              "gst_on_fee": "27.20",
+              "net_expected_in_bank": "7377.68",
+              "order_id": "order_RZ007",
+              "settlement_date": "2026-07-12",
+              "transaction_id": "setl_RZD",
+              "utr": "327811021900"
+            }
+          ],
+          "tool": "find_utr"
+        },
+        "params": {
+          "utr_fragment": "327811"
+        },
+        "thought": "I will search for bank or settlement records sharing a distinctive portion of the stated UTR, since a truncated or transposed reference could explain why exact UTR matching failed.",
+        "turn": 2
+      },
+      {
+        "action": "conclude",
+        "observation": null,
+        "params": {},
+        "thought": "No further records have been returned for the batch-wide exact-amount search, so the investigation cannot identify a bank counterpart.",
+        "turn": 3
+      }
+    ],
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "Rs 7,377.68",
+    "sufficient_evidence": false,
+    "tools_used": [
+      "credits_near_settlement",
+      "find_utr"
     ]
   },
   "20f7a51646d06e5b06b1386c05a8ca0846fc584c4391d0331bb5b630d2de1582": {
@@ -6252,6 +6459,18 @@
       "credits_near_settlement",
       "get_credit"
     ]
+  },
+  "efc664372252375f545409719e0a3f1abb8627c8a84ce12b29f843a5cd5b0734": {
+    "case_id": "BNK_R0005",
+    "confidence": "high",
+    "evidence_cited": [
+      "BNK_R0005"
+    ],
+    "hypothesis": "Bank credit BNK_R0005 for Rs 18,400.00 landed on 2026-07-11, but no settlement counterpart was available to explain it. The narration identifies ACME TRADING invoice INV/2026/0412, but no UTR was recovered to link the credit to a gateway payout.",
+    "model": "openai/gpt-5.6-terra",
+    "recommended_action": "escalate_to_human",
+    "rupee_impact": "18400.00",
+    "sufficient_evidence": false
   },
   "f6705e38217bc34dcb09a7f73d3f4785594e39bbe87ab9552d22acd50ef7e9df": {
     "case_id": "pay_skch8jwwdx",

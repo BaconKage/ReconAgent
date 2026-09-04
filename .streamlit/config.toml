@@ -1,0 +1,21 @@
+# Streamlit Community Cloud reads this on deploy.
+#
+# The demo runs with NO API key: the reasoning layer replays the 104 committed
+# traces, and every engine metric is identical either way. Nothing here needs a
+# secret, and nothing here should ever contain one - see .streamlit/secrets.toml
+# in .gitignore.
+
+[theme]
+base = "dark"
+primaryColor = "#e8484d"
+backgroundColor = "#0e1117"
+secondaryBackgroundColor = "#1a1d24"
+textColor = "#fafafa"
+
+[server]
+headless = true
+# The committed batches are tiny; nothing here uploads a file.
+maxUploadSize = 5
+
+[browser]
+gatherUsageStats = false

@@ -13,6 +13,91 @@ Razorpay AI Buildathon — Track 04, AI Finance Controller.
 > and no model SDK installed**. If the offline guarantee ever breaks, the badge
 > above goes red.
 
+## What this is, in sixty seconds
+
+A merchant on a payment gateway holds three records of the same money and they
+never agree. Reconciling them is a person with three spreadsheets, every
+settlement cycle. ReconAgent does it in one command - and, for everything it
+cannot resolve, says *why* in a sentence a finance operator can act on.
+
+**In** — settlement report (what the gateway paid out) · bank statement (what
+actually landed) · merchant ledger (what the customer ordered)
+
+**Out** — reconciled books · a categorised exception queue · a forward cash
+position, with an append-only audit trail of every decision
+
+**The idea it is built on:** *rules decide money, the model investigates
+uncertainty.* All matching is deterministic Python over integer paise - no model
+call, no network, byte-identical output. The LLM never moves a match, changes a
+status or adds a link; it explains the exceptions the engine hands to a person,
+and it is allowed to answer *"this cannot be determined."* Closing a money loop is
+exactly where a plausible guess costs the most, so the part that decides is
+reproducible and the part that reasons is advisory and cited.
+
+### Verified numbers
+
+Every figure below has a command beside it. Nothing here is asserted.
+
+| | | how to reproduce |
+|---|---|---|
+| **ENGINE** | | |
+| precision, dev / holdout | **100% / 100%** | `python run_demo.py [--dataset holdout]` |
+| recall, dev / holdout | 100% / **84.2%** | same — the gap is real and unfixed on purpose |
+| adversarial pairs conflated | **0 / 5** and **0 / 9** | same |
+| precision at 25,000 records | **99.5%** | `python benchmark.py --rows 250 5000 25000` |
+| **AGENT** | | |
+| **unsafe auto-resolves** | **0** | `python -m evaluation.agent_eval` |
+| unverified auto-resolves | 2 | same — partial refunds cleared on circular arithmetic |
+| recommendation accuracy | 97.2% | same — against **100%** for a policy that escalates everything |
+| recovery of engine misses | **0 / 30** | same — the agent never assembled a group the engine missed |
+| sufficient-evidence accuracy | 95.1% | same — scored on 41 of 104; no discriminating power yet |
+| grounding violations | **0 / 395** | `python verify_grounding.py` |
+| **SYSTEM** | | |
+| records reconciled | 252 dev · 290 holdout · 100,000 benchmarked | `python benchmark.py` |
+| cash position | every rupee attributed to one bucket | `python run_demo.py` |
+| CI | green on Python 3.10 and 3.13, no API key | badge above |
+| Razorpay integration | transport + schema **verified live**; accuracy benchmark on reproducible synthetic data | `python -m integrations.razorpay` |
+
+### The case worth thirty seconds
+
+Two bank credits. Both exactly **₹48,615.93**. Both dated **2026-07-17**. Neither
+carries a UTR. Which one settles `pay_f7atwyam1n`?
+
+Nobody can know — the information does not exist. So the engine refuses, and the
+agent goes and looks before agreeing. A matcher that picked the closer amount
+would be right half the time and **report certainty every time**.
+
+### Run it
+
+```bash
+pip install -r requirements.txt && python run_demo.py
+```
+
+No API key. No LLM SDK. The whole demo replays 104 committed reasoning traces.
+
+| | |
+|---|---|
+| **Live demo** | _(deployment ready — see [Deploying](#deploying-the-demo); URL to be added)_ |
+| **Demo video** | _(to be added)_ |
+| **Architecture** | [ARCHITECTURE.md](ARCHITECTURE.md) |
+
+### What this project learned about itself
+
+The benchmark looked perfect. Scaling it to 25,000 records showed the headline
+"100% precision, 0 false positives" was measured on a sample far too small to
+detect the ~0.5% false-positive rate that was there all along. The response was to
+question the benchmark rather than trust it, publish the correction in bold, and
+build a coincidence guard that halved the rate — validated on a seed it had never
+seen. The residual is stated, not hidden.
+
+The same discipline has now been turned on the reasoning layer, and it is not
+flattering: a deterministic lookup table matches the agent on recommendation
+accuracy, and the agent has recovered **0 of 30** matches the engine missed. That
+is published above rather than omitted, because a claim nobody could falsify is
+not a measurement.
+
+---
+
 Every merchant on a payment gateway has to reconcile three systems of record each
 settlement cycle: the gateway's settlement report, the bank statement, and their
 own order ledger. They never agree cleanly. Fees and GST come off the top,
@@ -98,6 +183,8 @@ python -m pytest tests/ -q                 # 244 tests
 python -m evaluation.sensitivity           # threshold trade-off sweep
 python benchmark.py                        # throughput and accuracy vs batch size
 python verify_grounding.py                 # every ID the model wrote, checked
+python -m evaluation.agent_eval            # the agent's recommendations, scored
+python -m evaluation.agent_eval --compare  # agent vs a rules-only baseline
 python -m integrations.razorpay --out data/rzp   # build a batch from a Razorpay
 python run_demo.py --data data/rzp               #   recon report, then run it
 ```
@@ -640,6 +727,27 @@ grouping and split detection would be measuring the generator.
 
 ---
 
+## Deploying the demo
+
+The app is ready for **Streamlit Community Cloud** and needs no API key: the
+reasoning layer replays the 104 committed traces, and every engine metric is
+identical with or without a model. That is the property that makes a public demo
+safe - there is nothing to leak, because there is nothing to set.
+
+1. Push to GitHub (already done).
+2. At [share.streamlit.io](https://share.streamlit.io), *New app* -> pick this
+   repo, branch `main`, main file `app.py`.
+3. Deploy. `.streamlit/config.toml` carries the theme and server settings.
+4. Paste the URL into the **Live demo** row at the top of this README.
+
+**Do not add secrets.** The app is designed to run without them. If you ever want
+live reasoning on a deployment, Streamlit's `st.secrets` is the only correct
+mechanism - never a committed file. `.streamlit/secrets.toml` is in `.gitignore`
+for that reason, and `envfile.py` never overrides a real environment variable, so
+a deployed secret cannot be silently shadowed by a checked-in one.
+
+---
+
 ## Honest limitations
 
 **The data is synthetic and I wrote it.** I designed the messiness and then built
@@ -669,10 +777,24 @@ the missing column is a limitation of my synthetic sources.
 tokens, customer names in the bank reference, historical pairing — several would
 be decidable. The engine currently uses amount, date and UTR only.
 
-**The reasoning layer is advisory and unverified.** Its recommendations are not
-checked against ground truth, because it does not make decisions. Grounding is
-measured and reproducible (`verify_grounding.py`: 0 of 395 IDs ungrounded);
-usefulness is not.
+**The reasoning layer is advisory, and now measured — the results are mixed.**
+`python -m evaluation.agent_eval` scores its recommendations against the same
+ground truth the engine is scored against. It has made **0 unsafe auto-resolves**
+across 104 cases, and 0 of 395 record IDs it wrote were ungrounded. But a
+deterministic lookup table that escalates everything and looks at nothing scores
+**100%** on recommendation accuracy against the agent's **97.2%**, and the agent
+has recovered **0 of 30** matches the engine missed. On the metrics that can be
+labelled from this data, the multi-turn agent does not beat a fixed rule. Its
+remaining case rests on the explanation a table cannot write, and the usefulness
+of *that* is still unmeasured — there is no ground truth for prose, and proxying
+it with a confidence score would be measuring the wrong thing.
+
+**Two auto-resolves rest on circular arithmetic.** On a partial refund the agent
+computes the shortfall, names it "the refund", and presents the identity as
+verification. The ledger records refund *status* and never refund *amount*, so
+nothing can corroborate it. Counted separately as `unverified` rather than folded
+into the headline, because a correct resolution does exist there — but it is not
+the same as a checked one.
 
 **Scale is now tested, and it found two things.** Matching is quadratic, so the
 throughput headline was a ~50x overstatement; and the false-positive rate is ~0.5%
@@ -732,6 +854,11 @@ audit/        append-only JSONL decision trail
 evaluation/   metrics + threshold sensitivity — the only reader of ground truth
 benchmark.py  throughput and accuracy as a function of batch size
 verify_grounding.py  every ID the model wrote, checked against its evidence
+evaluation/
+  agent_eval.py   the agent's recommendations, scored against ground truth
+  grounding.py    record-ID extraction, shared by both checks
+scripts/
+  generate_shallow_arm.py  one-shot traces, for the shallow-vs-deep comparison
 docs/         README screenshots + the script that regenerates them
 cash/         forward cash position
 data/         seeded generator, dev and holdout batches

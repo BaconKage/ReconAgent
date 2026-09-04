@@ -52,6 +52,11 @@ jobs:
       - name: Grounding - every ID the model wrote must be one it was shown
         run: python verify_grounding.py
 
+      - name: Agent recommendations, scored against ground truth
+        # Exits non-zero on an unsafe auto-resolve or a grounding violation.
+        # Runs offline from committed traces - no key, same as everything else.
+        run: python -m evaluation.agent_eval
+
       - name: Threshold sensitivity sweep
         run: python -m evaluation.sensitivity
 
