@@ -17,3 +17,7 @@ venv/
 # Streamlit secrets. The deployed demo needs no key at all - it replays committed
 # traces - but if one is ever set locally it must not be committed.
 .streamlit/secrets.toml
+
+# Personal working files, not part of the submission. Listed explicitly because
+# `git add -A` has already swept something into this repo once.
+VIDEO_SCRIPT.md
